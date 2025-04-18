@@ -1,0 +1,17 @@
+{
+  "require": {
+    "php": ">=7.4",
+    "ext-pdo": "*",
+    "ext-json": "*",
+    "vlucas/phpdotenv": "^5.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "back\\": "src/",
+      "back\\controllers\\": "src/controllers/",
+      "back\\models\\": "src/models/",
+      "back\\utils\\": "src/utils/"
+
+    }
+  }
+}
