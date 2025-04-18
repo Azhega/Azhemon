@@ -6,18 +6,14 @@ $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
 use back\Router;
-use back\controllers\{RoleController/*, User, Auth, Product, Sale, Order, OrderItem, Delivery, Returns*/};
+use back\controllers\{
+  AuthController,
+  RoleController
+};
 
 $controllers = [
-    RoleController::class/*,
-    User::class,
-    Auth::class,
-    Product::class,
-    Sale::class,
-    Order::class,
-    OrderItem::class,
-    Delivery::class,
-    Returns::class*/
+  AuthController::class,
+	RoleController::class
 ];
 
 $router = new Router();

@@ -1,80 +1,68 @@
 <?php
 
-namespace App\Models;
+namespace back\models;
 
-use App\Models\SqlConnect;
-use App\Utils\{HttpException, JWT};
+use back\models\SqlConnect;
+use back\utils\{HttpException, JWT};
 use \PDO;
 use \Exception;
 
 class AuthModel extends SqlConnect {
-  private string $table  = "users";
+  private string $table  = "player";
   private int $tokenValidity = 3600;
+  private string $roleTable = "role";
   
+  /*========================= REGISTER ======================================*/
+
   public function register(array $data) {
-    $query = "SELECT email FROM $this->table WHERE email = :email";
+    $query = "SELECT username FROM $this->table WHERE username = :username";
     $req = $this->db->prepare($query);
-    $req->execute(["email" => $data["email"]]);
+    $req->execute(["username" => $data["username"]]);
     
     if ($req->rowCount() > 0) {
       throw new HttpException("User already exists!", 400);
     }
 
-    $queryRole = "SELECT id FROM roles WHERE role_name = 'customer'";
+    $queryRole = "SELECT id FROM $this->roleTable WHERE name = :name";
     $reqRole = $this->db->prepare($queryRole);
-    $reqRole->execute();
+    $reqRole->execute([
+      'name' => 'admin'
+    ]);
     $role = $reqRole->fetch(PDO::FETCH_ASSOC);
+    var_dump($role);
     $roleId = $role['id'];
-
-    $hashedPassword = password_hash($data["password_hash"], PASSWORD_BCRYPT);
-
-    if (!filter_var($data["email"], FILTER_VALIDATE_EMAIL)) { //To filter validate email on register
-      throw new Exception('Invalid email format.');
-    }
+    
+    $hashedPassword = password_hash($data["password_hash"],
+      PASSWORD_BCRYPT);
 
     //To filter secure password on register
-    if (strlen($data["password_hash"]) < 8) {
-      throw new Exception('Password must be at least 8 characters long.');
+    if (strlen($data["password_hash"]) <= 5) {
+      throw new Exception('Password must be at least 6 characters long.');
     }
     
     if (!preg_match('/[A-Z]/', $data["password_hash"])) {
-        throw new Exception('Password must include at least one uppercase letter.');
+      throw new Exception(
+        'Password must include at least one uppercase letter.');
     }
     
     if (!preg_match('/[0-9]/', $data["password_hash"])) {
-        throw new Exception('Password must include at least one number.');
+      throw new Exception('Password must include at least one number.');
     }
 
-    if ($data['firstname'] == null 
-    || $data['lastname'] == null
-    || $data['state'] == null
-    || $data['city'] == null
-    || $data['street'] == null
-    || $data['street_number'] == null
-    || $data['postal_code'] == null
-    || $data['phone_number'] == null) {
+    if ($data['username'] == null 
+    || $data['password_hash'] == null) {
       throw new Exception('Missing fields.');
     }
 
-
     // Create the user
-    $queryAdd = "INSERT INTO $this->table (firstname, lastname, state, city, street, street_number, 
-                                            postal_code, email, phone_number, password_hash, role_id) 
-                                            VALUES (:firstname, :lastname, :state, :city, :street, :street_number, 
-                                            :postal_code, :email, :phone_number, :password_hash, :role_id)";
-    $req2 = $this->db->prepare($queryAdd);
+    $addQuery = "INSERT INTO $this->table (
+      username, password_hash) 
+      VALUES (:username, :password_hash)";
+
+    $req2 = $this->db->prepare($addQuery);
     $req2->execute([
-      "firstname" => $data['firstname'],
-      "lastname" => $data['lastname'],
-      "state" => $data['state'],
-      "city" => $data['city'],
-      "street" => $data['street'],
-      "street_number" => $data['street_number'],
-      "postal_code" => $data['postal_code'],
-      "email" => $data["email"],
-      "phone_number" => $data['phone_number'],
-      "password_hash" => $hashedPassword,
-      "role_id" => $roleId
+      "username" => $data['username'],
+      "password_hash" => $hashedPassword
     ]);
 
     $userId = $this->db->lastInsertId();
@@ -82,29 +70,57 @@ class AuthModel extends SqlConnect {
     // Generate the JWT token
     $token = $this->generateJWT($userId, $roleId);
 
-    return ['token' => $token];
+    return [
+      'message' => 'Registration success for ' . $data['username'] . ' !',
+      'token' => $token
+    ];
   }
 
-  public function login($email, $password) {
-    $query = "SELECT users.*, roles.role_name FROM $this->table JOIN roles ON users.role_id = roles.id WHERE users.email = :email";
+  /*========================= LOGIN =========================================*/
+
+  public function login($username, $password) {
+    $query = "SELECT player.*, role.name FROM $this->table 
+      JOIN role ON player.role_id = role.id WHERE player.username = :username";
     $req = $this->db->prepare($query);
-    $req->execute(['email' => $email]);
+    $req->execute(['username' => $username]);
 
     $user = $req->fetch(PDO::FETCH_ASSOC);
 
     if ($user) {
         if (password_verify($password, $user['password_hash'])) {
-          $token = $this->generateJWT($user['id'], $user['role_name']);
-            return ['token' => $token];
-        }
-    }
+          $token = $this->generateJWT($user['id'], $user['role_id']);
 
-    throw new \Exception("Invalid credentials.");
+          return [
+            'message' => 'Login successful !',
+            'token' => $token, 
+            'username' => $username,
+            'user_id' => $user['id'], 
+            'role_id' => $user['role_id']
+          ];
+        }
+        throw new HttpException("Wrong password", 401);
+    }
   }
 
-  private function generateJWT(string $userId, string $role) {
+  /*========================= LOGOUT =========================================*/
+
+  public function logout() {
+    setcookie('token', '', [
+      'expires'  => time() - 3600,
+      'path'     => '/',
+      'secure'   => false,
+      'httponly' => true,
+      'samesite' => 'Strict'
+    ]);
+
+    return true;
+  }
+
+  /*========================= JWT  ==========================================*/
+
+  private function generateJWT(int $userId, int $role) {
     $payload = [
-      'user_id' => $userId,
+      'id' => $userId,
       'role' => $role,
       'exp' => time() + $this->tokenValidity
     ];
