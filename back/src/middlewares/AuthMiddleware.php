@@ -1,35 +1,44 @@
 <?php 
 
-namespace App\Middlewares;
+namespace back\middlewares;
 
-use App\Utils\JWT;
+require_once __DIR__ . '/../utils/Config.php';
+
+use back\utils\JWT;
+use Exception;
 
 class AuthMiddleware {
-    public function handle(&$request) {
-        $headers = getallheaders();
-        
-        if (!isset($headers['Authorization'])) {
-            return $this->unauthorizedResponse();
-        }
+  public function handle(&$request) {
+    JWT::initialize(JWT_SECRET, JWT_ISSUER, JWT_AUDIENCE);
 
-        $authHeader = $headers['Authorization'];
-
-        if (!preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
-            return $this->unauthorizedResponse();
-        }
-
-        $jwt = $matches[1];
-
-        if (!JWT::verify($jwt)) {
-            return $this->unauthorizedResponse();
-        }
-
-        return true;
+    $headers = getallheaders();
+    
+    if (!isset($headers['Authorization'])) {
+      return $this->unauthorizedResponse("Authorization header not found");
     }
 
-    private function unauthorizedResponse() {
-        echo json_encode(['error' => "Unauthorized"]);
-        http_response_code(401);
-        return false;
+    $authHeader = $headers['Authorization'];
+
+    if (!preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+      return $this->unauthorizedResponse("Invalid Authorization header format");
     }
+
+    $token = $matches[1];
+
+    try {
+      $payload = JWT::verify($token);
+      $request['user'] = $payload;
+    } catch (Exception $e) {
+      return $this->unauthorizedResponse($e->getMessage());
+    }
+
+    return true;
+  }
+
+  private function unauthorizedResponse($message) {
+    header("Content-Type: application/json");
+    echo json_encode(['error' => $message]);
+    http_response_code(401);
+    return false;
+  }
 }

@@ -6,7 +6,7 @@ use back\controllers\Controller;
 use back\models\RoleModel;
 use back\utils\Route;
 use back\utils\{HttpException};
-use App\Middlewares\{AuthMiddleware,RoleMiddleware};
+use back\middlewares\{AuthMiddleware,RoleMiddleware};
 
 class RoleController extends Controller {
   protected object $role;
@@ -39,9 +39,9 @@ class RoleController extends Controller {
 
   /*========================= GET ALL =======================================*/
 
-  #[Route("GET", "/back/role"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("GET", "/back/role",
+    middlewares: [AuthMiddleware::class/*, 
+    [RoleMiddleware::class, Roles::ROLE_ADMIN]*/])]
   public function getRoles() {
       $limit = isset($this->params['limit']) ? 
         intval($this->params['limit']) : null;

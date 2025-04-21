@@ -7,9 +7,10 @@ use back\utils\{HttpException, JWT};
 use \PDO;
 use \Exception;
 
+require_once __DIR__ . '/../utils/Config.php';
+
 class AuthModel extends SqlConnect {
   private string $table  = "player";
-  private int $tokenValidity = 3600;
   private string $roleTable = "role";
   
   /*========================= REGISTER ======================================*/
@@ -26,11 +27,12 @@ class AuthModel extends SqlConnect {
     $queryRole = "SELECT id FROM $this->roleTable WHERE name = :name";
     $reqRole = $this->db->prepare($queryRole);
     $reqRole->execute([
-      'name' => 'admin'
+      'name' => 'user'
     ]);
     $role = $reqRole->fetch(PDO::FETCH_ASSOC);
     var_dump($role);
     $roleId = $role['id'];
+    $roleName = $role['name'];
     
     $hashedPassword = password_hash($data["password_hash"],
       PASSWORD_BCRYPT);
@@ -66,12 +68,13 @@ class AuthModel extends SqlConnect {
     ]);
 
     $userId = $this->db->lastInsertId();
+    $username = $data['username'];
 
     // Generate the JWT token
-    $token = $this->generateJWT($userId, $roleId);
+    $token = $this->generateJWT($userId, $username, $roleId, $roleName);
 
     return [
-      'message' => 'Registration success for ' . $data['username'] . ' !',
+      'message' => 'Registration success for ' . $username . ' !',
       'token' => $token
     ];
   }
@@ -79,7 +82,7 @@ class AuthModel extends SqlConnect {
   /*========================= LOGIN =========================================*/
 
   public function login($username, $password) {
-    $query = "SELECT player.*, role.name FROM $this->table 
+    $query = "SELECT player.*, role.name AS role_name FROM $this->table 
       JOIN role ON player.role_id = role.id WHERE player.username = :username";
     $req = $this->db->prepare($query);
     $req->execute(['username' => $username]);
@@ -88,14 +91,35 @@ class AuthModel extends SqlConnect {
 
     if ($user) {
         if (password_verify($password, $user['password_hash'])) {
-          $token = $this->generateJWT($user['id'], $user['role_id']);
+          $accessToken = $this->generateJWT(
+            $user['id'],
+            $username,  
+            $user['role_id'],
+            $user['role_name'],
+          );
+
+          $refreshToken = $this->generateRefreshToken(
+            $user['id'],
+            $username,  
+            $user['role_id'],
+            $user['role_name'],
+          );
+
+          setcookie("refresh_token", $refreshToken, [
+            'expires'   => time() + REFRESH_TOKEN_EXPIRATION,
+            'path'      => '/',
+            'secure'    => false, //true pour https en prod
+            'httponly'  => true,
+            'samesite'  => 'Strict'
+          ]);
 
           return [
-            'message' => 'Login successful !',
-            'token' => $token, 
-            'username' => $username,
-            'user_id' => $user['id'], 
-            'role_id' => $user['role_id']
+            'message'       => 'Login successful !',
+            'access_token'  => $accessToken, 
+            'user_id'       => $user['id'],
+            'username'      => $username,
+            'role_id'       => $user['role_id'],
+            'role'          => $user['role_name']
           ];
         }
         throw new HttpException("Wrong password", 401);
@@ -116,14 +140,40 @@ class AuthModel extends SqlConnect {
     return true;
   }
 
-  /*========================= JWT  ==========================================*/
+  /*========================= GENERATE JWT ===================================*/
 
-  private function generateJWT(int $userId, int $role) {
+  private function generateJWT(int $userId, $username, int $roleId, $role) {
+    $issuedAt = time();
     $payload = [
-      'id' => $userId,
-      'role' => $role,
-      'exp' => time() + $this->tokenValidity
+      'iss'       => JWT_ISSUER,
+      'aud'       => JWT_AUDIENCE,
+      'iat'       => $issuedAt,
+      'exp'       => $issuedAt + ACCESS_TOKEN_EXPIRATION,
+      'sub'       => $userId,
+      'username'  => $username,
+      'role_id'   => $roleId,
+      'role'      => $role
     ];
+    JWT::initialize(JWT_SECRET, JWT_ISSUER, JWT_AUDIENCE);
+    return JWT::generate($payload);
+  }
+
+  /*========================= REFRESH TOKEN ==================================*/
+
+  private function generateRefreshToken(int $userId, $username, int $roleId, $role) {
+    $issuedAt = time();
+    $payload = [
+      'iss'       => JWT_ISSUER,
+      'aud'       => JWT_AUDIENCE,
+      'iat'       => $issuedAt,
+      'exp'       => $issuedAt + REFRESH_TOKEN_EXPIRATION,
+      'sub'       => $userId,
+      'username'  => $username,
+      'role_id'   => $roleId,
+      'role'      => $role,
+      'type'      => 'refresh'
+    ];
+    JWT::initialize(JWT_SECRET, JWT_ISSUER, JWT_AUDIENCE);
     return JWT::generate($payload);
   }
 }

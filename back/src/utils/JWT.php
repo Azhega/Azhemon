@@ -2,37 +2,41 @@
 
 namespace back\utils;
 
+use Exception;
+
 class JWT {
   private static $secret;
+  private static $algorithm = 'HS256';
+  private static $issuer;
+  private static $audience;
 
-  public static function initialize() {  
-      self::$secret = getenv('JWT_SECRET') ?: null; //To secure secret
-      var_dump("initialize : " . self::$secret);
+  public static function initialize($secret, $issuer = null, $audience = null) {  
+      self::$secret = $secret;
+      self::$issuer = $issuer;
+      self::$audience = $audience;
   }
 
   public static function generate($payload) {
-    // Base 64
-      // Header
-    $header = self::base64UrlEncode(json_encode(['alg' => 'HS256', 'typ' => 'JWT']));
-    // Payload
-    $payload = self::base64UrlEncode(json_encode($payload));
-    
-    // Concaténation header . payload
-    $concat_signature = "$header.$payload";
-    // Génération de la signature avec hash
-    $signature = hash_hmac("sha256", $concat_signature, self::$secret, true);
-      //  base64 de la signature
-    $signature = self::base64UrlEncode($signature);
 
-    // Return -> header . payload . signature
-    return "$header.$payload.$signature";
+    $header = self::base64UrlEncode(json_encode([
+      'alg' => self::$algorithm,
+      'typ' => 'JWT'
+    ]));
+
+    $payloadEncoded = self::base64UrlEncode(json_encode($payload));
+    
+    $concatSignature = "$header.$payloadEncoded";
+    $signature = hash_hmac("sha256", $concatSignature, self::$secret, true);
+    $signatureEncoded = self::base64UrlEncode($signature);
+
+    return "$header.$payloadEncoded.$signatureEncoded";
   }
 
   public static function verify($jwt) {
     // Ensure the JWT has the correct number of segments
     $segments = explode('.', $jwt);
     if (count($segments) !== 3) {
-        return false;  // Invalid JWT structure
+      throw new Exception('Invalid JWT structure.');
     }
 
     list($headerEncoded, $payloadEncoded, $signatureProvided) = $segments;
@@ -42,16 +46,36 @@ class JWT {
     var_dump("verify secret : " . self::$secret);
 
     $signatureProvided = self::base64UrlDecode($signatureProvided);
-    $signatureExpected = hash_hmac('sha256', "$headerEncoded.$payloadEncoded", self::$secret, true);
+    $signatureExpected = hash_hmac(
+      'sha256', 
+      "$headerEncoded.$payloadEncoded", 
+      self::$secret, 
+      true
+    );
+
+    var_dump("signature expected : " . $signatureExpected);
+    var_dump("signature provided : " . $signatureProvided);
 
     // Verify the signature
     if (!hash_equals($signatureExpected, $signatureProvided)) {
-        return false;
+      throw new Exception('Invalid signature.');
     }
 
     // Verify the 'exp' claim if it exists
     if (isset($payload['exp']) && time() >= $payload['exp']) {
-        return false;  // Token has expired
+      throw new Exception('Token has expired.');
+    }
+
+    if (isset($payload['iss']) 
+    && self::$issuer !== null 
+    && $payload['iss'] !== self::$issuer) {
+      throw new Exception('Invalid issuer.');
+    }
+
+    if (isset($payload['aud']) 
+    && self::$audience !== null 
+    && $payload['aud'] !== self::$audience) {
+      throw new Exception('Invalid audience.');
     }
 
     // Token is valid; return the payload
@@ -59,7 +83,7 @@ class JWT {
   }
 
   private static function base64UrlEncode($data) {
-    return rtrim(strtr(base64_encode($data), '+/', '-_'), characters: '=');
+    return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
   }
 
 
