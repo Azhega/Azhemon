@@ -95,7 +95,9 @@ class AuthController extends Controller {
       }
 
       $issuedAt = time();
+      $jti = bin2hex(random_bytes(16));
       $newPayload = [
+        'jti'       => $jti,
         'iss'      => JWT_ISSUER,      
         'aud'      => JWT_AUDIENCE,
         'iat'      => $issuedAt,

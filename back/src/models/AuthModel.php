@@ -129,7 +129,33 @@ class AuthModel extends SqlConnect {
   /*========================= LOGOUT =========================================*/
 
   public function logout() {
-    setcookie('token', '', [
+    $headers = getallheaders();
+
+    if (!isset($headers['Authorization'])) {
+      throw new Exception("Authorization header not found");
+    }
+
+    $authHeader = $headers['Authorization'];
+
+    if (!isset($headers['Authorization']) 
+    || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+      throw new HttpException("Access Token missing.", 400);
+    }
+
+    $accessToken = $matches[1];
+
+    try {
+      JWT::initialize(JWT_SECRET, JWT_ISSUER, JWT_AUDIENCE);
+      $payload = JWT::verify($accessToken);
+      
+      if (isset($payload['jti'])) {
+        self::revokeToken($payload['jti'], $this->db);
+      }
+    } catch (Exception $e) {
+      //Continue even if verification fails (token already expired or invalid)
+    }
+
+    setcookie('refresh_token', '', [
       'expires'  => time() - 3600,
       'path'     => '/',
       'secure'   => false,
@@ -144,7 +170,9 @@ class AuthModel extends SqlConnect {
 
   private function generateJWT(int $userId, $username, int $roleId, $role) {
     $issuedAt = time();
+    $jti = bin2hex(random_bytes(16));
     $payload = [
+      'jti'       => $jti,
       'iss'       => JWT_ISSUER,
       'aud'       => JWT_AUDIENCE,
       'iat'       => $issuedAt,
@@ -175,5 +203,21 @@ class AuthModel extends SqlConnect {
     ];
     JWT::initialize(JWT_SECRET, JWT_ISSUER, JWT_AUDIENCE);
     return JWT::generate($payload);
+  }
+
+  /*========================= TOKEN BLACKLIST ================================*/
+
+  public static function isTokenRevoked($jti, $db) {
+    $stmt = $db->prepare("
+      SELECT COUNT(*) as count FROM revoked_token WHERE jti = :jti
+    ");
+    $stmt->execute(['jti' => $jti]);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    return ($result['count'] > 0);
+  }
+  
+  public function revokeToken($jti, $db) {
+    $stmt = $db->prepare("INSERT INTO revoked_token (jti, revoked_at) VALUES (:jti, NOW())");
+    return $stmt->execute(['jti' => $jti]);
   }
 }
