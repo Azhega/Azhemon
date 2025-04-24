@@ -3,17 +3,23 @@
 namespace back\utils;
 
 use Exception;
+use back\models\AuthModel;
 
 class JWT {
   private static $secret;
   private static $algorithm = 'HS256';
   private static $issuer;
   private static $audience;
+  private static $db;
 
   public static function initialize($secret, $issuer = null, $audience = null) {  
-      self::$secret = $secret;
-      self::$issuer = $issuer;
-      self::$audience = $audience;
+    self::$secret = $secret;
+    self::$issuer = $issuer;
+    self::$audience = $audience;
+  }
+
+  public static function setDB($db) {
+    self::$db = $db;
   }
 
   public static function generate($payload) {
@@ -43,8 +49,6 @@ class JWT {
     $header = json_decode(self::base64UrlDecode($headerEncoded), true);
     $payload = json_decode(self::base64UrlDecode($payloadEncoded), true);
 
-    var_dump("verify secret : " . self::$secret);
-
     $signatureProvided = self::base64UrlDecode($signatureProvided);
     $signatureExpected = hash_hmac(
       'sha256', 
@@ -52,9 +56,6 @@ class JWT {
       self::$secret, 
       true
     );
-
-    var_dump("signature expected : " . $signatureExpected);
-    var_dump("signature provided : " . $signatureProvided);
 
     // Verify the signature
     if (!hash_equals($signatureExpected, $signatureProvided)) {
@@ -76,6 +77,16 @@ class JWT {
     && self::$audience !== null 
     && $payload['aud'] !== self::$audience) {
       throw new Exception('Invalid audience.');
+    }
+
+    if (isset($payload['jti'])) {
+      if (!self::$db) {
+        throw new Exception('Database connection not set in JWT.');
+      }
+
+      if (AuthModel::isTokenRevoked($payload['jti'], self::$db)) {
+        throw new Exception('This token has been revoked.');
+      }
     }
 
     // Token is valid; return the payload
