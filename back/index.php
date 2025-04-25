@@ -12,7 +12,8 @@ use back\models\SqlConnect;
 use back\Router;
 use back\controllers\{
   AuthController,
-  RoleController
+  RoleController,
+  PlayerController
 };
 
 $sqlConnect = new SqlConnect();
@@ -22,7 +23,8 @@ JWT::setDB($db);
 
 $controllers = [
   AuthController::class,
-	RoleController::class
+	RoleController::class,
+  PlayerController::class
 ];
 
 $router = new Router();

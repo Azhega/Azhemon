@@ -16,32 +16,48 @@ class PlayerModel extends SqlConnect {
   /*========================= ADD ===========================================*/
 
   public function add(array $data) {
-    $query = "SELECT password_hash FROM $this->table 
-      WHERE password_hash = :password_hash";
+    $query = "SELECT username FROM $this->table 
+      WHERE username = :username";
     $req = $this->db->prepare($query);
-    $req->execute(["password_hash" => $data["password_hash"]]);
+    $req->execute(["username" => $data["username"]]);
     
     if ($req->rowCount() > 0) {
       throw new HttpException("User already exists!", 400);
     }
-   
-    if (!preg_match('/^[0-9]*$/m', $data["password_hash"])) {
-        throw new Exception(
-          'Identification code must only be composed of numbers.');
+
+    //To filter secure password on player add
+    if (strlen($data["password_hash"]) <= 5) {
+      throw new Exception('Password must be at least 6 characters long.');
+    }
+    
+    if (!preg_match('/[A-Z]/', $data["password_hash"])) {
+      throw new Exception(
+        'Password must include at least one uppercase letter.');
+    }
+    
+    if (!preg_match('/[0-9]/', $data["password_hash"])) {
+      throw new Exception('Password must include at least one number.');
     }
 
-    // if ($data['role_id'] == null 
-    // || $data['username'] == null) {
-    //   throw new Exception('Missing fields.');
-    // }
+    if ($data['username'] == null 
+    || $data['password_hash'] == null) {
+      throw new Exception('Missing fields.');
+    }
 
+    $hashedPassword = password_hash($data["password_hash"],
+      PASSWORD_BCRYPT);
+
+    //No role_id in insert to prevent adding admin user by mistake
     $query = "
-      INSERT INTO $this->table (role_id, username, password_hash)
-      VALUES (:role_id, :username, :password_hash)
+      INSERT INTO $this->table (username, password_hash)
+      VALUES (:username, :password_hash)
     ";
 
     $req = $this->db->prepare($query);
-    $req->execute($data);
+    $req->execute([
+      "username" => $data['username'],
+      "password_hash" => $hashedPassword
+    ]);
   }
 
   /*========================= GET BY ID =====================================*/
@@ -91,7 +107,7 @@ class PlayerModel extends SqlConnect {
 
   public function getLast() {
     $req = $this->db->prepare(
-        "SELECT * FROM $this->table ORDER BY id DESC LIMIT 1");
+      "SELECT * FROM $this->table ORDER BY id DESC LIMIT 1");
     $req->execute();
 
     return $req->rowCount() > 0 ? 
@@ -101,20 +117,39 @@ class PlayerModel extends SqlConnect {
   /*========================= UPDATE ========================================*/
 
   public function update(array $data, int $id) {
-    if (!preg_match('/^[0-9]*$/m', $data["password_hash"])) {
-      throw new Exception(
-        'Identification code must only be composed of numbers.');
+    //To filter secure password on player add
+    if (strlen($data["password_hash"]) <= 5) {
+      throw new Exception('Password must be at least 6 characters long.');
     }
+    
+    if (!preg_match('/[A-Z]/', $data["password_hash"])) {
+      throw new Exception(
+        'Password must include at least one uppercase letter.');
+    }
+    
+    if (!preg_match('/[0-9]/', $data["password_hash"])) {
+      throw new Exception('Password must include at least one number.');
+    }
+
+    if ($data['username'] == null 
+    || $data['password_hash'] == null) {
+      throw new Exception('Missing fields.');
+    }
+
+    $hashedPassword = password_hash($data["password_hash"],
+      PASSWORD_BCRYPT);
+
+    $data["password_hash"] = $hashedPassword;
 
     $request = "UPDATE $this->table SET ";
     $params = [];
     $fields = [];
 
     foreach ($data as $key => $value) {
-        if (in_array($key, $this->authorized_fields_to_update)) {
-            $fields[] = "$key = :$key";
-            $params[":$key"] = $value;
-        }
+      if (in_array($key, $this->authorized_fields_to_update)) {
+        $fields[] = "$key = :$key";
+        $params[":$key"] = $value;
+      }
     }
 
     $params[':id'] = $id;
@@ -137,8 +172,14 @@ class PlayerModel extends SqlConnect {
       throw new HttpException("User doesn't exists !", 400);
     }
 
+    $res = $req->fetch(PDO::FETCH_ASSOC);
+    $deletedPlayerUsername = $res['username'];
+
     $req = $this->db->prepare("DELETE FROM $this->table WHERE id = :id");
     $req->execute(["id" => $id]);
-    return new stdClass();
+
+    return [
+      'message' => 'Player ' . $deletedPlayerUsername . ' successfully removed !',
+    ];
   }
 }
