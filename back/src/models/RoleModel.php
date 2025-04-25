@@ -118,8 +118,13 @@ class RoleModel extends SqlConnect {
       throw new HttpException("Role doesn't exists !", 400);
     }
 
+    $res = $req->fetch(PDO::FETCH_ASSOC);
+    $deletedRoleName = $res['name'];
+
     $req = $this->db->prepare("DELETE FROM $this->table WHERE id = :id");
     $req->execute(["id" => $id]);
-    return new stdClass();
+    return [
+      'message' => 'Role ' . $deletedRoleName . ' successfully removed !',
+    ];
   }
 }
