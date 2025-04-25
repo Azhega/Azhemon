@@ -13,7 +13,8 @@ use back\Router;
 use back\controllers\{
   AuthController,
   RoleController,
-  PlayerController
+  PlayerController,
+  MoveCategoryController
 };
 
 $sqlConnect = new SqlConnect();
@@ -24,7 +25,8 @@ JWT::setDB($db);
 $controllers = [
   AuthController::class,
 	RoleController::class,
-  PlayerController::class
+  PlayerController::class,
+  MoveCategoryController::class
 ];
 
 $router = new Router();
