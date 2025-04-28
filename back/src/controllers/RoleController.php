@@ -39,9 +39,9 @@ class RoleController extends Controller {
 
   /*========================= GET ALL =======================================*/
 
-  #[Route("GET", "/back/role",
-    middlewares: [AuthMiddleware::class/*, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]*/])]
+  #[Route("GET", "/back/role"/*,
+    middlewares: [AuthMiddleware::class, 
+    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function getRoles() {
       $limit = isset($this->params['limit']) ? 
         intval($this->params['limit']) : null;
