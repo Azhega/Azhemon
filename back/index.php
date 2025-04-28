@@ -15,7 +15,8 @@ use back\controllers\{
   RoleController,
   PlayerController,
   MoveCategoryController,
-  TypeController
+  TypeController,
+  NatureController
 };
 
 $sqlConnect = new SqlConnect();
@@ -28,7 +29,8 @@ $controllers = [
 	RoleController::class,
   PlayerController::class,
   MoveCategoryController::class,
-  TypeController::class
+  TypeController::class,
+  NatureController::class
 ];
 
 $router = new Router();
