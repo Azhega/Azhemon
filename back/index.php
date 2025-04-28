@@ -18,7 +18,8 @@ use back\controllers\{
   TypeController,
   NatureController,
   AbilityController,
-  ItemController
+  ItemController,
+  MoveController
 };
 
 $sqlConnect = new SqlConnect();
@@ -34,7 +35,8 @@ $controllers = [
   TypeController::class,
   NatureController::class,
   AbilityController::class,
-  ItemController::class
+  ItemController::class,
+  MoveController::class
 ];
 
 $router = new Router();
