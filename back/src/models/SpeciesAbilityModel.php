@@ -90,6 +90,17 @@ class SpeciesAbilityModel extends SqlConnect {
   /*========================= UPDATE ========================================*/
 
   public function update(array $data, int $id) {
+    $query = "SELECT * FROM $this->table WHERE pokemon_species_id = :pokemon_species_id AND ability_id = :ability_id";
+    $req = $this->db->prepare($query);
+    $req->execute([
+      "pokemon_species_id" => $data["pokemon_species_id"],
+      "ability_id" => $data["ability_id"]
+    ]);
+    
+    if ($req->rowCount() > 0) {
+      throw new HttpException("Species Ability already exists!", 400);
+    }
+    
     $request = "UPDATE $this->table SET ";
     $params = [];
     $fields = [];
