@@ -22,7 +22,8 @@ use back\controllers\{
   MoveController,
   PokemonSpeciesController,
   SpeciesAbilityController,
-  SpeciesMoveController
+  SpeciesMoveController,
+  TeamController
 };
 
 $sqlConnect = new SqlConnect();
@@ -42,7 +43,8 @@ $controllers = [
   MoveController::class,
   PokemonSpeciesController::class,
   SpeciesAbilityController::class,
-  SpeciesMoveController::class
+  SpeciesMoveController::class,
+  TeamController::class
 ];
 
 $router = new Router();
