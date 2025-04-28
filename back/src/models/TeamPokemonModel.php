@@ -138,7 +138,7 @@ class TeamPokemonModel extends SqlConnect {
     $query = "
       SELECT team_pokemon.team_id, team_pokemon.slot, 
       player.username AS username, pokemon_species.name AS pokemon_name
-      FROM team_pokemon
+      FROM $this->table
       JOIN team
       ON team_pokemon.team_id = team.id
       JOIN player
@@ -168,7 +168,7 @@ class TeamPokemonModel extends SqlConnect {
       . ", Player : " . $deletedTeamPokemonPlayerName 
       . ", Team ID : " . $deletedTeamPokemonTeamID 
       . ", Slot : " . $deletedTeamPokemonSlot
-      . ' successfully removed !',
+      . ') successfully removed !',
     ];
   }
 }
