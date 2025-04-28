@@ -21,7 +21,8 @@ use back\controllers\{
   ItemController,
   MoveController,
   PokemonSpeciesController,
-  SpeciesAbilityController
+  SpeciesAbilityController,
+  SpeciesMoveController
 };
 
 $sqlConnect = new SqlConnect();
@@ -40,7 +41,8 @@ $controllers = [
   ItemController::class,
   MoveController::class,
   PokemonSpeciesController::class,
-  SpeciesAbilityController::class
+  SpeciesAbilityController::class,
+  SpeciesMoveController::class
 ];
 
 $router = new Router();
