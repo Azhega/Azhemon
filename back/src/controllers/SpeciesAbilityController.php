@@ -37,12 +37,30 @@ class SpeciesAbilityController extends Controller {
     return $this->speciesAbility->get(intval($this->params['id']));
   }
 
+  /*=================== GET ABILITY BY POKEMON NAME ==========================*/
+
+  #[Route("GET", "/back/species_ability/pokemon_name/:name"/*,
+    middlewares: [AuthMiddleware::class, 
+    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  public function getSpeciesAbilityByPokemonName() {
+    return $this->speciesAbility->getAbilityByPokemonName($this->params['name']);
+  }
+
+  /*==================== GET POKEMON BY NAME ABILITY =========================*/
+
+  #[Route("GET", "/back/species_ability/ability_name/:name"/*,
+    middlewares: [AuthMiddleware::class, 
+    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  public function getPokemonByAbilityName() {
+    return $this->speciesAbility->getPokemonByAbilityName($this->params['name']);
+  }
+
   /*========================= GET ALL =======================================*/
 
   #[Route("GET", "/back/species_ability"/*,
     middlewares: [AuthMiddleware::class/*, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
-  public function getSpeciesAbilitys() {
+  public function getSpeciesAbilities() {
       $limit = isset($this->params['limit']) ? 
         intval($this->params['limit']) : null;
       return $this->speciesAbility->getAll($limit);

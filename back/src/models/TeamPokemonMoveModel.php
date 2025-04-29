@@ -72,6 +72,323 @@ class TeamPokemonMoveModel extends SqlConnect {
       $req->fetch(PDO::FETCH_ASSOC) : new stdClass();
   }
 
+  /*========================= GET BY PLAYER ID ===============================*/
+
+  public function getByPlayerID(int $playerID) {
+    $query = "
+      SELECT 
+        team.id AS team_id,
+        team.name AS team_name,
+        team_pokemon.id AS team_pokemon_id,
+        team_pokemon.slot AS pokemon_slot,
+        pokemon_species.name AS pokemon_name,
+        team_pokemon_move.slot AS move_slot,
+        team_pokemon_move.id AS move_id,
+        move.name AS move_name
+      FROM team_pokemon_move
+      JOIN team_pokemon ON team_pokemon_move.team_pokemon_id = team_pokemon.id
+      JOIN team ON team_pokemon.team_id = team.id
+      JOIN player ON team.player_id = player.id
+      JOIN pokemon_species ON team_pokemon.pokemon_species_id = pokemon_species.id
+      LEFT JOIN move ON team_pokemon_move.move_id = move.id
+      WHERE player.id = :playerID
+      ORDER BY team.id, team_pokemon.slot, team_pokemon_move.slot
+    ";
+    
+    $stmt = $this->db->prepare($query);
+    $stmt->execute(["playerID" => $playerID]);
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    if(!$results){
+      throw new HttpException("No data found for Player ID : $playerID", 404);
+    }
+
+    $teams = [];
+    foreach($results as $row) {
+      $teamId = $row['team_id'];
+      if(!isset($teams[$teamId])) {
+        $teams[$teamId] = [
+          "id"       => $teamId,
+          "name"     => $row['team_name'],
+          "pokemons" => []
+        ];
+      }
+      $pokemonId = $row['team_pokemon_id'];
+      if(!isset($teams[$teamId]['pokemons'][$pokemonId])) {
+        $teams[$teamId]['pokemons'][$pokemonId] = [
+          "id"           => $pokemonId,
+          "slot"         => $row['pokemon_slot'],
+          "pokemon_name" => $row['pokemon_name'],
+          "moves"        => []
+        ];
+      }
+      $teams[$teamId]['pokemons'][$pokemonId]['moves'][] = [
+        "move_id"   => $row['move_id'],
+        "slot"      => $row['move_slot'],
+        "move_name" => $row['move_name']
+      ];
+    }
+
+    foreach($teams as &$team) {
+      $team['pokemons'] = array_values($team['pokemons']);
+    }
+    $teams = array_values($teams);
+    
+    return $teams;
+  }
+
+  /*===================== GET BY PLAYER ID AND TEAM NAME =====================*/
+
+  public function getByPlayerIDAndTeamName(int $playerID, string $teamName) {
+    $query = "
+      SELECT 
+        team.id AS team_id,
+        team.name AS team_name,
+        team_pokemon.id AS team_pokemon_id,
+        team_pokemon.slot AS pokemon_slot,
+        pokemon_species.name AS pokemon_name,
+        team_pokemon_move.slot AS move_slot,
+        team_pokemon_move.id AS move_id,
+        move.name AS move_name
+      FROM team_pokemon_move
+      JOIN team_pokemon ON team_pokemon_move.team_pokemon_id = team_pokemon.id
+      JOIN team ON team_pokemon.team_id = team.id
+      JOIN player ON team.player_id = player.id
+      JOIN pokemon_species ON team_pokemon.pokemon_species_id = pokemon_species.id
+      LEFT JOIN move ON team_pokemon_move.move_id = move.id
+      WHERE player.id = :playerID
+        AND team.name = :teamName
+      ORDER BY team_pokemon.slot, team_pokemon_move.slot
+    ";
+    
+    $stmt = $this->db->prepare($query);
+    $stmt->execute(["playerID" => $playerID, "teamName" => $teamName]);
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    if(!$results){
+      throw new HttpException("No moves found for Player ID : $playerID and team name : '$teamName'", 404);
+    }
+
+    $team = [
+      "id"       => $results[0]["team_id"],
+      "name"     => $results[0]["team_name"],
+      "pokemons" => []
+    ];
+    foreach($results as $row) {
+      $pokemonId = $row['team_pokemon_id'];
+      if(!isset($team['pokemons'][$pokemonId])) {
+        $team['pokemons'][$pokemonId] = [
+          "id"           => $pokemonId,
+          "slot"         => $row['pokemon_slot'],
+          "pokemon_name" => $row['pokemon_name'],
+          "moves"        => []
+        ];
+      }
+      $team['pokemons'][$pokemonId]['moves'][] = [
+        "move_id"   => $row['move_id'],
+        "slot"      => $row['move_slot'],
+        "move_name" => $row['move_name']
+      ];
+    }
+    $team['pokemons'] = array_values($team['pokemons']);
+    
+    return $team;
+  }
+
+  /*================= GET BY PLAYER ID AND TEAM NAME AND SLOT ================*/
+
+  public function getByPlayerIDAndTeamNameAndSlot(int $playerID, string $teamName, int $pokemonSlot) {
+    $query = "
+      SELECT 
+        team.id AS team_id,
+        team.name AS team_name,
+        team_pokemon.id AS team_pokemon_id,
+        team_pokemon.slot AS pokemon_slot,
+        pokemon_species.name AS pokemon_name,
+        team_pokemon_move.slot AS move_slot,
+        team_pokemon_move.id AS move_id,
+        move.name AS move_name
+      FROM team_pokemon_move
+      JOIN team_pokemon ON team_pokemon_move.team_pokemon_id = team_pokemon.id
+      JOIN team ON team_pokemon.team_id = team.id
+      JOIN player ON team.player_id = player.id
+      JOIN pokemon_species ON team_pokemon.pokemon_species_id = pokemon_species.id
+      LEFT JOIN move ON team_pokemon_move.move_id = move.id
+      WHERE player.id = :playerID
+        AND team.name = :teamName
+        AND team_pokemon.slot = :pokemonSlot
+      ORDER BY team_pokemon_move.slot
+    ";
+    
+    $stmt = $this->db->prepare($query);
+    $stmt->execute([
+      "playerID"    => $playerID,
+      "teamName"    => $teamName,
+      "pokemonSlot" => $pokemonSlot
+    ]);
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    if(!$results) {
+        throw new HttpException("No pokemon found for Player ID : $playerID, Team : '$teamName' and slot : $pokemonSlot", 404);
+    }
+
+    $pokemon = [
+      "id"           => $results[0]["team_pokemon_id"],
+      "slot"         => $results[0]["pokemon_slot"],
+      "pokemon_name" => $results[0]["pokemon_name"],
+      "moves"        => []
+    ];
+    foreach($results as $row) {
+      $pokemon["moves"][] = [
+      "move_id"   => $row["move_id"],
+      "slot"      => $row["move_slot"],
+      "move_name" => $row["move_name"]
+      ];
+    }
+
+    $response = [
+      "team" => [
+      "id"   => $results[0]["team_id"],
+      "name" => $results[0]["team_name"]
+      ],
+      "pokemon" => $pokemon
+    ];
+    
+    return $response;
+  }
+
+  /*========================= GET BY TEAM POKEMON ID =========================*/
+
+  public function getByPokemonID(int $pokemonID) {
+    $query = "
+      SELECT 
+        team_pokemon_move.slot AS move_slot,
+        team_pokemon_move.id AS move_id,
+        move.name AS move_name
+      FROM team_pokemon_move
+      LEFT JOIN move ON team_pokemon_move.move_id = move.id
+      WHERE team_pokemon_move.team_pokemon_id = :pokemonID
+      ORDER BY team_pokemon_move.slot
+    ";
+    $stmt = $this->db->prepare($query);
+    $stmt->execute(["pokemonID" => $pokemonID]);
+    $moves = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    if(!$moves) {
+      throw new HttpException("No moves found for Pokemon ID : $pokemonID", 404);
+    }
+    return $moves;
+  }
+
+  /*========================= GET BY TEAM ID ===============================*/
+
+  public function getByTeamID(int $teamID) {
+    $query = "
+      SELECT 
+        team.id AS team_id,
+        team.name AS team_name,
+        team_pokemon.id AS team_pokemon_id,
+        team_pokemon.slot AS pokemon_slot,
+        pokemon_species.name AS pokemon_name,
+        team_pokemon_move.slot AS move_slot,
+        team_pokemon_move.id AS move_id,
+        move.name AS move_name
+      FROM team_pokemon_move
+      JOIN team_pokemon ON team_pokemon_move.team_pokemon_id = team_pokemon.id
+      JOIN team ON team_pokemon.team_id = team.id
+      JOIN pokemon_species ON team_pokemon.pokemon_species_id = pokemon_species.id
+      LEFT JOIN move ON team_pokemon_move.move_id = move.id
+      WHERE team.id = :teamID
+      ORDER BY team_pokemon.slot, team_pokemon_move.slot
+    ";
+    $stmt = $this->db->prepare($query);
+    $stmt->execute(["teamID" => $teamID]);
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    if(!$results){
+      throw new HttpException("No data found for team ID : $teamID", 404);
+    }
+    
+    $team = [
+      "id"       => $results[0]["team_id"],
+      "name"     => $results[0]["team_name"],
+      "pokemons" => []
+    ];
+    foreach ($results as $row) {
+      $pokemonId = $row['team_pokemon_id'];
+      if(!isset($team['pokemons'][$pokemonId])){
+        $team['pokemons'][$pokemonId] = [
+          "id"           => $pokemonId,
+          "slot"         => $row['pokemon_slot'],
+          "pokemon_name" => $row['pokemon_name'],
+          "moves"        => []
+        ];
+      }
+      $team['pokemons'][$pokemonId]['moves'][] = [
+        "move_id"   => $row['move_id'],
+        "slot"      => $row['move_slot'],
+        "move_name" => $row['move_name']
+      ];
+    }
+    $team['pokemons'] = array_values($team['pokemons']);
+    return $team;
+  }
+
+  /*========================= GET BY TEAM ID AND SLOT ========================*/
+
+  public function getByTeamIdAndSlot(int $teamID, int $pokemonSlot) {
+    $query = "
+      SELECT 
+        team.id AS team_id,
+        team.name AS team_name,
+        team_pokemon.id AS team_pokemon_id,
+        team_pokemon.slot AS pokemon_slot,
+        pokemon_species.name AS pokemon_name,
+        team_pokemon_move.slot AS move_slot,
+        team_pokemon_move.id AS move_id,
+        move.name AS move_name
+      FROM team_pokemon_move
+      JOIN team_pokemon ON team_pokemon_move.team_pokemon_id = team_pokemon.id
+      JOIN team ON team_pokemon.team_id = team.id
+      JOIN pokemon_species ON team_pokemon.pokemon_species_id = pokemon_species.id
+      LEFT JOIN move ON team_pokemon_move.move_id = move.id
+      WHERE team.id = :teamID
+        AND team_pokemon.slot = :pokemonSlot
+      ORDER BY team_pokemon_move.slot
+    ";
+    $stmt = $this->db->prepare($query);
+    $stmt->execute([
+      "teamID"      => $teamID,
+      "pokemonSlot" => $pokemonSlot
+    ]);
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    if(!$results){
+        throw new HttpException("No data found for team ID : $teamID and slot : $pokemonSlot", 404);
+    }
+
+    $pokemon = [
+      "id"           => $results[0]["team_pokemon_id"],
+      "slot"         => $results[0]["pokemon_slot"],
+      "pokemon_name" => $results[0]["pokemon_name"],
+      "moves"        => []
+    ];
+    foreach($results as $row){
+        $pokemon["moves"][] = [
+          "move_id"   => $row["move_id"],
+          "slot"      => $row["move_slot"],
+          "move_name" => $row["move_name"]
+        ];
+    }
+    $response = [
+      "team" => [
+        "id"   => $results[0]["team_id"],
+        "name" => $results[0]["team_name"]
+      ],
+      "pokemon" => $pokemon
+    ];
+    
+    return $response;
+  }
+
+
   /*========================= GET ALL =======================================*/
 
   public function getAll(?int $limit = null) {

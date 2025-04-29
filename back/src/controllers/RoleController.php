@@ -37,6 +37,15 @@ class RoleController extends Controller {
     return $this->role->get(intval($this->params['id']));
   }
 
+  /*========================= GET BY NAME ====================================*/
+
+  #[Route("GET", "/back/role/name/:name"/*,
+    middlewares: [AuthMiddleware::class, 
+    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  public function getRoleCategoryByName() {
+    return $this->role->getByName($this->params['name']);
+  }
+
   /*========================= GET ALL =======================================*/
 
   #[Route("GET", "/back/role"/*,

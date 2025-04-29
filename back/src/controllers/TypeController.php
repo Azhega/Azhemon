@@ -37,6 +37,15 @@ class TypeController extends Controller {
     return $this->type->get(intval($this->params['id']));
   }
 
+  /*========================= GET BY ID =====================================*/
+
+  #[Route("GET", "/back/type/name/:name"/*,
+    middlewares: [AuthMiddleware::class, 
+    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  public function getTypeByName() {
+    return $this->type->getByName($this->params['name']);
+  }
+
   /*========================= GET ALL =======================================*/
 
   #[Route("GET", "/back/type"/*,

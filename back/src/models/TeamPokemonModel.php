@@ -72,6 +72,259 @@ class TeamPokemonModel extends SqlConnect {
       $req->fetch(PDO::FETCH_ASSOC) : new stdClass();
   }
 
+  /*===================== GET ALL TEAM POKEMON BY TEAM ID ====================*/
+
+  public function getByTeamID(int $id) {
+    $query = "
+      SELECT 
+        team_pokemon.slot, 
+        team_pokemon.id,  
+        pokemon_species.name AS pokemon_name, 
+        ability.name AS ability_name, 
+        item.name AS item_name, 
+        nature.name AS nature_name
+      FROM $this->table 
+      JOIN team
+      ON team_pokemon.team_id = team.id
+      JOIN pokemon_species
+      ON team_pokemon.pokemon_species_id = pokemon_species.id
+      JOIN ability
+      ON team_pokemon.ability_id = ability.id
+      JOIN item
+      ON team_pokemon.item_id = item.id
+      JOIN nature
+      ON team_pokemon.nature_id = nature.id
+      WHERE team.id = :id
+      ORDER BY slot ASC
+    ";
+    $req = $this->db->prepare($query);
+    $req->execute(["id" => $id]);
+    
+    if ($req->rowCount() == 0) {
+      throw new HttpException("No Pokemons in team !", 400);
+    }
+
+    $req = $this->db->prepare($query);
+    $req->execute(["id" => $id]);
+
+    return $req->rowCount() > 0 ? 
+      $req->fetchAll(PDO::FETCH_ASSOC) : new stdClass();
+  }
+
+  /*========= GET TEAM POKEMON BY TEAM ID AND TEAM POKEMON SLOT===============*/
+
+  public function getByTeamIDAndSlot(int $id, int $slot) {
+    $query = "
+      SELECT team_pokemon.id,  
+        pokemon_species.name AS pokemon_name, 
+        ability.name AS ability_name, 
+        item.name AS item_name, 
+        nature.name AS nature_name
+      FROM $this->table 
+      JOIN team
+      ON team_pokemon.team_id = team.id
+      JOIN pokemon_species
+      ON team_pokemon.pokemon_species_id = pokemon_species.id
+      JOIN ability
+      ON team_pokemon.ability_id = ability.id
+      JOIN item
+      ON team_pokemon.item_id = item.id
+      JOIN nature
+      ON team_pokemon.nature_id = nature.id
+      WHERE team.id = :id AND team_pokemon.slot = :slot
+    ";
+    $req = $this->db->prepare($query);
+    $req->execute(["id" => $id, "slot" => $slot]);
+    
+    if ($req->rowCount() == 0) {
+      throw new HttpException("No Pokemons in team !", 400);
+    }
+
+    $req = $this->db->prepare($query);
+    $req->execute(["id" => $id, "slot" => $slot]);
+
+    return $req->rowCount() > 0 ? 
+      $req->fetch(PDO::FETCH_ASSOC) : new stdClass();
+  }
+
+  /*================= GET ALL TEAM POKEMON BY PLAYER ID ======================*/
+
+  public function getByPlayerID(int $id) {
+    $query = "
+      SELECT 
+        team.id AS team_id, 
+        team.name AS team_name, 
+        team_pokemon.slot, 
+        team_pokemon.id,  
+        pokemon_species.name AS pokemon_name, 
+        ability.name AS ability_name, 
+        item.name AS item_name, 
+        nature.name AS nature_name
+      FROM $this->table 
+      JOIN team
+      ON team_pokemon.team_id = team.id
+      JOIN pokemon_species
+      ON team_pokemon.pokemon_species_id = pokemon_species.id
+      JOIN ability
+      ON team_pokemon.ability_id = ability.id
+      JOIN item
+      ON team_pokemon.item_id = item.id
+      JOIN nature
+      ON team_pokemon.nature_id = nature.id
+      JOIN player
+      ON team.player_id = player.id
+      WHERE player.id = :id
+      ORDER BY slot ASC
+    ";
+
+    $req = $this->db->prepare($query);
+    $req->execute(["id" => $id]);
+    $results = $req->fetchAll(PDO::FETCH_ASSOC);
+
+    if ($req->rowCount() == 0) {
+      throw new HttpException("No Pokemons in team !", 400);
+    }
+
+    $teams = [];
+
+    foreach ($results as $row) {
+      $teamName = $row['team_name'];
+      $teamID = $row['team_id'];
+
+      if (!isset($teams[$teamName])) {
+        $teams[$teamName] = [
+          "id"       => $teamID,
+          "name"     => $teamName,
+          "pokemons" => []
+        ];
+      }
+
+      unset($row['team_name']);
+      unset($row['team_id']);
+
+      $teams[$teamName]["pokemons"][] = $row;
+    }
+
+    $structuredResult = array_values($teams);
+
+    return $structuredResult;
+  }
+
+  /*========== GET TEAM POKEMON BY PLAYER ID AND TEAM NAME ===================*/
+
+  public function getByPlayerIDAndTeamName(int $playerID, string $teamName) {
+    $query = "
+      SELECT 
+        team.id AS team_id,
+        team.name AS team_name,
+        team_pokemon.slot,
+        team_pokemon.id AS team_pokemon_id,
+        pokemon_species.name AS pokemon_name, 
+        ability.name AS ability_name, 
+        item.name AS item_name, 
+        nature.name AS nature_name
+      FROM team_pokemon
+      JOIN team ON team_pokemon.team_id = team.id
+      JOIN pokemon_species ON team_pokemon.pokemon_species_id = pokemon_species.id
+      JOIN ability ON team_pokemon.ability_id = ability.id
+      JOIN item ON team_pokemon.item_id = item.id
+      JOIN nature ON team_pokemon.nature_id = nature.id
+      JOIN player ON team.player_id = player.id
+      WHERE player.id = :player_id
+        AND team.name = :team_name
+      ORDER BY team_pokemon.slot ASC
+    ";
+    
+    $stmt = $this->db->prepare($query);
+    $stmt->execute([
+      "player_id"   => $playerID,
+      "team_name" => $teamName
+    ]);
+    
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    if (count($results) === 0) {
+      throw new HttpException("Team not found or no Pokémons in team!", 400);
+    }
+
+    $team = [
+      "id"       => $results[0]["team_id"],
+      "name"     => $results[0]["team_name"],
+      "pokemons" => []
+    ];
+
+    foreach($results as $row) {
+      $pokemon = [
+        "slot"          => $row["slot"],
+        "id"            => $row["team_pokemon_id"],
+        "pokemon_name"  => $row["pokemon_name"],
+        "ability_name"  => $row["ability_name"],
+        "item_name"     => $row["item_name"],
+        "nature_name"   => $row["nature_name"]
+      ];
+      $team["pokemons"][] = $pokemon;
+    }
+    
+    return $team;
+  }
+
+  /*========== GET TEAM POKEMON BY PLAYER ID  AND TEAM ID AND SLOT ===========*/
+
+  public function getByPlayerIDAndTeamNameAndSlot(
+    string $playerID, string $teamName, int $slot) {
+    $query = "
+      SELECT 
+        team.id AS team_id,
+        team.name AS team_name,
+        team_pokemon.slot,
+        team_pokemon.id AS team_pokemon_id,
+        pokemon_species.name AS pokemon_name, 
+        ability.name AS ability_name, 
+        item.name AS item_name, 
+        nature.name AS nature_name
+      FROM team_pokemon
+      JOIN team ON team_pokemon.team_id = team.id
+      JOIN pokemon_species ON team_pokemon.pokemon_species_id = pokemon_species.id
+      JOIN ability ON team_pokemon.ability_id = ability.id
+      JOIN item ON team_pokemon.item_id = item.id
+      JOIN nature ON team_pokemon.nature_id = nature.id
+      JOIN player ON team.player_id = player.id
+      WHERE player.id = :player_id
+        AND team.name = :team_name
+        AND team_pokemon.slot = :slot
+      ORDER BY team_pokemon.slot ASC
+    ";
+    
+    $stmt = $this->db->prepare($query);
+    $stmt->execute([
+      "player_id"   => $playerID,
+      "team_name" => $teamName,
+      "slot"   => $slot
+    ]);
+    
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$result) {
+      throw new HttpException("No Pokemon found for this slot.", 404);
+    }
+
+    $response = [
+      "team" => [
+        "id"   => $result["team_id"],
+        "name" => $result["team_name"]
+      ],
+      "pokemon" => [
+        "slot"          => $result["slot"],
+        "id"            => $result["team_pokemon_id"],
+        "pokemon_name"  => $result["pokemon_name"],
+        "ability_name"  => $result["ability_name"],
+        "item_name"     => $result["item_name"],
+        "nature_name"   => $result["nature_name"]
+      ]
+    ];
+    
+    return $response;
+  }
   /*========================= GET ALL =======================================*/
 
   public function getAll(?int $limit = null) {

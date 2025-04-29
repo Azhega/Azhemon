@@ -8,14 +8,14 @@ use back\utils\{HttpException};
 
 class TeamModel extends SqlConnect {
   private $table = "team";
-  public $authorized_fields_to_update = ['player_id'];
+  public $authorized_fields_to_update = ['player_id', 'name'];
 
   /*========================= ADD ===========================================*/
 
   public function add(array $data) {
     $query = "
-      INSERT INTO $this->table (player_id)
-      VALUES (:player_id)
+      INSERT INTO $this->table (player_id, name)
+      VALUES (:player_id, :name)
     ";
 
     $req = $this->db->prepare($query);
@@ -35,6 +35,28 @@ class TeamModel extends SqlConnect {
 
     $req = $this->db->prepare("SELECT * FROM $this->table WHERE id = :id");
     $req->execute(["id" => $id]);
+
+    return $req->rowCount() > 0 ? 
+      $req->fetch(PDO::FETCH_ASSOC) : new stdClass();
+  }
+
+  /*========================= GET BY NAME ====================================*/
+
+  public function getByName(string $username) {
+    $query = "
+    SELECT team.id, team.name FROM $this->table 
+    JOIN player
+    ON team.player_id = player.id
+    WHERE player.username = :username";
+    $req = $this->db->prepare($query);
+    $req->execute(["username" => $username]);
+    
+    if ($req->rowCount() == 0) {
+      throw new HttpException("Team doesn't exists !", 400);
+    }
+
+    $req = $this->db->prepare($query);
+    $req->execute(["username" => $username]);
 
     return $req->rowCount() > 0 ? 
       $req->fetch(PDO::FETCH_ASSOC) : new stdClass();
