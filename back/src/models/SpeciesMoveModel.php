@@ -51,6 +51,58 @@ class SpeciesMoveModel extends SqlConnect {
       $req->fetch(PDO::FETCH_ASSOC) : new stdClass();
   }
 
+  /*===================== GET MOVE BY POKEMON NAME ===========================*/
+
+  public function getMoveByPokemonName(string $name) {
+    $query = "
+      SELECT move.name AS move_name
+      FROM species_move
+      JOIN pokemon_species
+      ON species_move.pokemon_species_id = pokemon_species.id
+      JOIN move
+      ON species_move.move_id = move.id 
+      WHERE pokemon_species.name = :name
+    ";
+    $req = $this->db->prepare($query);
+    $req->execute(["name" => $name]);
+    
+    if ($req->rowCount() == 0) {
+      throw new HttpException("Species Move doesn't exists !", 400);
+    }
+
+    $req = $this->db->prepare($query);
+    $req->execute(["name" => $name]);
+
+    return $req->rowCount() > 0 ? 
+      $req->fetchAll(PDO::FETCH_ASSOC) : new stdClass();
+  }
+
+  /*===================== GET POKEMON BY MOVE NAME ===========================*/
+
+  public function getPokemonByMoveName(string $name) {
+    $query = "
+      SELECT pokemon_species.name AS pokemon_name
+      FROM species_move
+      JOIN pokemon_species
+      ON species_move.pokemon_species_id = pokemon_species.id
+      JOIN move
+      ON species_move.move_id = move.id 
+      WHERE move.name = :name
+    ";
+    $req = $this->db->prepare($query);
+    $req->execute(["name" => $name]);
+    
+    if ($req->rowCount() == 0) {
+      throw new HttpException("Species Move doesn't exists !", 400);
+    }
+
+    $req = $this->db->prepare($query);
+    $req->execute(["name" => $name]);
+
+    return $req->rowCount() > 0 ? 
+      $req->fetchAll(PDO::FETCH_ASSOC) : new stdClass();
+  }
+
   /*========================= GET ALL =======================================*/
 
   public function getAll(?int $limit = null) {

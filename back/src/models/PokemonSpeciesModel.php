@@ -55,6 +55,24 @@ class PokemonSpeciesModel extends SqlConnect {
       $req->fetch(PDO::FETCH_ASSOC) : new stdClass();
   }
 
+  /*========================= GET BY NAME ====================================*/
+
+  public function getByName(string $name) {
+    $query = "SELECT * FROM $this->table WHERE name = :name";
+    $req = $this->db->prepare($query);
+    $req->execute(["name" => $name]);
+    
+    if ($req->rowCount() == 0) {
+      throw new HttpException("Pokemon Species doesn't exists !", 400);
+    }
+
+    $req = $this->db->prepare("SELECT * FROM $this->table WHERE name = :name");
+    $req->execute(["name" => $name]);
+
+    return $req->rowCount() > 0 ? 
+      $req->fetch(PDO::FETCH_ASSOC) : new stdClass();
+  }
+
   /*========================= GET ALL =======================================*/
 
   public function getAll(?int $limit = null) {

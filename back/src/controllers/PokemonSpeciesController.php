@@ -37,6 +37,15 @@ class PokemonSpeciesController extends Controller {
     return $this->pokemonSpecies->get(intval($this->params['id']));
   }
 
+  /*========================= GET BY NAME ====================================*/
+
+  #[Route("GET", "/back/pokemon_species/name/:name"/*,
+    middlewares: [AuthMiddleware::class, 
+    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  public function getPokemonSpeciesByName() {
+    return $this->pokemonSpecies->getByName($this->params['name']);
+  }
+
   /*========================= GET ALL =======================================*/
 
   #[Route("GET", "/back/pokemon_species"/*,

@@ -37,6 +37,15 @@ class TeamController extends Controller {
     return $this->team->get(intval($this->params['id']));
   }
 
+  /*========================= GET BY NAME ====================================*/
+
+  #[Route("GET", "/back/team/name/:name"/*,
+    middlewares: [AuthMiddleware::class, 
+    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  public function getTeamByName() {
+    return $this->team->getByName($this->params['name']);
+  }
+
   /*========================= GET ALL =======================================*/
 
   #[Route("GET", "/back/team"/*,

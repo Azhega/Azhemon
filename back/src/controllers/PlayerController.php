@@ -37,6 +37,15 @@ class PlayerController extends Controller {
     return $this->player->get(intval($this->params['id']));
   }
 
+  /*========================= GET BY NAME ====================================*/
+
+  #[Route("GET", "/back/player/name/:name"/*,
+    middlewares: [AuthMiddleware::class, 
+    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  public function getPlayerByName() {
+    return $this->player->getByName($this->params['name']);
+  }
+
   /*========================= GET ALL =======================================*/
 
   #[Route("GET", "/back/player"/*,

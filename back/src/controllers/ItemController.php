@@ -37,6 +37,15 @@ class ItemController extends Controller {
     return $this->item->get(intval($this->params['id']));
   }
 
+  /*========================= GET BY NAME ====================================*/
+
+  #[Route("GET", "/back/item/name/:name"/*,
+    middlewares: [AuthMiddleware::class, 
+    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  public function getItemByName() {
+    return $this->item->getByName($this->params['name']);
+  }
+
   /*========================= GET ALL =======================================*/
 
   #[Route("GET", "/back/item"/*,

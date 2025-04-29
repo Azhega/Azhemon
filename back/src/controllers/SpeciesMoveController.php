@@ -37,6 +37,24 @@ class SpeciesMoveController extends Controller {
     return $this->speciesMove->get(intval($this->params['id']));
   }
 
+  /*====================== GET MOVE BY POKEMON NAME ==========================*/
+
+  #[Route("GET", "/back/species_move/pokemon_name/:name"/*,
+    middlewares: [AuthMiddleware::class, 
+    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  public function getSpeciesMoveByPokemonName() {
+    return $this->speciesMove->getMoveByPokemonName($this->params['name']);
+  }
+
+  /*====================== GET POKEMON BY NAME MOVE ==========================*/
+
+  #[Route("GET", "/back/species_move/move_name/:name"/*,
+    middlewares: [AuthMiddleware::class, 
+    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  public function getPokemonByMoveName() {
+    return $this->speciesMove->getPokemonByMoveName($this->params['name']);
+  }
+
   /*========================= GET ALL =======================================*/
 
   #[Route("GET", "/back/species_move"/*,

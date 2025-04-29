@@ -37,6 +37,15 @@ class MoveCategoryController extends Controller {
     return $this->moveCategory->get(intval($this->params['id']));
   }
 
+  /*========================= GET BY NAME ====================================*/
+
+  #[Route("GET", "/back/move_category/name/:name"/*,
+    middlewares: [AuthMiddleware::class, 
+    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  public function getMoveCategoryByName() {
+    return $this->moveCategory->getByName($this->params['name']);
+  }
+
   /*========================= GET ALL =======================================*/
 
   #[Route("GET", "/back/move_category"/*,

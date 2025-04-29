@@ -51,6 +51,58 @@ class SpeciesAbilityModel extends SqlConnect {
       $req->fetch(PDO::FETCH_ASSOC) : new stdClass();
   }
 
+  /*===================== GET ABILITY BY POKEMON NAME ========================*/
+
+  public function getAbilityByPokemonName(string $name) {
+    $query = "
+      SELECT ability.name AS ability_name
+      FROM species_ability
+      JOIN pokemon_species
+      ON species_ability.pokemon_species_id = pokemon_species.id
+      JOIN ability
+      ON species_ability.ability_id = ability.id 
+      WHERE pokemon_species.name = :name
+    ";
+    $req = $this->db->prepare($query);
+    $req->execute(["name" => $name]);
+    
+    if ($req->rowCount() == 0) {
+      throw new HttpException("Species Ability doesn't exists !", 400);
+    }
+
+    $req = $this->db->prepare($query);
+    $req->execute(["name" => $name]);
+
+    return $req->rowCount() > 0 ? 
+      $req->fetchAll(PDO::FETCH_ASSOC) : new stdClass();
+  }
+
+  /*===================== GET POKEMON BY ABILITY NAME ========================*/
+
+  public function getPokemonByAbilityName(string $name) {
+    $query = "
+      SELECT pokemon_species.name AS pokemon_name
+      FROM species_ability
+      JOIN pokemon_species
+      ON species_ability.pokemon_species_id = pokemon_species.id
+      JOIN ability
+      ON species_ability.ability_id = ability.id 
+      WHERE ability.name = :name
+    ";
+    $req = $this->db->prepare($query);
+    $req->execute(["name" => $name]);
+    
+    if ($req->rowCount() == 0) {
+      throw new HttpException("Species Ability doesn't exists !", 400);
+    }
+
+    $req = $this->db->prepare($query);
+    $req->execute(["name" => $name]);
+
+    return $req->rowCount() > 0 ? 
+      $req->fetchAll(PDO::FETCH_ASSOC) : new stdClass();
+  }
+
   /*========================= GET ALL =======================================*/
 
   public function getAll(?int $limit = null) {

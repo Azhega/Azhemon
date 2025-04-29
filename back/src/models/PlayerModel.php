@@ -68,11 +68,29 @@ class PlayerModel extends SqlConnect {
     $req->execute(["id" => $id]);
     
     if ($req->rowCount() == 0) {
-      throw new HttpException("User doesn't exists !", 400);
+      throw new HttpException("Player doesn't exists !", 400);
     }
 
     $req = $this->db->prepare("SELECT * FROM $this->table WHERE id = :id");
     $req->execute(["id" => $id]);
+
+    return $req->rowCount() > 0 ? 
+      $req->fetch(PDO::FETCH_ASSOC) : new stdClass();
+  }
+
+  /*========================= GET BY NAME ====================================*/
+
+  public function getByName(string $username) {
+    $query = "SELECT * FROM $this->table WHERE username = :username";
+    $req = $this->db->prepare($query);
+    $req->execute(["username" => $username]);
+    
+    if ($req->rowCount() == 0) {
+      throw new HttpException("Player doesn't exists !", 400);
+    }
+
+    $req = $this->db->prepare("SELECT * FROM $this->table WHERE username = :username");
+    $req->execute(["username" => $username]);
 
     return $req->rowCount() > 0 ? 
       $req->fetch(PDO::FETCH_ASSOC) : new stdClass();
@@ -169,7 +187,7 @@ class PlayerModel extends SqlConnect {
     $req->execute(["id" => $id]);
     
     if ($req->rowCount() == 0) {
-      throw new HttpException("User doesn't exists !", 400);
+      throw new HttpException("Player doesn't exists !", 400);
     }
 
     $res = $req->fetch(PDO::FETCH_ASSOC);
