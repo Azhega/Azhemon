@@ -16,6 +16,19 @@ class TeamPokemonModel extends SqlConnect {
   /*========================= ADD ===========================================*/
 
   public function add(array $data) {
+    if ($data['slot'] < 1 || $data['slot'] > 6) {
+      throw new HttpException("Slot must be between 1 and 6.", 400);
+    }
+
+    $query = "SELECT COUNT(*) as nb FROM team_pokemon WHERE team_id = :team_id";
+    $stmt = $this->db->prepare($query);
+    $stmt->execute(['team_id' => $data["team_id"]]);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if ($result['nb'] >= 6) {
+        throw new HttpException("A team can only contain a maximum of 6 Pokemon.", 400);
+    }
+
     $query = "
       SELECT * FROM $this->table 
       WHERE team_id = :team_id AND slot = :slot
