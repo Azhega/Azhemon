@@ -9,7 +9,7 @@ use back\utils\{HttpException};
 class MoveModel extends SqlConnect {
   private $table = "move";
   public $authorized_fields_to_update = [
-    'name', 'type_id', 'category_id', 'power', 'accuracy', 'pp', 'description'
+    'name', 'type_id', 'category_id', 'power', 'accuracy', 'pp', 'priority', 'description'
   ];
 
   /*========================= ADD ===========================================*/
@@ -24,8 +24,8 @@ class MoveModel extends SqlConnect {
     }
 
     $query = "
-      INSERT INTO $this->table (name, type_id, category_id, power, accuracy, pp, description)
-      VALUES (:name, :type_id, :category_id, :power, :accuracy, :pp, :description)
+      INSERT INTO $this->table (name, type_id, category_id, power, accuracy, pp, priority, description)
+      VALUES (:name, :type_id, :category_id, :power, :accuracy, :pp, :priority, :description)
     ";
 
     $req = $this->db->prepare($query);
