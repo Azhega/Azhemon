@@ -15,7 +15,7 @@ export class GameController {
   initialize(): void {
     console.log('Initializing game...');
     this.loadInitialData();
-    this.showMenuScene();
+    this.switchScreen('menu');
   }
   
   private registerEventListeners(): void {
@@ -43,43 +43,27 @@ export class GameController {
       Store.setState({ game: { ...Store.getState().game, isLoading: true } });
     }
   }
-  
-  private showMenuScene(): void {
-    Store.setState({ 
-      game: { 
-        ...Store.getState().game, 
-        screen: 'menu' 
-      } 
-    });
-  }
-
-  private showTeamBuilderScene(): void {
-    Store.setState({ 
-      game: { 
-        ...Store.getState().game, 
-        screen: 'teambuilder' 
-      } 
-    });
-  }
-
-  private showBattleScene(): void {
-    Store.setState({ 
-      game: { 
-        ...Store.getState().game, 
-        screen: 'battle' 
-      } 
-    });
-  }
 
   private enterTeambuilder(): void {
     console.log('Entering Teambuilder...');
-    this.showTeamBuilderScene();
+    this.switchScreen('teambuilder');
     // Enter teambuilder logic here
   }
   
   private startBattle(): void {
     console.log('Starting battle...');
-    this.showBattleScene();
+    this.switchScreen('battle');
     // Start battle logic here
+  }
+
+  switchScreen(screen: 'menu' | 'teambuilder' | 'battle'): void {
+    Store.setState({
+      game: {
+        ...Store.getState().game,
+        currentScreen: screen
+      }
+    });
+
+    EventBus.emit('screen:changed', screen);
   }
 }
