@@ -8,7 +8,7 @@ export class Store {
   private listeners: Listener[] = [];
   
   private constructor() {
-    // État initial
+    // Initial state
     this.state = {
       game: {
         screen: 'menu', // 'menu', 'teambuilder', 'battle'
