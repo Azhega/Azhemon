@@ -4,44 +4,61 @@ import { MenuView } from './MenuView.ts';
 import { TeamBuilderView } from './TeamBuilderView';
 import { BattleView } from './BattleView';
 
-class MainView {
+export class MainView {
   private menuView: MenuView;
   private teamBuilderView: TeamBuilderView;
   private battleView: BattleView;
+  private loadingScreen: HTMLElement;
   
   constructor() {
+    this.loadingScreen = document.getElementById('loading-screen') as HTMLElement;
     this.menuView = new MenuView();
     this.teamBuilderView = new TeamBuilderView();
     this.battleView = new BattleView();
-    
-    // Hide other views initially
-    this.teamBuilderView.hide();
-    this.battleView.hide();
-    
+
     // Listen to screen change events
     EventBus.on('screen:changed', (screen) => this.updateScreen(screen));
     
     // Subscribe to store changes
     Store.subscribe((state) => {
-      this.updateScreen(state.game.currentScreen);
+      if (state.game.isLoading) {
+        this.showLoading();
+      } else {
+        this.hideLoading();
+        this.updateScreen(state.game.currentScreen);
+      }
     });
+  }
+
+  initialize(): void {
+    // Show loading screen by default
+    this.showLoading();
+    // GameController will hide loading screen when data is ready
   }
   
   private updateScreen(screen: string): void {
-    this.menuView.hide();
-    this.teamBuilderView.hide();
-    this.battleView.hide();
-    
+    document.querySelectorAll('.screen').forEach(el => {
+      (el as HTMLElement).style.display = 'none';
+    });
+
     switch (screen) {
       case 'menu':
-        this.menuView.show();
+        document.getElementById('menu-screen')!.style.display = 'flex';
         break;
       case 'teambuilder':
-        this.teamBuilderView.show();
+        document.getElementById('teambuilder-screen')!.style.display = 'block';
         break;
       case 'battle':
-        this.battleView.show();
+        document.getElementById('battle-screen')!.style.display = 'block';
         break;
     }
+  }
+
+  private showLoading(): void {
+    this.loadingScreen.style.display = 'flex';
+  }
+  
+  private hideLoading(): void {
+    this.loadingScreen.style.display = 'none';
   }
 }
