@@ -1,3 +1,5 @@
+import { Effect } from './EffectModel.ts';
+
 export interface PokemonStats {
   hp: number;
   attack: number;
@@ -17,29 +19,31 @@ export interface PokemonMove {
   power: number;
   accuracy: number;
   pp: number;
+  currentPP: number;
   description: string;
   priority: number;
-  effect: string; // Effect to implement later
+  effects: Effect[]; // Effects to implement later
+  target: Pokemon;
 }
 
 export interface PokemonAbility {
   id: number;
   name: string;
   description: string;
-  effect: string; // Effect to implement later
+  effects: Effect[]; // Effects to implement later
 }
 
 export interface PokemonItem {
   id: number;
   name: string;
   description: string;
-  effect: string; // Effect to implement later
+  effects: Effect[]; // Effects to implement later
 }
 
 export interface PokemonNature {
   id: number;
   name: string;
-  effect: string; // Effect to implement later
+  effects: Effect[]; // Effects to implement later
 }
 
 export class Pokemon {
