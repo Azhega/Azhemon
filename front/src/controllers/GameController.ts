@@ -46,7 +46,7 @@ export class GameController {
       Store.setState({ pokemonSpecies });
       
       // Initialize teams and current team
-      const teams = await this.apiService.getAll('teams');
+      const teams = await this.apiService.getAll('team');
       Store.setState({ 
         currentTeam: [null, null, null, null, null, null],
         savedTeams: teams

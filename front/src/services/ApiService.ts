@@ -1,5 +1,5 @@
 export class ApiService {
-  private baseUrl = '/back';
+  private baseUrl = 'http://azhemon.azh:8099/back';
 
   async getAll(endpoint: string): Promise<any[]> {
     try {
