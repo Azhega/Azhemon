@@ -55,12 +55,25 @@ class SpeciesMoveModel extends SqlConnect {
 
   public function getMoveByPokemonName(string $name) {
     $query = "
-      SELECT move.name AS move_name
+      SELECT 
+        move.id AS id,
+        move.name AS name,
+        type.name AS type,
+        move_category.name AS category,
+        move.power AS power,
+        move.accuracy AS accuracy,
+        move.pp AS pp,
+        move.priority AS move_priority,
+        move.description AS description
       FROM species_move
       JOIN pokemon_species
       ON species_move.pokemon_species_id = pokemon_species.id
       JOIN move
       ON species_move.move_id = move.id 
+      JOIN type
+      ON move.type_id = type.id
+      JOIN move_category
+      ON move.category_id = move_category.id
       WHERE pokemon_species.name = :name
     ";
     $req = $this->db->prepare($query);

@@ -271,10 +271,39 @@ export class TeamBuilderView {
     // Attach click events to pokemon in list
     const pokemonItems = container.querySelectorAll('.pokemon-item');
     pokemonItems.forEach(item => {
-      item.addEventListener('click', () => {
+      item.addEventListener('click', async () => {
         if (this.selectedPokemonIndex !== null) {
           const pokemonId = parseInt((item as HTMLElement).dataset.pokemonId!);
           let selectedPokemon = pokemonSpecies.find((p: Pokemon) => p.id === pokemonId);
+          try {
+            const selectedPokemonPossibleAbilities = await ApiService.getAll(
+              'species_ability/pokemon_name/' + selectedPokemon.name);
+            selectedPokemon.possibleAbilities = selectedPokemonPossibleAbilities.map((ability: any) => ({
+              id: ability.id,
+              name: ability.name,
+              description: ability.description,
+              effects: [],
+            }));
+
+            const selectedPokemonPossibleMoves = await ApiService.getAll(
+              'species_move/pokemon_name/' + selectedPokemon.name);
+            selectedPokemon.possibleMoves = selectedPokemonPossibleMoves.map((move: any) => ({
+              id: move.id,
+              name: move.name,
+              type: move.type,
+              category: move.category,
+              power: move.power,
+              accuracy: move.accuracy,
+              pp: move.pp,
+              currentPP: move.pp,
+              priority: 0,
+              description: move.description,
+              target: null,
+              effects: [],
+            }));
+          } catch (error){
+            console.error("Error fetching moves:", error);
+          }
           
           if (selectedPokemon) {
             const baseStats: PokemonStats = {
@@ -314,9 +343,9 @@ export class TeamBuilderView {
               currentHp: baseStats.hp,
               level: 50,
               moves: [],
-              possibleMoves: [],
+              possibleMoves: selectedPokemon.possibleMoves,
               ability: pokemonAbility,
-              possibleAbilities: [],
+              possibleAbilities: selectedPokemon.possibleAbilities,
               nature: pokemonNature,
               item: null,
               status: null,
