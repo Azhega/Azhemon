@@ -55,7 +55,10 @@ class SpeciesAbilityModel extends SqlConnect {
 
   public function getAbilityByPokemonName(string $name) {
     $query = "
-      SELECT ability.name AS ability_name
+      SELECT 
+        ability.id AS id,
+        ability.name AS name,
+        ability.description AS description
       FROM species_ability
       JOIN pokemon_species
       ON species_ability.pokemon_species_id = pokemon_species.id
