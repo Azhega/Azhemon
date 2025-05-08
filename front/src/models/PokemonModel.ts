@@ -15,7 +15,7 @@ export interface PokemonMove {
   id: number;
   name: string;
   type: string;
-  category: 'Physical' | 'Special' | 'Status';
+  category: 'Physical' | 'Special' | 'Status' | string;
   power: number;
   accuracy: number;
   pp: number;

@@ -239,6 +239,7 @@
 .type.acier { background-color: var(--type-steel); color: black; }
 .type.fée { background-color: var(--type-fairy); }
 .type.null { display: none;}
+.type.undefined { display: none;}
 
 .save-team-button {
   padding: 12px 24px;
