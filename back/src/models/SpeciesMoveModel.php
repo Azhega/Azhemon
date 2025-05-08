@@ -54,6 +54,7 @@ class SpeciesMoveModel extends SqlConnect {
   /*===================== GET MOVE BY POKEMON NAME ===========================*/
 
   public function getMoveByPokemonName(string $name) {
+    $name = urldecode($name);
     $query = "
       SELECT 
         move.id AS id,
@@ -80,7 +81,7 @@ class SpeciesMoveModel extends SqlConnect {
     $req->execute(["name" => $name]);
     
     if ($req->rowCount() == 0) {
-      throw new HttpException("Species Move doesn't exists !", 400);
+      throw new HttpException("Species Move doesn't exists !" . $name, 400);
     }
 
     $req = $this->db->prepare($query);
