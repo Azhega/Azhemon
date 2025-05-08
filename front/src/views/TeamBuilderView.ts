@@ -147,11 +147,11 @@ export class TeamBuilderView {
         <div class="pokemon-attributes">
           <div class="attribute-row">
             <span class="attribute-label">Objet</span>
-            <span class="attribute-value editable" data-attribute="item">${pokemon?.item || 'Aucun'}</span>
+            <span class="attribute-value editable" data-attribute="item">${pokemon?.item?.name || 'Aucun'}</span>
           </div>
           <div class="attribute-row">
             <span class="attribute-label">Talent</span>
-            <span class="attribute-value editable" data-attribute="ability">${pokemon?.ability || 'Aucun'}</span>
+            <span class="attribute-value editable" data-attribute="ability">${pokemon?.ability.name || 'Aucun'}</span>
           </div>
         </div>
         
@@ -162,7 +162,8 @@ export class TeamBuilderView {
               const move = pokemon?.moves && pokemon?.moves[i] ? pokemon?.moves[i] : null;
               return `
                 <div class="move-slot ${!move ? 'empty' : ''}" data-move-slot="${i}">
-                  <span class="editable" data-attribute="move" data-move-index="${i}">${move || 'Attaque ' + (i + 1)}</span>
+                  <span class="editable" data-attribute="move" data-move-index="${i}">${move?.name || 'Attaque ' + (i + 1)}</span>
+                  <span class="type ${move?.type.toLowerCase()}">${move?.type}</span>
                 </div>
               `;
             }).join('')}
@@ -241,7 +242,7 @@ export class TeamBuilderView {
       </div>
       <div class="selector-list pokemon-list">
         ${pokemonSpecies.map((pokemon: any) => `
-          <div class="selector-item pokemon-item" data-pokemon-id="${pokemon.id}" data-pokemon-name="${pokemon.name}">
+          <div class="selector-item pokemon-element" data-pokemon-id="${pokemon.id}" data-pokemon-name="${pokemon.name}">
             <img src="src/public/images/sprites/${pokemon.name.toLowerCase()}/${pokemon.name.toLowerCase()}_face.png" 
                 alt="${pokemon.name}" class="pokemon-icon">
             <span>${pokemon.name}</span>
@@ -259,21 +260,21 @@ export class TeamBuilderView {
     if (searchInput) {
       searchInput.addEventListener('input', (e) => {
         const query = (e.target as HTMLInputElement).value.toLowerCase();
-        const items = container.querySelectorAll('.pokemon-item');
+        const pokemons = container.querySelectorAll('.pokemon-element');
         
-        items.forEach(item => {
-          const name = (item as HTMLElement).dataset.pokemonName!.toLowerCase();
-          (item as HTMLElement).style.display = name.includes(query) ? 'flex' : 'none';
+        pokemons.forEach(pokemon => {
+          const name = (pokemon as HTMLElement).dataset.pokemonName!.toLowerCase();
+          (pokemon as HTMLElement).style.display = name.includes(query) ? 'flex' : 'none';
         });
       });
     }
 
     // Attach click events to pokemon in list
-    const pokemonItems = container.querySelectorAll('.pokemon-item');
-    pokemonItems.forEach(item => {
-      item.addEventListener('click', async () => {
+    const pokemonItems = container.querySelectorAll('.pokemon-element');
+    pokemonItems.forEach(pokemon => {
+      pokemon.addEventListener('click', async () => {
         if (this.selectedPokemonIndex !== null) {
-          const pokemonId = parseInt((item as HTMLElement).dataset.pokemonId!);
+          const pokemonId = parseInt((pokemon as HTMLElement).dataset.pokemonId!);
           let selectedPokemon = pokemonSpecies.find((p: Pokemon) => p.id === pokemonId);
           try {
             const selectedPokemonPossibleAbilities = await ApiService.getAll(
@@ -387,11 +388,11 @@ export class TeamBuilderView {
         <input type="text" id="item-search" placeholder="Rechercher..." class="search-input">
       </div>
       <div class="selector-list">
-        <div class="selector-item item-item" data-item-id="0">
+        <div class="selector-item item-element" data-item-id="0">
           <span>Aucun</span>
         </div>
         ${items.map((item: PokemonItem) => `
-          <div class="selector-item item-item" data-item-id="${item.id}" data-item-name="${item.name}">
+          <div class="selector-item item-element" data-item-id="${item.id}" data-item-name="${item.name}">
             <span>${item.name}</span>
             <small>${item.description}</small>
           </div>
@@ -400,6 +401,24 @@ export class TeamBuilderView {
     `;
 
     // WIP search and click events similar to pokemon selector
+
+    const itemElements = container.querySelectorAll('.item-element');
+    itemElements.forEach(item => {
+      item.addEventListener('click', () => {
+        if (this.selectedPokemonIndex !== null) {
+          const itemId = parseInt((item as HTMLElement).dataset.itemId!);
+          const itemName = (item as HTMLElement).dataset.itemName!;
+          const selectedPokemon = this.currentTeam[this.selectedPokemonIndex!];
+          if (selectedPokemon) {
+            selectedPokemon.item = { id: itemId, name: itemName, description: '', effects: [] };
+            this.updatePokemonInSlot(this.selectedPokemonIndex!, selectedPokemon);
+            // Reset the selector
+            this.selectedAttributeType = null;
+            this.loadSelector('');
+          }
+        }
+      });
+    });
   }
 
   private loadAbilitySelector(container: HTMLElement, pokemonData?: Pokemon): void {
@@ -411,7 +430,7 @@ export class TeamBuilderView {
       </div>
       <div class="selector-list">
         ${abilities.map(ability => `
-          <div class="selector-item ability-item" data-ability-id="${ability.id}" data-ability-name="${ability.name}">
+          <div class="selector-item ability-element" data-ability-id="${ability.id}" data-ability-name="${ability.name}">
             <span>${ability.name}</span>
             <small>${ability.description}</small>
           </div>
@@ -420,6 +439,24 @@ export class TeamBuilderView {
     `;
 
     // WIP click events
+
+    const abilityElements = container.querySelectorAll('.ability-element');
+    abilityElements.forEach(ability => {
+      ability.addEventListener('click', () => {
+        if (this.selectedPokemonIndex !== null) {
+          const abilityId = parseInt((ability as HTMLElement).dataset.abilityId!);
+          const abilityName = (ability as HTMLElement).dataset.abilityName!;
+          const selectedPokemon = this.currentTeam[this.selectedPokemonIndex!];
+          if (selectedPokemon) {
+            selectedPokemon.ability = { id: abilityId, name: abilityName, description: '', effects: [] };
+            this.updatePokemonInSlot(this.selectedPokemonIndex!, selectedPokemon);
+            // Reset the selector
+            this.selectedAttributeType = null;
+            this.loadSelector('');
+          }
+        }
+      });
+    });
   }
 
   private loadMoveSelector(container: HTMLElement, data?: { moveIndex: number; selectedPokemon: Pokemon }): void {
@@ -432,7 +469,7 @@ export class TeamBuilderView {
       </div>
       <div class="selector-list">
         ${moves.map((move: PokemonMove) => `
-          <div class="selector-item move-item" data-move-id="${move.id}" data-move-name="${move.name}" data-move-index="${data?.moveIndex || 0}">
+          <div class="selector-item move-element" data-move-id="${move.id}" data-move-name="${move.name}" data-move-index="${data?.moveIndex || 0}" data-move-type="${move.type}">
             <div class="move-header">
               <span>${move.name}</span>
               <span class="type ${move.type.toLowerCase()}">${move.type}</span>
@@ -447,6 +484,39 @@ export class TeamBuilderView {
     `;
 
     // WIP search and click events
+
+    const moveElements = container.querySelectorAll('.move-element');
+    moveElements.forEach(move => {
+      move.addEventListener('click', () => {
+        if (this.selectedPokemonIndex !== null) {
+          const moveId = parseInt((move as HTMLElement).dataset.moveId!);
+          const moveName = (move as HTMLElement).dataset.moveName!;
+          const moveIndex = parseInt((move as HTMLElement).dataset.moveIndex!);
+          const moveType = (move as HTMLElement).dataset.moveType!;
+          const selectedPokemon = this.currentTeam[this.selectedPokemonIndex!];
+          if (selectedPokemon) {
+            selectedPokemon.moves[moveIndex] = {
+              id: moveId,
+              name: moveName,
+              type: moveType,
+              power: 0,
+              accuracy: 0,
+              pp: 0,
+              currentPP: 0,
+              category: '',
+              priority: 0,
+              description: '',
+              target: null,
+              effects: [],
+            };
+            this.updatePokemonInSlot(this.selectedPokemonIndex!, selectedPokemon);
+            // Reset the selector
+            this.selectedAttributeType = null;
+            this.loadSelector('');
+          }
+        }
+      });
+    });
   }
   
   private attachEvents(): void {
@@ -538,7 +608,20 @@ export class TeamBuilderView {
           },
           currentHp: apiPokemon.hp,
           level: 50,
-          moves: apiPokemon.moves.map((move) => move.move_name),
+          moves: apiPokemon.moves.map((move: PokemonMove) => ({
+            id: move.id,
+            name: move.name,
+            type: move.type,
+            power: move.power,
+            accuracy: move.accuracy,
+            pp: move.pp,
+            currentPP: move.pp,
+            category: move.category,
+            priority: move.priority,
+            description: move.description,
+            target: null,
+            effects: []
+          })),
           possibleMoves: apiPokemon.possibleMoves.map((move: PokemonMove) => ({
             id: move.id,
             name: move.name,
