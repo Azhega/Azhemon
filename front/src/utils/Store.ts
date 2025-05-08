@@ -15,7 +15,7 @@ export class Store {
         isLoading: false
       },
       battle: null,
-      teams: [],
+      currentTeam: [],
       pokemonSpecies: []
     };
   }

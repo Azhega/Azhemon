@@ -1,16 +1,20 @@
-// src/views/TeamBuilderView.ts
 import EventBus from '../utils/EventBus';
 import Store from '../utils/Store';
-import { Pokemon } from '../models/PokemonModel';
+import { Pokemon, PokemonStats, PokemonAbility, PokemonNature, PokemonItem, PokemonMove } from '../models/PokemonModel';
+import ApiService from '../services/ApiService';
 
 export class TeamBuilderView {
   private element: HTMLElement;
   private currentTeam: (Pokemon | null)[] = [null, null, null, null, null, null];
+  private selectedPokemonIndex: number | null = null;
+  private selectedAttributeType: string | null = null; // 'pokemon', 'item', 'ability', 'move'
   
   constructor() {
     this.element = document.getElementById('teambuilder-screen')!;
     this.render();
     this.attachEvents();
+
+    this.loadTeams();
     
     // Subscribe to team changes in the store
     Store.subscribe((state) => {
@@ -19,27 +23,59 @@ export class TeamBuilderView {
         this.updateTeamDisplay();
       }
     });
+
+    console.log("Store :", Store.getState());
   }
   
   private render(): void {
     this.element.innerHTML = `
-      <div class="teambuilder-container">
-        <div class="teambuilder-header">
-          <h1 class="teambuilder-title">Team Builder</h1>
-          <button id="back-to-menu" class="back-button">Retour au Menu</button>
+      <div class="teambuilder-layout">
+        <!-- Left panel - Team management -->
+        <div class="team-panel">
+          <div class="teambuilder-header">
+            <h1 class="teambuilder-title">Team Builder</h1>
+            <button id="back-to-menu" class="back-button">Retour au Menu</button>
+          </div>
+          
+          <!-- Teams Selector -->
+          <div class="team-list">
+            <h2>Mes équipes</h2>
+            <select id="teams-dropdown" class="teams-dropdown">
+              <!-- Saved teams will be injected here -->
+            </select>
+            <button id="new-team-btn" class="action-button">+ Nouvelle équipe</button>
+          </div>
+          
+          <div class="team-pokemon-list">
+            <h2>Pokémon de l'équipe</h2>
+            <div id="team-slots">
+              ${Array(6).fill(0).map((_, i) => `
+                <div class="pokemon-slot empty" data-slot="${i}">
+                  <div class="slot-number">${i + 1}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          
+          <button id="save-team" class="save-team-button">Sauvegarder l'équipe</button>
         </div>
         
-        <div class="team-container" id="team-slots">
-          ${Array(6).fill(0).map((_, i) => `
-            <div class="pokemon-slot empty" data-slot="${i}"></div>
-          `).join('')}
+        <!-- Right panel - Pokemon details & selector -->
+        <div class="details-panel">
+          <div id="pokemon-details" class="pokemon-details">
+            <!-- Pokemon details will be displayed here when a pokemon is selected -->
+            <div class="empty-details-message">
+              <p>Sélectionnez un Pokémon pour voir et modifier ses détails</p>
+            </div>
+          </div>
+          
+          <div id="selector-panel" class="selector-panel">
+            <!-- Dynamic content will be loaded here based on what is being edited -->
+            <div class="empty-selector-message">
+              <p>Cliquez sur un attribut du Pokémon pour le modifier</p>
+            </div>
+          </div>
         </div>
-        
-        <button id="save-team" class="save-team-button">Sauvegarder l'équipe</button>
-      </div>
-      
-      <div id="pokemon-selector" style="display: none;">
-        <!-- Le sélecteur de Pokémon sera injecté ici -->
       </div>
     `;
     
@@ -53,48 +89,537 @@ export class TeamBuilderView {
     for (let i = 0; i < 6; i++) {
       const slot = teamContainer.querySelector(`[data-slot="${i}"]`) as HTMLElement;
       const pokemon = this.currentTeam[i];
+      console.log("pokemon : ", pokemon);
+      console.log("currentTeam : ", this.currentTeam);
       
-      if (pokemon && typeof pokemon.name === 'string') {
-        // If the slot is occupied
-        slot.className = 'pokemon-slot';
+      if (pokemon) {
+        slot.className = 'pokemon-slot' + (this.selectedPokemonIndex === i ? ' selected' : '');
         slot.innerHTML = `
-          <img src="src/public/images/sprites/${pokemon.name}/${pokemon.name.toLowerCase()}_face.png" alt="${pokemon.name.toLowerCase()}" style="width: 100px; height: 100px;">
-          <h3>${pokemon.name}</h3>
-          <div class="pokemon-types">
-            ${pokemon.types.map(type => `<span class="type ${type.toLowerCase()}">${type}</span>`).join('')}
+          <div class="slot-number">${i + 1}</div>
+          <div class="pokemon-preview">
+            <img src="src/public/images/sprites/${pokemon.name.toLowerCase()}/${pokemon.name.toLowerCase()}_face.png" 
+                alt="${pokemon.name.toLowerCase()}" class="pokemon-sprite">
+            <div class="pokemon-info">
+              <h3 class="pokemon-name">${pokemon.name}</h3>
+              <div class="pokemon-types">
+                <span class="type ${pokemon.types[0].toLowerCase()}">${pokemon.types[0]}</span>
+                <span class="type ${pokemon.types[1].toLowerCase()}">${pokemon.types[1]}</span>
+              </div>
+            </div>
           </div>
         `;
       } else {
-        // If slot is empty
         slot.className = 'pokemon-slot empty';
-        slot.innerHTML = '';
+        slot.innerHTML = `<div class="slot-number">${i + 1}</div>`;
+      }
+    }
+
+    // If there's a selected Pokémon, update the details panel
+    this.updateDetailsPanel();
+  }
+
+  private updateDetailsPanel(): void {
+    const detailsPanel = document.getElementById('pokemon-details')!;
+    
+    if (this.selectedPokemonIndex === null || !this.currentTeam[this.selectedPokemonIndex]) {
+      detailsPanel.innerHTML = `
+        <div class="empty-details-message">
+          <p>Sélectionnez un Pokémon pour voir et modifier ses détails</p>
+        </div>
+      `;
+      return;
+    }
+    
+    const pokemon = this.currentTeam[this.selectedPokemonIndex];
+    detailsPanel.innerHTML = `
+      <div class="pokemon-detail-card">
+        <div class="pokemon-header">
+          <img src="src/public/images/sprites/${pokemon?.name.toLowerCase()}/${pokemon?.name.toLowerCase()}_face.png" 
+              alt="${pokemon?.name.toLowerCase()}" class="pokemon-avatar">
+          <div class="pokemon-title">
+            <h2 class="pokemon-name editable" data-attribute="pokemon">${pokemon?.name}</h2>
+            <div class="pokemon-types">
+              ${pokemon?.types.map(type => `<span class="type ${type.toLowerCase()}">${type}</span>`).join('')}
+            </div>
+          </div>
+        </div>
+        
+        <div class="pokemon-attributes">
+          <div class="attribute-row">
+            <span class="attribute-label">Objet</span>
+            <span class="attribute-value editable" data-attribute="item">${pokemon?.item || 'Aucun'}</span>
+          </div>
+          <div class="attribute-row">
+            <span class="attribute-label">Talent</span>
+            <span class="attribute-value editable" data-attribute="ability">${pokemon?.ability || 'Aucun'}</span>
+          </div>
+        </div>
+        
+        <div class="pokemon-moves">
+          <h3>Attaques</h3>
+          <div class="moves-list">
+            ${Array(4).fill(0).map((_, i) => {
+              const move = pokemon?.moves && pokemon?.moves[i] ? pokemon?.moves[i] : null;
+              return `
+                <div class="move-slot ${!move ? 'empty' : ''}" data-move-slot="${i}">
+                  <span class="editable" data-attribute="move" data-move-index="${i}">${move || 'Attaque ' + (i + 1)}</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+        
+        <button id="remove-pokemon" class="remove-button" data-slot="${this.selectedPokemonIndex}">
+          Retirer ce Pokémon
+        </button>
+      </div>
+    `;
+
+    this.attachDetailEvents();
+  }
+
+  private async loadTeams(): Promise<void> {
+    try {
+      const teamsData = await ApiService.getAll('team');
+      this.populateTeamsDropdown(teamsData);
+    } catch (error) {
+      console.error('Erreur lors du chargement des équipes', error);
+      const dropdown = document.getElementById('teams-dropdown') as HTMLSelectElement;
+      if (dropdown) {
+        dropdown.innerHTML = `<option value="">Erreur lors du chargement</option>`;
       }
     }
   }
   
+  private populateTeamsDropdown(teams: { id: number; name: string }[]): void {
+    const dropdown = document.getElementById('teams-dropdown') as HTMLSelectElement;
+    if (!teams || teams.length === 0) {
+      dropdown.innerHTML = `<option value="">Aucune équipe disponible</option>`;
+    } else {
+      dropdown.innerHTML = teams.map(team => `<option value="${team.id}">${team.name}</option>`).join('');
+    }
+  } 
+
+  private loadSelector(type: string, data?: any): void {
+    const selectorPanel = document.getElementById('selector-panel')!;
+    this.selectedAttributeType = type;
+    
+    selectorPanel.innerHTML = '<div class="loading">Chargement...</div>';
+    
+    switch(type) {
+      case 'pokemon':
+        this.loadPokemonSelector(selectorPanel);
+        break;
+      case 'item':
+        this.loadItemSelector(selectorPanel);
+        break;
+      case 'ability':
+        this.loadAbilitySelector(selectorPanel, data);
+        break;
+      case 'move':
+        this.loadMoveSelector(selectorPanel, data);
+        break;
+      default:
+        selectorPanel.innerHTML = `
+          <div class="empty-selector-message">
+            <p>Cliquez sur un attribut du Pokémon pour le modifier</p>
+          </div>
+        `;
+    }
+  }
+
+  private loadPokemonSelector(container: HTMLElement): void {
+    const state = Store.getState();
+    const pokemonSpecies = state.pokemonSpecies || [];
+    console.log("pokemonSpecies : ", pokemonSpecies);
+    console.log("state : ", state);
+    
+    container.innerHTML = `
+      <div class="selector-header">
+        <h3>Choisir un Pokémon</h3>
+        <input type="text" id="pokemon-search" placeholder="Rechercher..." class="search-input">
+      </div>
+      <div class="selector-list pokemon-list">
+        ${pokemonSpecies.map((pokemon: any) => `
+          <div class="selector-item pokemon-item" data-pokemon-id="${pokemon.id}" data-pokemon-name="${pokemon.name}">
+            <img src="src/public/images/sprites/${pokemon.name.toLowerCase()}/${pokemon.name.toLowerCase()}_face.png" 
+                alt="${pokemon.name}" class="pokemon-icon">
+            <span>${pokemon.name}</span>
+            <div class="pokemon-types small">
+              <span class="type ${pokemon.first_type.toLowerCase()}">${pokemon.first_type}</span>
+              <span class="type ${pokemon.second_type.toLowerCase()}">${pokemon.second_type}</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    // Attach search event
+    const searchInput = document.getElementById('pokemon-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const query = (e.target as HTMLInputElement).value.toLowerCase();
+        const items = container.querySelectorAll('.pokemon-item');
+        
+        items.forEach(item => {
+          const name = (item as HTMLElement).dataset.pokemonName!.toLowerCase();
+          (item as HTMLElement).style.display = name.includes(query) ? 'flex' : 'none';
+        });
+      });
+    }
+
+    // Attach click events to pokemon in list
+    const pokemonItems = container.querySelectorAll('.pokemon-item');
+    pokemonItems.forEach(item => {
+      item.addEventListener('click', () => {
+        if (this.selectedPokemonIndex !== null) {
+          const pokemonId = parseInt((item as HTMLElement).dataset.pokemonId!);
+          let selectedPokemon = pokemonSpecies.find((p: Pokemon) => p.id === pokemonId);
+          
+          if (selectedPokemon) {
+            const baseStats: PokemonStats = {
+              hp: selectedPokemon.hp,
+              attack: selectedPokemon.atk,
+              defense: selectedPokemon.def,
+              specialAttack: selectedPokemon.spe_atk,
+              specialDefense: selectedPokemon.spe_def,
+              speed: selectedPokemon.speed,
+              accuracy: 0,
+              evasion: 0,
+            };
+    
+            const pokemonAbility: PokemonAbility = {
+              id: 0,
+              name: 'Aucun',
+              description: 'Aucun talent',
+              effects: [],
+            };
+    
+            const pokemonNature: PokemonNature = {
+              id: 0,
+              name: 'Aucun',
+              description: 'Aucune nature',
+              effects: [],
+            };
+    
+            selectedPokemon = {
+              id: selectedPokemon.id,
+              name: selectedPokemon.name,
+              types: [
+                selectedPokemon.first_type,
+                selectedPokemon.second_type
+              ],
+              baseStats: baseStats,
+              currentStats: baseStats,
+              currentHp: baseStats.hp,
+              level: 50,
+              moves: [],
+              possibleMoves: [],
+              ability: pokemonAbility,
+              possibleAbilities: [],
+              nature: pokemonNature,
+              item: null,
+              status: null,
+              statModifiers: {
+                hp: 0,
+                attack: 0,
+                defense: 0,
+                specialAttack: 0,
+                specialDefense: 0,
+                speed: 0,
+                accuracy: 0,
+                evasion: 0,
+              },
+              isAlive: true,
+              trainer: null,
+              terrain: null,
+              calculateStats(): PokemonStats {
+                return this.calculateStats();
+              }
+            };
+
+            this.updatePokemonInSlot(this.selectedPokemonIndex, selectedPokemon);
+            // Reset the selector
+            this.selectedAttributeType = null;
+            this.loadSelector('');
+          }
+        }
+      });
+    });
+  }
+
+  private loadItemSelector(container: HTMLElement): void {
+    const state = Store.getState();
+    const items = state.availableItems;
+    
+    container.innerHTML = `
+      <div class="selector-header">
+        <h3>Choisir un objet</h3>
+        <input type="text" id="item-search" placeholder="Rechercher..." class="search-input">
+      </div>
+      <div class="selector-list">
+        <div class="selector-item item-item" data-item-id="0">
+          <span>Aucun</span>
+        </div>
+        ${items.map((item: PokemonItem) => `
+          <div class="selector-item item-item" data-item-id="${item.id}" data-item-name="${item.name}">
+            <span>${item.name}</span>
+            <small>${item.description}</small>
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    // WIP search and click events similar to pokemon selector
+  }
+
+  private loadAbilitySelector(container: HTMLElement, pokemonData?: Pokemon): void {
+    const abilities = pokemonData?.possibleAbilities || [];
+    
+    container.innerHTML = `
+      <div class="selector-header">
+        <h3>Choisir un talent</h3>
+      </div>
+      <div class="selector-list">
+        ${abilities.map(ability => `
+          <div class="selector-item ability-item" data-ability-id="${ability.id}" data-ability-name="${ability.name}">
+            <span>${ability.name}</span>
+            <small>${ability.description}</small>
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    // WIP click events
+  }
+
+  private loadMoveSelector(container: HTMLElement, data?: { moveIndex: number; selectedPokemon: Pokemon }): void {
+    const moves = data?.selectedPokemon.possibleMoves || [];
+    console.log("moves : ", moves);
+    container.innerHTML = `
+      <div class="selector-header">
+        <h3>Choisir une attaque</h3>
+        <input type="text" id="move-search" placeholder="Rechercher..." class="search-input">
+      </div>
+      <div class="selector-list">
+        ${moves.map((move: PokemonMove) => `
+          <div class="selector-item move-item" data-move-id="${move.id}" data-move-name="${move.name}" data-move-index="${data?.moveIndex || 0}">
+            <div class="move-header">
+              <span>${move.name}</span>
+              <span class="type ${move.type.toLowerCase()}">${move.type}</span>
+            </div>
+            <div class="move-stats">
+              <small>Puissance: ${move.power}</small>
+              <small>Précision: ${move.accuracy}</small>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    // WIP search and click events
+  }
+  
   private attachEvents(): void {
-    // Back to menu
     document.getElementById('back-to-menu')?.addEventListener('click', () => {
       EventBus.emit('teambuilder:back-to-menu');
     });
     
-    // Save team
     document.getElementById('save-team')?.addEventListener('click', () => {
       EventBus.emit('teambuilder:save-team', this.currentTeam);
     });
     
-    // Click on a Pokémon slot to open the Pokémon selector
-    document.querySelectorAll('.pokemon-slot').forEach(slot => {
-      slot.addEventListener('click', (e) => {
-        const slotIndex = parseInt((e.currentTarget as HTMLElement).dataset.slot || '0');
-        EventBus.emit('teambuilder:open-pokemon-selector', { slotIndex });
+    // Click on a Pokémon slot to select it
+    const teamContainer = document.getElementById('team-slots');
+    if (teamContainer) {
+      teamContainer.addEventListener('click', (e) => {
+        const slot = (e.target as HTMLElement).closest('.pokemon-slot');
+        if (slot) {
+          const slotIndex = parseInt(slot.getAttribute('data-slot') || '0');
+          
+          if (this.currentTeam[slotIndex]) {
+            // If the slot has a Pokémon, select it
+            this.selectedPokemonIndex = slotIndex;
+            this.updateTeamDisplay();
+          } else {
+            // If the slot is empty, open the Pokémon selector
+            this.selectedPokemonIndex = slotIndex;
+            this.loadSelector('pokemon');
+            this.updateTeamDisplay();
+          }
+        }
       });
+    }
+
+    document.getElementById('new-team-btn')?.addEventListener('click', () => {
+      // Reset current team
+      this.currentTeam = [null, null, null, null, null, null];
+      this.selectedPokemonIndex = null;
+      Store.setState({ currentTeam: this.currentTeam });
+      this.updateTeamDisplay();
+    });
+    
+    // Dropdown event for teams via API
+    const teamsDropdown = document.getElementById('teams-dropdown') as HTMLSelectElement;
+    teamsDropdown?.addEventListener('change', async (e: Event) => {
+      const selectedValue = (e.target as HTMLSelectElement).value;
+
+      const selectedTeamId = parseInt(selectedValue);
+      if (isNaN(selectedTeamId)) {
+        console.error("Invalid Team ID:", selectedValue);
+        return;
+      }
+
+      try {
+        const teamData: { id: number; name: string; pokemons: 
+          { id: number; slot: number; pokemon_name: string; moves: any[]; first_type: string; second_type: string;
+            hp: number; atk: number; def: number; spe_atk: number; spe_def: number; speed: number;
+            ability: PokemonAbility; item: PokemonItem; nature: PokemonNature; 
+            possibleAbilities: PokemonAbility[]; possibleMoves: PokemonMove[]}[] } =
+        await ApiService.getTeamPokemonMoveByTeamId(selectedTeamId);
+
+        console.log("Selected team data:", teamData);
+
+        this.currentTeam = teamData.pokemons.map((apiPokemon) => ({
+          id: apiPokemon.id,
+          name: apiPokemon.pokemon_name,
+          types: [
+            apiPokemon.first_type,
+            apiPokemon.second_type
+          ],
+          baseStats: {
+            hp: apiPokemon.hp,
+            attack: apiPokemon.atk,
+            defense: apiPokemon.def,
+            specialAttack: apiPokemon.spe_atk,
+            specialDefense: apiPokemon.spe_def,
+            speed: apiPokemon.speed,
+            accuracy: 0,
+            evasion: 0,
+          },
+          currentStats: {
+            hp: apiPokemon.hp,
+            attack: apiPokemon.atk,
+            defense: apiPokemon.def,
+            specialAttack: apiPokemon.spe_atk,
+            specialDefense: apiPokemon.spe_def,
+            speed: apiPokemon.speed,
+            accuracy: 0,
+            evasion: 0,
+          },
+          currentHp: apiPokemon.hp,
+          level: 50,
+          moves: apiPokemon.moves.map((move) => move.move_name),
+          possibleMoves: apiPokemon.possibleMoves.map((move: PokemonMove) => ({
+            id: move.id,
+            name: move.name,
+            type: move.type,
+            power: move.power,
+            accuracy: move.accuracy,
+            pp: move.pp,
+            currentPP: move.pp,
+            category: move.category,
+            priority: move.priority,
+            description: move.description,
+            target: null,
+            effects: []
+          })),
+          ability: {
+            id: apiPokemon.ability.id,
+            name: apiPokemon.ability.name,
+            description: apiPokemon.ability.description,
+            effects: [],
+          },
+          possibleAbilities: apiPokemon.possibleAbilities.map((ability: PokemonAbility) => ({
+            id: ability.id,
+            name: ability.name,
+            description: ability.description,
+            effects: [],
+          })),
+          nature: {
+            id: apiPokemon.nature.id,
+            name: apiPokemon.nature.name,
+            description: apiPokemon.nature.description,
+            effects: [],
+          },
+          item: {
+            id: apiPokemon.item.id,
+            name: apiPokemon.item.name,
+            description: apiPokemon.item.description,
+            effects: [],
+          },
+          status: null,
+          statModifiers: {
+            hp: 0,
+            attack: 0,
+            defense: 0,
+            specialAttack: 0,
+            specialDefense: 0,
+            speed: 0,
+            accuracy: 0,
+            evasion: 0,
+          },
+          isAlive: true,
+          trainer: null,
+          terrain: null,
+          calculateStats(): PokemonStats {
+            return this.calculateStats();
+          }
+        }));
+
+        Store.setState({ currentTeam: [...this.currentTeam] });
+
+        console.log("Transformed team data:", this.currentTeam);
+        console.log("Store :", Store.getState());
+
+        this.updateTeamDisplay();
+      } catch (error) {
+        console.error("Erreur lors du chargement de l'équipe :", error);
+      }
     });
   }
+
+  private attachDetailEvents(): void {
+    // Delegate event for all editable elements
+    const detailsPanel = document.getElementById('pokemon-details');
+    if (detailsPanel) {
+      detailsPanel.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        const editable = target.closest('.editable');
+        
+        if (editable) {
+          const attribute = editable.getAttribute('data-attribute');
+          
+          if (attribute === 'pokemon') {
+            this.loadSelector('pokemon');
+          } else if (attribute === 'item') {
+            this.loadSelector('item');
+          } else if (attribute === 'ability') {
+            this.loadSelector('ability', this.currentTeam[this.selectedPokemonIndex!]);
+          } else if (attribute === 'move') {
+            const moveIndex = parseInt(editable.getAttribute('data-move-index') || '0');
+            const selectedPokemon = this.currentTeam[this.selectedPokemonIndex!];
+            this.loadSelector('move', { moveIndex, selectedPokemon });
+          }
+        }
+      });
+
+      const removeButton = document.getElementById('remove-pokemon');
+      if (removeButton) {
+        removeButton.addEventListener('click', () => {
+          if (this.selectedPokemonIndex !== null) {
+            this.updatePokemonInSlot(this.selectedPokemonIndex, null);
+            this.selectedPokemonIndex = null;
+            this.updateTeamDisplay();
+          }
+        });
+      }
+    }
+  }
   
-  // Will be called when a Pokémon is selected from the selector
   updatePokemonInSlot(slotIndex: number, pokemon: Pokemon | null): void {
     this.currentTeam[slotIndex] = pokemon;
+    Store.setState({ currentTeam: [...this.currentTeam] });
     this.updateTeamDisplay();
   }
 }
