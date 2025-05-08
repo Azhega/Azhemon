@@ -54,6 +54,7 @@ class SpeciesAbilityModel extends SqlConnect {
   /*===================== GET ABILITY BY POKEMON NAME ========================*/
 
   public function getAbilityByPokemonName(string $name) {
+    $name = urldecode($name);
     $query = "
       SELECT 
         ability.id AS id,
