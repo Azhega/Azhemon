@@ -1,3 +1,5 @@
+import { Pokemon, PokemonAbility, PokemonItem, PokemonNature, PokemonMove } from '../models/PokemonModel';
+
 export class ApiService {
   private baseUrl = 'http://azhemon.azh:8099/back';
 
@@ -112,7 +114,11 @@ export class ApiService {
     return this.getById('team_pokemon_move/pokemon_id', pokemonId);
   }
 
-  async getTeamPokemonMoveByTeamId(teamId: number): Promise<any[]> {
+  async getTeamPokemonMoveByTeamId(teamId: number): Promise<
+  { id: number; name: string; pokemons: 
+            { id: number; slot: number; pokemon_name: string; moves: any[]; first_type: string; second_type: string;
+              hp: number; atk: number; def: number; spe_atk: number; spe_def: number; speed: number;
+              ability: PokemonAbility; item: PokemonItem; nature: PokemonNature; possibleAbilities: PokemonAbility[]; possibleMoves: PokemonMove[] }[] }> {
     return this.getById('team_pokemon_move/team_id', teamId);
   }
 
