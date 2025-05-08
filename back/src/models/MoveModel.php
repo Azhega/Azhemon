@@ -35,16 +35,18 @@ class MoveModel extends SqlConnect {
   /*========================= GET ===========================================*/
 
   public function get(int $id) {
-    $query = "SELECT * FROM $this->table WHERE id = :id";
+    $query = "
+      SELECT $this->table.*, type.name AS type 
+      FROM $this->table 
+      JOIN type ON $this->table.type_id = type.id 
+      WHERE $this->table.id = :id
+    ";
     $req = $this->db->prepare($query);
     $req->execute(["id" => $id]);
     
     if ($req->rowCount() == 0) {
       throw new HttpException("Move doesn't exists !", 400);
     }
-
-    $req = $this->db->prepare("SELECT * FROM $this->table WHERE id = :id");
-    $req->execute(["id" => $id]);
 
     return $req->rowCount() > 0 ? 
       $req->fetch(PDO::FETCH_ASSOC) : new stdClass();
@@ -71,7 +73,11 @@ class MoveModel extends SqlConnect {
   /*========================= GET ALL =======================================*/
 
   public function getAll(?int $limit = null) {
-    $query = "SELECT * FROM {$this->table}";
+    $query = "
+      SELECT $this->table.*, type.name AS type
+      FROM $this->table 
+      JOIN type ON $this->table.type_id = type.id 
+    ";
     
     if ($limit !== null) {
         $query .= " LIMIT :limit";

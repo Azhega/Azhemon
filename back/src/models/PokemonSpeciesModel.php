@@ -57,17 +57,41 @@ class PokemonSpeciesModel extends SqlConnect {
 
   /*========================= GET BY NAME ====================================*/
 
+  // public function getByName(string $name) {
+  //   $query = "SELECT * FROM $this->table WHERE name = :name";
+  //   $req = $this->db->prepare($query);
+  //   $req->execute(["name" => $name]);
+    
+  //   if ($req->rowCount() == 0) {
+  //     throw new HttpException("Pokemon Species doesn't exists !", 400);
+  //   }
+
+  //   $req = $this->db->prepare("SELECT * FROM $this->table WHERE name = :name");
+  //   $req->execute(["name" => $name]);
+
+  //   return $req->rowCount() > 0 ? 
+  //     $req->fetch(PDO::FETCH_ASSOC) : new stdClass();
+  // }
+
+  /*========================= GET BY NAME ====================================*/
+
   public function getByName(string $name) {
-    $query = "SELECT * FROM $this->table WHERE name = :name";
+    $query = "
+      SELECT 
+      p.*,
+      t1.name AS first_type,
+      t2.name AS second_type
+      FROM $this->table p
+      LEFT JOIN type t1 ON p.first_type_id = t1.id
+      LEFT JOIN type t2 ON p.second_type_id = t2.id
+      WHERE p.name = :name
+    ";
     $req = $this->db->prepare($query);
     $req->execute(["name" => $name]);
     
     if ($req->rowCount() == 0) {
       throw new HttpException("Pokemon Species doesn't exists !", 400);
     }
-
-    $req = $this->db->prepare("SELECT * FROM $this->table WHERE name = :name");
-    $req->execute(["name" => $name]);
 
     return $req->rowCount() > 0 ? 
       $req->fetch(PDO::FETCH_ASSOC) : new stdClass();
@@ -76,8 +100,16 @@ class PokemonSpeciesModel extends SqlConnect {
   /*========================= GET ALL =======================================*/
 
   public function getAll(?int $limit = null) {
-    $query = "SELECT * FROM {$this->table}";
-    
+    $query = "
+      SELECT 
+      p.*,
+      t1.name AS first_type,
+      t2.name AS second_type
+      FROM $this->table p
+      LEFT JOIN type t1 ON p.first_type_id = t1.id
+      LEFT JOIN type t2 ON p.second_type_id = t2.id
+      ";
+
     if ($limit !== null) {
         $query .= " LIMIT :limit";
         $params = [':limit' => (int)$limit];

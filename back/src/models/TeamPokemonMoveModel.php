@@ -289,16 +289,66 @@ class TeamPokemonMoveModel extends SqlConnect {
         team_pokemon.id AS team_pokemon_id,
         team_pokemon.slot AS pokemon_slot,
         pokemon_species.name AS pokemon_name,
+        pokemon_species.hp AS pokemon_hp,
+        pokemon_species.atk AS pokemon_atk,
+        pokemon_species.def AS pokemon_def,
+        pokemon_species.spe_atk AS pokemon_spe_atk,
+        pokemon_species.spe_def AS pokemon_spe_def,
+        pokemon_species.speed AS pokemon_speed,
+        type1.name AS first_type_name,
+        type2.name AS second_type_name,
         team_pokemon_move.slot AS move_slot,
         team_pokemon_move.id AS move_id,
-        move.name AS move_name
+        move.name AS move_name,
+        ability.id AS ability_id,
+        ability.name AS ability_name,
+        ability.description AS ability_description,
+        item.id AS item_id,
+        item.name AS item_name,
+        item.description AS item_description,
+        nature.id AS nature_id,
+        nature.name AS nature_name,
+        nature.description AS nature_description,
+        (
+          SELECT JSON_ARRAYAGG(JSON_OBJECT(
+            'id', a.id,
+            'name', a.name,
+            'description', a.description
+          ))
+          FROM species_ability AS sa
+          JOIN ability AS a ON sa.ability_id = a.id
+          WHERE sa.pokemon_species_id = pokemon_species.id
+        ) AS possibleAbilities,
+        (
+          SELECT JSON_ARRAYAGG(JSON_OBJECT(
+            'id', m.id,
+            'name', m.name,
+            'type', t3.name,
+            'category', c.name,
+            'power', m.power,
+            'accuracy', m.accuracy,
+            'pp', m.pp,
+            'priority', m.priority,
+            'description', m.description
+          ))
+          FROM species_move AS sm
+          JOIN move AS m ON sm.move_id = m.id
+          LEFT JOIN type AS t3 ON m.type_id = t3.id
+          LEFT JOIN move_category AS c ON m.category_id = c.id
+          WHERE sm.pokemon_species_id = pokemon_species.id
+        ) AS possibleMoves
       FROM team_pokemon_move
       JOIN team_pokemon ON team_pokemon_move.team_pokemon_id = team_pokemon.id
       JOIN team ON team_pokemon.team_id = team.id
       JOIN pokemon_species ON team_pokemon.pokemon_species_id = pokemon_species.id
       LEFT JOIN move ON team_pokemon_move.move_id = move.id
+      LEFT JOIN type AS type1 ON pokemon_species.first_type_id = type1.id
+      LEFT JOIN type AS type2 ON pokemon_species.second_type_id = type2.id
+      JOIN ability ON team_pokemon.ability_id = ability.id
+      JOIN item ON team_pokemon.item_id = item.id
+      JOIN nature ON team_pokemon.nature_id = nature.id
       WHERE team.id = :teamID
-      ORDER BY team_pokemon.slot, team_pokemon_move.slot
+      ORDER BY team_pokemon.slot, team_pokemon_move.slot;
     ";
     $stmt = $this->db->prepare($query);
     $stmt->execute(["teamID" => $teamID]);
@@ -319,7 +369,32 @@ class TeamPokemonMoveModel extends SqlConnect {
           "id"           => $pokemonId,
           "slot"         => $row['pokemon_slot'],
           "pokemon_name" => $row['pokemon_name'],
-          "moves"        => []
+          "first_type"   => $row["first_type_name"],
+          "second_type"  => $row["second_type_name"],
+          "hp"          => $row["pokemon_hp"],
+          "atk"      => $row["pokemon_atk"],
+          "def"     => $row["pokemon_def"],
+          "spe_atk" => $row["pokemon_spe_atk"],
+          "spe_def" => $row["pokemon_spe_def"],
+          "speed"       => $row["pokemon_speed"],
+          "ability"     => [
+            "id"          => $row["ability_id"],
+            "name"        => $row["ability_name"],
+            "description" => $row["ability_description"]
+          ],
+          "item"        => [
+            "id"          => $row["item_id"],
+            "name"        => $row["item_name"],
+            "description" => $row["item_description"]
+          ],
+          "nature"      => [
+            "id"          => $row["nature_id"],
+            "name"        => $row["nature_name"],
+            "description" => $row["nature_description"]
+          ],
+          "moves"        => [],
+          "possibleAbilities" => $row["possibleAbilities"] ? json_decode($row["possibleAbilities"], true) : [],
+          "possibleMoves"     => $row["possibleMoves"] ? json_decode($row["possibleMoves"], true) : []
         ];
       }
       $team['pokemons'][$pokemonId]['moves'][] = [
