@@ -23,7 +23,7 @@ export interface PokemonMove {
   description: string;
   priority: number;
   effects: Effect[]; // Effects to implement later
-  target: Pokemon;
+  target: Pokemon | null;
 }
 
 export interface PokemonAbility {
@@ -43,6 +43,14 @@ export interface PokemonItem {
 export interface PokemonNature {
   id: number;
   name: string;
+  description: string;
+  effects: Effect[]; // Effects to implement later
+}
+
+export interface PokemonStatus {
+  id: number;
+  name: string;
+  description: string;
   effects: Effect[]; // Effects to implement later
 }
 
@@ -55,10 +63,12 @@ export class Pokemon {
   currentHp: number;
   level: number = 50; // Default level, to implement if in advance
   moves: PokemonMove[];
+  possibleMoves: PokemonMove[];
   ability: PokemonAbility;
+  possibleAbilities: PokemonAbility[];
   item: PokemonItem | null;
   nature: PokemonNature;
-  status: string | null;
+  status: PokemonStatus | null;
   statModifiers: Record<keyof PokemonStats, number>;
   isAlive: boolean = true;
   trainer: number | null = null; // Trainer ID, to implement later
@@ -71,7 +81,9 @@ export class Pokemon {
     this.baseStats = data.baseStats;
     this.level = 50;
     this.moves = data.moves || [];
+    this.possibleMoves = data.possibleMoves;
     this.ability = data.ability;
+    this.possibleAbilities = data.possibleAbilities;
     this.item = data.item || null;
     this.nature = data.nature;
     this.status = null;
@@ -93,7 +105,7 @@ export class Pokemon {
     this.currentHp = this.currentStats.hp;
   }
   
-  private calculateStats(): PokemonStats {
+  public calculateStats(): PokemonStats {
     // To develop later: Nature and EV/IV calculations
     return {
       hp: Math.floor(((2 * this.baseStats.hp + 31) * this.level) / 100) + this.level + 10,
@@ -106,6 +118,39 @@ export class Pokemon {
       evasion: 100
     };
   }
-  
   // Other methods to implement later
+}
+
+export class PokemonTeam {
+  members: (Pokemon | null)[] = [null, null, null, null, null, null];
+  
+  constructor(initialMembers?: (Pokemon | null)[]) {
+    if (initialMembers) {
+      this.members = [...initialMembers];
+      while (this.members.length < 6) {
+        this.members.push(null);
+      }
+    }
+  }
+  
+  setPokemon(index: number, pokemon: Pokemon | null): void {
+    if (index >= 0 && index < 6) {
+      this.members[index] = pokemon;
+    }
+  }
+  
+  getPokemon(index: number): Pokemon | null {
+    if (index >= 0 && index < 6) {
+      return this.members[index];
+    }
+    return null;
+  }
+  
+  toJSON(): (Pokemon | null)[] {
+    return [...this.members];
+  }
+  
+  isEmpty(): boolean {
+    return !this.members.some(pokemon => pokemon !== null);
+  }
 }
