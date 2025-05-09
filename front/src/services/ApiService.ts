@@ -140,7 +140,7 @@ export class ApiService {
   }
 
   // Helper method for POST requests
-  private async post(endpoint: string, body: any, token?: string): Promise<any> {
+  public async post(endpoint: string, body: any, token?: string): Promise<any> {
     try {
       const response = await fetch(`${this.baseUrl}/${endpoint}`, {
         method: 'POST',

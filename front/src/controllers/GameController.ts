@@ -35,13 +35,13 @@ export class GameController {
 
     // Teambuilder events
     EventBus.on('teambuilder:back-to-menu', () => this.switchScreen('menu'));
-    EventBus.on('teambuilder:save-team', (team) => this.saveTeam(team));
-    EventBus.on('teambuilder:open-pokemon-selector', (data) => this.openPokemonSelector(data.slotIndex));
-    EventBus.on('teambuilder:select-pokemon', (data) => this.selectPokemon(data));
-    EventBus.on('teambuilder:select-item', (data) => this.selectItem(data));
-    EventBus.on('teambuilder:select-ability', (data) => this.selectAbility(data));
-    EventBus.on('teambuilder:select-move', (data) => this.selectMove(data));
-    EventBus.on('teambuilder:load-team', (teamIndex) => this.loadTeam(teamIndex));
+    // EventBus.on('teambuilder:save-team', (team) => this.saveTeam(team));
+    // EventBus.on('teambuilder:open-pokemon-selector', (data) => this.openPokemonSelector(data.slotIndex));
+    // EventBus.on('teambuilder:select-pokemon', (data) => this.selectPokemon(data));
+    // EventBus.on('teambuilder:select-item', (data) => this.selectItem(data));
+    // EventBus.on('teambuilder:select-ability', (data) => this.selectAbility(data));
+    // EventBus.on('teambuilder:select-move', (data) => this.selectMove(data));
+    // EventBus.on('teambuilder:load-team', (teamIndex) => this.loadTeam(teamIndex));
   }
   
   private async loadInitialData(): Promise<void> {
@@ -96,127 +96,159 @@ export class GameController {
     this.switchScreen('battle');
   }
 
-  private saveTeam(team: any[]): void {
-    if (!team.some(pokemon => pokemon !== null)) {
-      alert('Tu dois ajouter au moins un Pokémon à ton équipe !');
-      return;
-    }
-    
-    const currentState = Store.getState();
-    const savedTeams = [...(currentState.savedTeams || [])];
-    
-    // Check if it's the first team being saved
-    if (savedTeams.length === 0) {
-      savedTeams.push([...team]);
-    } else {
-      // Erase the first team and replace it with the new one
-      savedTeams[0] = [...team];
-    }
-    
-    Store.setState({ savedTeams });
-    alert('Équipe sauvegardée avec succès !');
-  }
+  // private async saveTeam(team: (any | null)[]): Promise<void> {
+  //   if (!team.some(pokemon => pokemon !== null)) {
+  //     alert('Tu dois ajouter au moins un Pokémon à ton équipe !');
+  //     return;
+  //   }
 
-  private openPokemonSelector(slotIndex: number): void {
-    if (this.teamBuilderView) {
-      EventBus.emit('teambuilder:show-pokemon-selector', { slotIndex });
-    }
-  }
+  //   for (const pokemon of team) {
+  //     if (!pokemon) continue;
+  //     if (pokemon.ability.id === 0) {
+  //       alert('Un Pokémon doit avoir un talent !');
+  //       return;
+  //     }
+  //     if (pokemon.moves.length === 0) {
+  //       alert('Un Pokémon doit avoir au moins une attaque !');
+  //       return; 
+  //     }
+  //   }
+    
+  //   const pokemonsPayload = team
+  //     .map((pokemon, index) => {
+  //       if (!pokemon) return null;
 
-  private selectPokemon(data: { slotIndex: number, pokemon: Pokemon }): void {
-    const { slotIndex, pokemon } = data;
-    const currentState = Store.getState();
-    const currentTeam = [...(currentState.currentTeam || Array(6).fill(null))];
+  //       return {
+  //         slot: index + 1, 
+  //         pokemon_species_id: pokemon.id,
+  //         ability_id: pokemon.ability.id,
+  //         item_id: pokemon.item?.id,
+  //         nature_id: 1, // To implement later
+  //         moves: (pokemon.moves || []).map((move: any, index: number) => ({
+  //           slot: index + 1,
+  //           move_id: move.id
+  //         }))
+  //       };
+  //     })
+  //     .filter(pokemon => pokemon !== null);
     
-    const newPokemon = {
-      ...pokemon,
-      item: null,
-      ability: pokemon.possibleAbilities[0]?.name || null,
-      moves: [],
-      evs: {
-        hp: 0,
-        attack: 0,
-        defense: 0,
-        spAttack: 0,
-        spDefense: 0,
-        speed: 0
-      },
-      nature: 'Docile' // Neutral nature
-    };
+  //   const payload = {
+  //     player_id: 1, //To implement later
+  //     name: 'test', // To implement later
+  //     pokemons: pokemonsPayload
+  //   };
     
-    currentTeam[slotIndex] = newPokemon;
-    Store.setState({ currentTeam });
-  }
+  //   try {
+  //     const response = await this.apiService.post('create_team', payload);
+  //     console.log('Team saved:', response);
+  //     alert('Équipe sauvegardée avec succès !');
+  //   } catch (error) {
+  //     console.error('Erreur lors du saveTeam:', error);
+  //     alert("Une erreur est survenue lors de la sauvegarde de l'équipe.");
+  //   }
+  // }
+  
 
-  private selectItem(data: { slotIndex: number, itemId: number }): void {
-    const { slotIndex, itemId } = data;
-    const currentState = Store.getState();
-    const currentTeam = [...(currentState.currentTeam || [])];
-    const availableItems = currentState.availableItems || [];
+  // private openPokemonSelector(slotIndex: number): void {
+  //   if (this.teamBuilderView) {
+  //     EventBus.emit('teambuilder:show-pokemon-selector', { slotIndex });
+  //   }
+  // }
+
+  // private selectPokemon(data: { slotIndex: number, pokemon: Pokemon }): void {
+  //   const { slotIndex, pokemon } = data;
+  //   const currentState = Store.getState();
+  //   const currentTeam = [...(currentState.currentTeam || Array(6).fill(null))];
     
-    if (currentTeam[slotIndex]) {
-      const selectedItem = itemId === 0 ? null : availableItems.find((item: PokemonItem) => item.id === itemId);
+  //   const newPokemon = {
+  //     ...pokemon,
+  //     item: null,
+  //     ability: pokemon.possibleAbilities[0]?.name || null,
+  //     moves: [],
+  //     evs: {
+  //       hp: 0,
+  //       attack: 0,
+  //       defense: 0,
+  //       spAttack: 0,
+  //       spDefense: 0,
+  //       speed: 0
+  //     },
+  //     nature: 'Docile' // Neutral nature
+  //   };
+    
+  //   currentTeam[slotIndex] = newPokemon;
+  //   Store.setState({ currentTeam });
+  // }
+
+  // private selectItem(data: { slotIndex: number, itemId: number }): void {
+  //   const { slotIndex, itemId } = data;
+  //   const currentState = Store.getState();
+  //   const currentTeam = [...(currentState.currentTeam || [])];
+  //   const availableItems = currentState.availableItems || [];
+    
+  //   if (currentTeam[slotIndex]) {
+  //     const selectedItem = itemId === 0 ? null : availableItems.find((item: PokemonItem) => item.id === itemId);
       
-      currentTeam[slotIndex] = {
-        ...currentTeam[slotIndex],
-        item: selectedItem ? selectedItem.name : null
-      };
+  //     currentTeam[slotIndex] = {
+  //       ...currentTeam[slotIndex],
+  //       item: selectedItem ? selectedItem.name : null
+  //     };
       
-      Store.setState({ currentTeam });
-    }
-  }
+  //     Store.setState({ currentTeam });
+  //   }
+  // }
 
-  private selectAbility(data: { slotIndex: number, abilityId: number }): void {
-    const { slotIndex, abilityId } = data;
-    const currentState = Store.getState();
-    const currentTeam = [...(currentState.currentTeam || [])];
+  // private selectAbility(data: { slotIndex: number, abilityId: number }): void {
+  //   const { slotIndex, abilityId } = data;
+  //   const currentState = Store.getState();
+  //   const currentTeam = [...(currentState.currentTeam || [])];
     
-    if (currentTeam[slotIndex]) {
-      const pokemon = currentTeam[slotIndex];
-      const pokemonData = currentState.pokemonSpecies.find((p: Pokemon) => p.id === pokemon.id);
-      const selectedAbility = pokemonData?.possibleAbilities.find((ability: PokemonAbility) => ability.id === abilityId);
+  //   if (currentTeam[slotIndex]) {
+  //     const pokemon = currentTeam[slotIndex];
+  //     const pokemonData = currentState.pokemonSpecies.find((p: Pokemon) => p.id === pokemon.id);
+  //     const selectedAbility = pokemonData?.possibleAbilities.find((ability: PokemonAbility) => ability.id === abilityId);
       
-      if (selectedAbility) {
-        currentTeam[slotIndex] = {
-          ...currentTeam[slotIndex],
-          ability: selectedAbility.name
-        };
+  //     if (selectedAbility) {
+  //       currentTeam[slotIndex] = {
+  //         ...currentTeam[slotIndex],
+  //         ability: selectedAbility.name
+  //       };
         
-        Store.setState({ currentTeam });
-      }
-    }
-  }
+  //       Store.setState({ currentTeam });
+  //     }
+  //   }
+  // }
 
-  private selectMove(data: { slotIndex: number, moveIndex: number, moveId: number }): void {
-    const { slotIndex, moveIndex, moveId } = data;
-    const currentState = Store.getState();
-    const currentTeam = [...(currentState.currentTeam || [])];
-    const availableMoves = currentState.availableMoves || [];
+  // private selectMove(data: { slotIndex: number, moveIndex: number, moveId: number }): void {
+  //   const { slotIndex, moveIndex, moveId } = data;
+  //   const currentState = Store.getState();
+  //   const currentTeam = [...(currentState.currentTeam || [])];
+  //   const availableMoves = currentState.availableMoves || [];
     
-    if (currentTeam[slotIndex]) {
-      const selectedMove = availableMoves.find((move: PokemonMove) => move.id === moveId);
+  //   if (currentTeam[slotIndex]) {
+  //     const selectedMove = availableMoves.find((move: PokemonMove) => move.id === moveId);
       
-      if (selectedMove) {
-        const pokemon = currentTeam[slotIndex];
-        const moves = [...(pokemon.moves || Array(4).fill(null))];
-        moves[moveIndex] = selectedMove.name;
+  //     if (selectedMove) {
+  //       const pokemon = currentTeam[slotIndex];
+  //       const moves = [...(pokemon.moves || Array(4).fill(null))];
+  //       moves[moveIndex] = selectedMove.name;
         
-        currentTeam[slotIndex] = {
-          ...pokemon,
-          moves
-        };
+  //       currentTeam[slotIndex] = {
+  //         ...pokemon,
+  //         moves
+  //       };
         
-        Store.setState({ currentTeam });
-      }
-    }
-  }
+  //       Store.setState({ currentTeam });
+  //     }
+  //   }
+  // }
 
-  private loadTeam(teamIndex: number): void {
-    const currentState = Store.getState();
-    const savedTeams = currentState.savedTeams || [];
+  // private loadTeam(teamIndex: number): void {
+  //   const currentState = Store.getState();
+  //   const savedTeams = currentState.savedTeams || [];
     
-    if (savedTeams[teamIndex]) {
-      Store.setState({ currentTeam: [...savedTeams[teamIndex]] });
-    }
-  }
+  //   if (savedTeams[teamIndex]) {
+  //     Store.setState({ currentTeam: [...savedTeams[teamIndex]] });
+  //   }
+  // }
 }

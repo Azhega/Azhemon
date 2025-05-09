@@ -347,7 +347,7 @@ class TeamPokemonMoveModel extends SqlConnect {
       LEFT JOIN type AS type2 ON pokemon_species.second_type_id = type2.id
       LEFT JOIN type AS type3 ON move.type_id = type3.id
       JOIN ability ON team_pokemon.ability_id = ability.id
-      JOIN item ON team_pokemon.item_id = item.id
+      LEFT JOIN item ON team_pokemon.item_id = item.id
       JOIN nature ON team_pokemon.nature_id = nature.id
       WHERE team.id = :teamID
       ORDER BY team_pokemon.slot, team_pokemon_move.slot;
