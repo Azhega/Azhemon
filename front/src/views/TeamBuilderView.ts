@@ -6,6 +6,7 @@ import ApiService from '../services/ApiService';
 export class TeamBuilderView {
   private element: HTMLElement;
   private currentTeam: (Pokemon | null)[] = [null, null, null, null, null, null];
+  private currentTeamName: string = '';
   private selectedPokemonIndex: number | null = null;
   private selectedAttributeType: string | null = null; // 'pokemon', 'item', 'ability', 'move'
   
@@ -44,6 +45,8 @@ export class TeamBuilderView {
               <!-- Saved teams will be injected here -->
             </select>
             <button id="new-team-btn" class="action-button">+ Nouvelle équipe</button>
+            <h3>Nom de l'équipe</h3>
+            <input type="text" id="team-name-input" placeholder="Entrez un nom d'équipe..." class="team-name-input">
           </div>
           
           <div class="team-pokemon-list">
@@ -524,8 +527,59 @@ export class TeamBuilderView {
       EventBus.emit('teambuilder:back-to-menu');
     });
     
-    document.getElementById('save-team')?.addEventListener('click', () => {
-      EventBus.emit('teambuilder:save-team', this.currentTeam);
+    document.getElementById('save-team')?.addEventListener('click', async () => {
+      const teamNameInput = document.getElementById('team-name-input') as HTMLInputElement;
+      this.currentTeamName = teamNameInput.value;
+      if (!this.currentTeam.some(pokemon => pokemon !== null)) {
+        alert('Tu dois ajouter au moins un Pokémon à ton équipe !');
+        return;
+      }
+  
+      for (const pokemon of this.currentTeam) {
+        if (!pokemon) continue;
+        if (pokemon.ability.id === 0) {
+          alert('Un Pokémon doit avoir un talent !');
+          return;
+        }
+        if (pokemon.moves.length === 0) {
+          alert('Un Pokémon doit avoir au moins une attaque !');
+          return; 
+        }
+      }
+      
+      const pokemonsPayload = this.currentTeam
+        .map((pokemon, index) => {
+          if (!pokemon) return null;
+  
+          return {
+            slot: index + 1, 
+            pokemon_species_id: pokemon.id,
+            ability_id: pokemon.ability.id,
+            item_id: pokemon.item?.id,
+            nature_id: 1, // To implement later
+            moves: (pokemon.moves || []).map((move: any, index: number) => ({
+              slot: index + 1,
+              move_id: move.id
+            }))
+          };
+        })
+        .filter(pokemon => pokemon !== null);
+      
+      const payload = {
+        player_id: 1, //To implement later
+        name: this.currentTeamName, // To implement later
+        pokemons: pokemonsPayload
+      };
+      
+      try {
+        const response = await ApiService.post('create_team', payload);
+        console.log('Team saved:', response);
+        alert('Équipe sauvegardée avec succès !');
+      } catch (error) {
+        console.error('Erreur lors du saveTeam:', error);
+        alert("Une erreur est survenue lors de la sauvegarde de l'équipe.");
+      }
+      teamNameInput.value = ''; // Clear the input after saving
     });
     
     // Click on a Pokémon slot to select it

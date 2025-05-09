@@ -28,6 +28,18 @@ class TeamController extends Controller {
     return $this->team->getLast();
   }
 
+  /*==================== POST CREATE COMPLETE TEAM ===========================*/
+
+  #[Route("POST", "/back/create_team"/*,
+    middlewares: [AuthMiddleware::class, 
+    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  public function createCompleteTeam() {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $this->team->createCompleteTeam($data);
+
+    return $this->team->getLast();
+  }
+
   /*========================= GET BY ID =====================================*/
 
   #[Route("GET", "/back/team/:id"/*,

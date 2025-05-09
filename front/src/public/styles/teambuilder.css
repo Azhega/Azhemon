@@ -122,6 +122,14 @@
   width: 100%;
 }
 
+.team-name-input {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 14px;
+  width: 200px;
+}
+
 .team-pokemon-list h2 {
   font-size: 18px;
   margin-bottom: 10px;

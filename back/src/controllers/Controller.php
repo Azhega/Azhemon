@@ -31,7 +31,6 @@ class Controller {
   }
 
   protected function header() {
-    header('Access-Control-Allow-Origin: *');
     header('Content-type: application/json; charset=utf-8');
   }
 }

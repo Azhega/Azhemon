@@ -22,6 +22,56 @@ class TeamModel extends SqlConnect {
     $req->execute($data);
   }
 
+  /*======================= CREATE COMPLETE TEAM =============================*/
+
+  public function createCompleteTeam(array $data) {
+    $query1 = "
+      INSERT INTO $this->table (player_id, name)
+      VALUES (:player_id, :name)
+    ";
+
+    $req = $this->db->prepare($query1);
+    $req->execute([
+      "player_id" => $data["player_id"], 
+      "name" => $data["name"]
+    ]);
+
+    $teamId = $this->db->lastInsertId();
+
+    foreach ($data["pokemons"] as $pokemon) {
+      $query2 = "
+        INSERT INTO team_pokemon (team_id, slot, pokemon_species_id, ability_id, item_id, nature_id)
+        VALUES (:team_id, :slot, :pokemon_species_id, :ability_id, :item_id, :nature_id)
+      ";
+
+      $req = $this->db->prepare($query2);
+      $req->execute([
+        "team_id" => $teamId,
+        "slot" => $pokemon["slot"],
+        "pokemon_species_id" => $pokemon["pokemon_species_id"],
+        "ability_id" => $pokemon["ability_id"],
+        "item_id" => $pokemon["item_id"],
+        "nature_id" => $pokemon["nature_id"]
+      ]);
+
+      $teamPokemonId = $this->db->lastInsertId();
+
+      foreach ($pokemon["moves"] as $move) {
+        $query3 = "
+          INSERT INTO team_pokemon_move (team_pokemon_id, move_id, slot)
+          VALUES (:team_pokemon_id, :move_id, :slot)
+        ";
+
+        $req = $this->db->prepare($query3);
+        $req->execute([
+          "team_pokemon_id" => $teamPokemonId,
+          "move_id" => $move["move_id"],
+          "slot" => $move["slot"]
+        ]);
+      }
+    }
+  }
+
   /*========================= GET ===========================================*/
 
   public function get(int $id) {
