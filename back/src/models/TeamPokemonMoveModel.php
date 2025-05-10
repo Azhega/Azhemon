@@ -301,6 +301,12 @@ class TeamPokemonMoveModel extends SqlConnect {
         team_pokemon_move.slot AS move_slot,
         move.id AS move_id,
         move.name AS move_name,
+        move_category.name AS move_category,
+        move.power AS move_power,
+        move.accuracy AS move_accuracy,
+        move.pp AS move_pp,
+        move.priority AS move_priority,
+        move.description AS move_description,
         ability.id AS ability_id,
         ability.name AS ability_name,
         ability.description AS ability_description,
@@ -349,6 +355,7 @@ class TeamPokemonMoveModel extends SqlConnect {
       JOIN ability ON team_pokemon.ability_id = ability.id
       LEFT JOIN item ON team_pokemon.item_id = item.id
       JOIN nature ON team_pokemon.nature_id = nature.id
+      JOIN move_category ON move.category_id = move_category.id
       WHERE team.id = :teamID
       ORDER BY team_pokemon.slot, team_pokemon_move.slot;
     ";
@@ -403,7 +410,13 @@ class TeamPokemonMoveModel extends SqlConnect {
         "id"   => $row['move_id'],
         "slot" => $row['move_slot'],
         "name" => $row['move_name'],
-        "type" => $row['move_type']
+        "type" => $row['move_type'],
+        "category" => $row['move_category'],
+        "power" => $row['move_power'],
+        "accuracy" => $row['move_accuracy'],
+        "pp" => $row['move_pp'],
+        "priority" => $row['move_priority'],
+        "description" => $row['move_description']
       ];
     }
     $team['pokemons'] = array_values($team['pokemons']);
