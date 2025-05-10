@@ -200,7 +200,8 @@ export class TeamBuilderView {
     if (!teams || teams.length === 0) {
       dropdown.innerHTML = `<option value="">Aucune équipe disponible</option>`;
     } else {
-      dropdown.innerHTML = teams.map(team => `<option value="${team.id}">${team.name}</option>`).join('');
+      dropdown.innerHTML = `<option value="0">Sélectionner une équipe</option>`;
+      dropdown.innerHTML += teams.map(team => `<option value="${team.id}">${team.name}</option>`).join('');
     }
   } 
 
@@ -588,6 +589,10 @@ export class TeamBuilderView {
           console.log('Team updated:', response);
           alert('Équipe mise à jour avec succès !');
           teamNameInput.value = ''; // Clear the input after saving
+          this.loadTeams();
+          this.currentTeam = [null, null, null, null, null, null];
+          Store.setState({ currentTeam: this.currentTeam , currentTeamIndex: null });
+          this.updateTeamDisplay();
           return;
         }
         const response = await ApiService.post('create_team', payload);
@@ -598,6 +603,10 @@ export class TeamBuilderView {
         alert("Une erreur est survenue lors de la sauvegarde de l'équipe.");
       }
       teamNameInput.value = ''; // Clear the input after saving
+      this.loadTeams();
+      this.currentTeam = [null, null, null, null, null, null];
+      Store.setState({ currentTeam: this.currentTeam , currentTeamIndex: null });
+      this.updateTeamDisplay();
     });
     
     // Click on a Pokémon slot to select it
@@ -640,6 +649,12 @@ export class TeamBuilderView {
       const selectedTeamId = parseInt(selectedValue);
       if (isNaN(selectedTeamId)) {
         console.error("Invalid Team ID:", selectedValue);
+        return;
+      }
+      if (selectedTeamId === 0) {
+        this.currentTeam = [null, null, null, null, null, null];
+        Store.setState({ currentTeam: this.currentTeam , currentTeamIndex: null });
+        this.updateTeamDisplay();
         return;
       }
 
