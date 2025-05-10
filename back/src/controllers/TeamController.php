@@ -94,7 +94,37 @@ class TeamController extends Controller {
 
       $this->team->update($data, intval($id));
 
-      # Let's return the updated team
+      return $this->team->get($id);
+    } catch (HttpException $e) {
+      throw $e;
+    }
+  }
+
+  /*========================= PATCH COMPLETE TEAM ============================*/
+
+  #[Route("PATCH", "/back/update_team/:id"/*,
+    middlewares: [AuthMiddleware::class, 
+    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  public function updateCompleteTeam() {
+    try {
+      $id = intval($this->params['id']);
+      $data = json_decode(file_get_contents('php://input'), true);
+
+      # Check if the data is empty
+      if (empty($data)) {
+        throw new HttpException("Missing parameters for the update.", 400);
+      }
+
+      # Check for missing fields
+      $missingFields = array_diff(
+        $this->team->authorized_fields_to_update, array_keys($data));
+      if (!empty($missingFields)) {
+        throw new HttpException(
+          "Missing fields: " . implode(", ", $missingFields), 400);
+      }
+
+      $this->team->updateCompleteTeam($data, intval($id));
+
       return $this->team->get($id);
     } catch (HttpException $e) {
       throw $e;

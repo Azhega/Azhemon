@@ -161,7 +161,7 @@ export class ApiService {
   }
 
   // Helper method for PATCH requests
-  private async patch(endpoint: string, body: any, token?: string): Promise<any> {
+  public async patch(endpoint: string, body: any, token?: string): Promise<any> {
     try {
       const response = await fetch(`${this.baseUrl}/${endpoint}`, {
         method: 'PATCH',

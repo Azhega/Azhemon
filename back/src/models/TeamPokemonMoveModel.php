@@ -286,7 +286,7 @@ class TeamPokemonMoveModel extends SqlConnect {
       SELECT 
         team.id AS team_id,
         team.name AS team_name,
-        team_pokemon.id AS team_pokemon_id,
+        pokemon_species.id AS team_pokemon_id,
         team_pokemon.slot AS pokemon_slot,
         pokemon_species.name AS pokemon_name,
         pokemon_species.hp AS pokemon_hp,
@@ -299,7 +299,7 @@ class TeamPokemonMoveModel extends SqlConnect {
         type2.name AS second_type_name,
         type3.name AS move_type,
         team_pokemon_move.slot AS move_slot,
-        team_pokemon_move.id AS move_id,
+        move.id AS move_id,
         move.name AS move_name,
         ability.id AS ability_id,
         ability.name AS ability_name,
@@ -401,7 +401,7 @@ class TeamPokemonMoveModel extends SqlConnect {
       }
       $team['pokemons'][$pokemonId]['moves'][] = [
         "id"   => $row['move_id'],
-        "slot"      => $row['move_slot'],
+        "slot" => $row['move_slot'],
         "name" => $row['move_name'],
         "type" => $row['move_type']
       ];
