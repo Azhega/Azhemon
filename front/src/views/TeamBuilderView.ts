@@ -506,7 +506,7 @@ export class TeamBuilderView {
           }
 
           if (selectedPokemon) {
-            selectedPokemon.moves[moveIndex] = {
+            selectedPokemon.moves[moveIndex] = { 
               id: moveId,
               name: moveName,
               type: moveType,
@@ -519,7 +519,7 @@ export class TeamBuilderView {
               description: '',
               target: null,
               effects: [],
-            };
+            }; // Default values that'll be updated when saving
             this.updatePokemonInSlot(this.selectedPokemonIndex!, selectedPokemon);
             // Reset the selector
             this.selectedAttributeType = null;
