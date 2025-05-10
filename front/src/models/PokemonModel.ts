@@ -62,7 +62,7 @@ export class Pokemon {
   currentStats: PokemonStats;
   currentHp: number;
   level: number = 50; // Default level, to implement if in advance
-  moves: PokemonMove[];
+  moves: (PokemonMove | null)[];
   possibleMoves: PokemonMove[];
   ability: PokemonAbility;
   possibleAbilities: PokemonAbility[];

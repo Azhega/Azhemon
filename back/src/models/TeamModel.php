@@ -57,17 +57,19 @@ class TeamModel extends SqlConnect {
       $teamPokemonId = $this->db->lastInsertId();
 
       foreach ($pokemon["moves"] as $move) {
-        $query3 = "
-          INSERT INTO team_pokemon_move (team_pokemon_id, move_id, slot)
-          VALUES (:team_pokemon_id, :move_id, :slot)
-        ";
+        if ($move) {
+          $query3 = "
+            INSERT INTO team_pokemon_move (team_pokemon_id, move_id, slot)
+            VALUES (:team_pokemon_id, :move_id, :slot)
+          ";
 
-        $req = $this->db->prepare($query3);
-        $req->execute([
-          "team_pokemon_id" => $teamPokemonId,
-          "move_id" => $move["move_id"],
-          "slot" => $move["slot"]
-        ]);
+          $req = $this->db->prepare($query3);
+          $req->execute([
+            "team_pokemon_id" => $teamPokemonId,
+            "move_id" => $move["move_id"],
+            "slot" => $move["slot"]
+          ]);
+        }
       }
     }
   }
@@ -148,7 +150,71 @@ class TeamModel extends SqlConnect {
       $req->fetch(PDO::FETCH_ASSOC) : new stdClass();
   }
 
-  /*========================= UPDATE ========================================*/
+  /*========================= UPDATE COMPLETE TEAM ===========================*/
+
+  public function updateCompleteTeam(array $data, int $id) {
+    $query1 = "
+      UPDATE $this->table
+      SET player_id = :player_id, name = :name
+      WHERE id = :id
+    ";
+
+    $req = $this->db->prepare($query1);
+    $req->execute([
+      "player_id" => $data["player_id"],
+      "name" => $data["name"],
+      "id" => $id
+    ]);
+
+    // Delete existing team_pokemon entries for the team
+    $query2 = "DELETE FROM team_pokemon WHERE team_id = :team_id";
+    $req = $this->db->prepare($query2);
+    $req->execute(["team_id" => $id]);
+
+    // Re-insert updated team_pokemon entries
+    foreach ($data["pokemons"] as $pokemon) {
+      $query3 = "
+      INSERT INTO team_pokemon (team_id, slot, pokemon_species_id, ability_id, item_id, nature_id)
+      VALUES (:team_id, :slot, :pokemon_species_id, :ability_id, :item_id, :nature_id)
+      ";
+
+      $req = $this->db->prepare($query3);
+      $req->execute([
+      "team_id" => $id,
+      "slot" => $pokemon["slot"],
+      "pokemon_species_id" => $pokemon["pokemon_species_id"],
+      "ability_id" => $pokemon["ability_id"],
+      "item_id" => $pokemon["item_id"],
+      "nature_id" => $pokemon["nature_id"]
+      ]);
+
+      $teamPokemonId = $this->db->lastInsertId();
+
+      // Delete existing moves for the team_pokemon
+      $query4 = "DELETE FROM team_pokemon_move WHERE team_pokemon_id = :team_pokemon_id";
+      $req = $this->db->prepare($query4);
+      $req->execute(["team_pokemon_id" => $teamPokemonId]);
+
+      // Re-insert updated moves for the team_pokemon
+      foreach ($pokemon["moves"] as $move) {
+        if ($move["move_id"] !== null) {
+          $query5 = "
+            INSERT INTO team_pokemon_move (team_pokemon_id, move_id, slot)
+            VALUES (:team_pokemon_id, :move_id, :slot)
+          ";
+
+          $req = $this->db->prepare($query5);
+          $req->execute([
+            "team_pokemon_id" => $teamPokemonId,
+            "move_id" => $move["move_id"],
+            "slot" => $move["slot"]
+          ]);
+        }
+      }
+    }
+  }
+
+  /*========================= UPDATE =========================================*/
 
   public function update(array $data, int $id) {
     $request = "UPDATE $this->table SET ";

@@ -8,7 +8,7 @@ RewriteRule ^(.*)$ index.php [QSA,L]
 <IfModule mod_headers.c>
   Header always unset Access-Control-Allow-Origin
   Header always set Access-Control-Allow-Origin "http://localhost:8089"
-  Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+  Header always set Access-Control-Allow-Methods "GET, POST, PATCH, OPTIONS, PUT, DELETE"
   Header always set Access-Control-Allow-Headers "Content-Type, Authorization"
 </IfModule>
 

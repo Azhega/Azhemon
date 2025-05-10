@@ -497,6 +497,12 @@ export class TeamBuilderView {
           const moveIndex = parseInt((move as HTMLElement).dataset.moveIndex!);
           const moveType = (move as HTMLElement).dataset.moveType!;
           const selectedPokemon = this.currentTeam[this.selectedPokemonIndex!];
+
+          if (selectedPokemon?.moves.some((m: PokemonMove | null) => m?.id === moveId)) {
+            // Remove the move if already present
+            selectedPokemon.moves = selectedPokemon.moves.map((m) => (m?.id === moveId ? null : m));
+          }
+
           if (selectedPokemon) {
             selectedPokemon.moves[moveIndex] = {
               id: moveId,
@@ -529,7 +535,12 @@ export class TeamBuilderView {
     
     document.getElementById('save-team')?.addEventListener('click', async () => {
       const teamNameInput = document.getElementById('team-name-input') as HTMLInputElement;
-      this.currentTeamName = teamNameInput.value;
+      const teamNameInputValue = teamNameInput.value;
+      if (!Store.getState().currentTeamIndex && !teamNameInputValue) {
+        alert('Tu dois donner un nom à ton équipe !');
+        return;
+      }
+
       if (!this.currentTeam.some(pokemon => pokemon !== null)) {
         alert('Tu dois ajouter au moins un Pokémon à ton équipe !');
         return;
@@ -559,7 +570,7 @@ export class TeamBuilderView {
             nature_id: 1, // To implement later
             moves: (pokemon.moves || []).map((move: any, index: number) => ({
               slot: index + 1,
-              move_id: move.id
+              move_id: move?.id
             }))
           };
         })
@@ -567,11 +578,18 @@ export class TeamBuilderView {
       
       const payload = {
         player_id: 1, //To implement later
-        name: this.currentTeamName, // To implement later
+        name: teamNameInputValue ? teamNameInputValue : Store.getState().currentTeamName, // To implement later
         pokemons: pokemonsPayload
       };
       
       try {
+        if (Store.getState().currentTeamIndex) {
+          const response = await ApiService.patch('update_team/' + Store.getState().currentTeamIndex, payload);
+          console.log('Team updated:', response);
+          alert('Équipe mise à jour avec succès !');
+          teamNameInput.value = ''; // Clear the input after saving
+          return;
+        }
         const response = await ApiService.post('create_team', payload);
         console.log('Team saved:', response);
         alert('Équipe sauvegardée avec succès !');
@@ -607,8 +625,10 @@ export class TeamBuilderView {
     document.getElementById('new-team-btn')?.addEventListener('click', () => {
       // Reset current team
       this.currentTeam = [null, null, null, null, null, null];
+      
       this.selectedPokemonIndex = null;
-      Store.setState({ currentTeam: this.currentTeam });
+      Store.setState({ currentTeam: this.currentTeam , currentTeamIndex: null });
+      console.log(Store.getState());
       this.updateTeamDisplay();
     });
     
@@ -733,7 +753,7 @@ export class TeamBuilderView {
           }
         }));
 
-        Store.setState({ currentTeam: [...this.currentTeam] });
+        Store.setState({ currentTeam: [...this.currentTeam], currentTeamIndex: selectedTeamId, currentTeamName: teamData.name });
 
         console.log("Transformed team data:", this.currentTeam);
         console.log("Store :", Store.getState());
