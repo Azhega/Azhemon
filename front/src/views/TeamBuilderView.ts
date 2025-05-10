@@ -59,7 +59,8 @@ export class TeamBuilderView {
               `).join('')}
             </div>
           </div>
-          
+
+          <button id="delete-team" class="delete-team-button">Supprimer l'équipe</button>
           <button id="save-team" class="save-team-button">Sauvegarder l'équipe</button>
         </div>
         
@@ -533,7 +534,25 @@ export class TeamBuilderView {
     document.getElementById('back-to-menu')?.addEventListener('click', () => {
       EventBus.emit('teambuilder:back-to-menu');
     });
-    
+
+    document.getElementById('delete-team')?.addEventListener('click', (e) => {
+      const teamIndex = Store.getState().currentTeamIndex;
+      if (teamIndex) {
+        ApiService.delete('team/' + teamIndex)
+          .then(() => {
+            alert('Équipe supprimée avec succès !');
+            this.loadTeams();
+            this.currentTeam = [null, null, null, null, null, null];
+            Store.setState({ currentTeam: this.currentTeam , currentTeamIndex: null });
+            this.updateTeamDisplay();
+          })
+          .catch((error) => {
+            console.error('Erreur lors de la suppression de l\'équipe:', error);
+            alert('Erreur lors de la suppression de l\'équipe.');
+          });
+      }
+    });
+
     document.getElementById('save-team')?.addEventListener('click', async () => {
       const teamNameInput = document.getElementById('team-name-input') as HTMLInputElement;
       const teamNameInputValue = teamNameInput.value;

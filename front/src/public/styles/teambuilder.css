@@ -151,6 +151,7 @@
   cursor: pointer;
   position: relative;
   min-height: 80px;
+  height: 125px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -194,6 +195,7 @@
 .pokemon-preview {
   display: flex;
   align-items: center;
+  height: 100%;
 }
 
 .pokemon-sprite {
@@ -263,6 +265,23 @@
 }
 
 .save-team-button:hover {
+  background-color: var(--button-hover);
+}
+
+.delete-team-button {
+  padding: 12px 24px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: auto;
+  width: 100%;
+}
+
+.delete-team-button:hover {
   background-color: var(--button-hover);
 }
 

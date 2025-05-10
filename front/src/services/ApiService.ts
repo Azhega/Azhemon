@@ -182,7 +182,7 @@ export class ApiService {
   }
 
   // Helper method for DELETE requests
-  private async delete(endpoint: string, token?: string): Promise<void> {
+  public async delete(endpoint: string, token?: string): Promise<void> {
     try {
       const response = await fetch(`${this.baseUrl}/${endpoint}`, {
         method: 'DELETE',
