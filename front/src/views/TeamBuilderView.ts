@@ -280,111 +280,83 @@ export class TeamBuilderView {
       pokemon.addEventListener('click', async () => {
         if (this.selectedPokemonIndex !== null) {
           const pokemonId = parseInt((pokemon as HTMLElement).dataset.pokemonId!);
-          let selectedPokemon = pokemonSpecies.find((p: Pokemon) => p.id === pokemonId);
+          const apiPokemon = pokemonSpecies.find((p: Pokemon) => p.id === pokemonId);
+
+          if (!apiPokemon) {
+            console.error("Pokemon not found in species list.");
+            return;
+          }
+
           try {
             const selectedPokemonPossibleAbilities = await ApiService.getAll(
-              'species_ability/pokemon_name/' + selectedPokemon.name);
-            selectedPokemon.possibleAbilities = selectedPokemonPossibleAbilities.map((ability: any) => ({
-              id: ability.id,
-              name: ability.name,
-              description: ability.description,
-              effects: [],
-            }));
+              'species_ability/pokemon_name/' + apiPokemon.name
+            );
 
             const selectedPokemonPossibleMoves = await ApiService.getAll(
-              'species_move/pokemon_name/' + selectedPokemon.name);
-            selectedPokemon.possibleMoves = selectedPokemonPossibleMoves.map((move: any) => ({
-              id: move.id,
-              name: move.name,
-              type: move.type,
-              category: move.category,
-              power: move.power,
-              accuracy: move.accuracy,
-              pp: move.pp,
-              currentPP: move.pp,
-              priority: 0,
-              description: move.description,
-              target: null,
-              effects: [],
-            }));
-          } catch (error){
-            console.error("Error fetching moves:", error);
-          }
-          
-          if (selectedPokemon) {
-            const baseStats: PokemonStats = {
-              hp: selectedPokemon.hp,
-              attack: selectedPokemon.atk,
-              defense: selectedPokemon.def,
-              specialAttack: selectedPokemon.spe_atk,
-              specialDefense: selectedPokemon.spe_def,
-              speed: selectedPokemon.speed,
-              accuracy: 0,
-              evasion: 0,
-            };
-    
-            const pokemonAbility: PokemonAbility = {
-              id: 0,
-              name: 'Aucun',
-              description: 'Aucun talent',
-              effects: [],
-            };
-    
-            const pokemonNature: PokemonNature = {
-              id: 0,
-              name: 'Aucun',
-              description: 'Aucune nature',
-              effects: [],
-            };
-    
-            selectedPokemon = {
-              id: selectedPokemon.id,
-              name: selectedPokemon.name,
-              types: [
-                selectedPokemon.first_type,
-                selectedPokemon.second_type
-              ],
-              baseStats: baseStats,
-              currentStats: baseStats,
-              currentHp: this.calculateCurrentHp(baseStats.hp),
-              level: 50,
-              moves: [],
-              possibleMoves: selectedPokemon.possibleMoves,
-              ability: pokemonAbility,
-              possibleAbilities: selectedPokemon.possibleAbilities,
-              nature: pokemonNature,
-              item: null,
-              status: null,
-              statModifiers: {
-                hp: 0,
-                attack: 0,
-                defense: 0,
-                specialAttack: 0,
-                specialDefense: 0,
-                speed: 0,
+              'species_move/pokemon_name/' + apiPokemon.name
+            );
+
+            const selectedPokemon = new Pokemon({
+              id: apiPokemon.id,
+              name: apiPokemon.name,
+              types: [apiPokemon.first_type, apiPokemon.second_type],
+              baseStats: {
+                hp: apiPokemon.hp,
+                attack: apiPokemon.atk,
+                defense: apiPokemon.def,
+                specialAttack: apiPokemon.spe_atk,
+                specialDefense: apiPokemon.spe_def,
+                speed: apiPokemon.speed,
                 accuracy: 0,
                 evasion: 0,
               },
-              isAlive: true,
-              trainer: null,
-              terrain: null,
-              calculateStats(): PokemonStats {
-                return this.calculateStats();
-              }
-            };
+              moves: [],
+              possibleMoves: selectedPokemonPossibleMoves.map((move: PokemonMove) => ({
+                id: move.id,
+                name: move.name,
+                type: move.type,
+                category: move.category,
+                power: move.power,
+                accuracy: move.accuracy,
+                pp: move.pp,
+                currentPP: move.pp,
+                priority: move.priority,
+                description: move.description,
+                target: null,
+                effects: [],
+              })),
+              ability: {
+                id: 0,
+                name: 'Aucun',
+                description: 'Aucun talent',
+                effects: [],
+              },
+              possibleAbilities: selectedPokemonPossibleAbilities.map((ability: PokemonAbility) => ({
+                id: ability.id,
+                name: ability.name,
+                description: ability.description,
+                effects: [],
+              })),
+              nature: {
+                id: 0,
+                name: 'Aucun',
+                description: 'Aucune nature',
+                effects: [],
+              },
+              item: null
+            });
 
             this.updatePokemonInSlot(this.selectedPokemonIndex, selectedPokemon);
+
             // Reset the selector
             this.selectedAttributeType = null;
             this.loadSelector('');
+          } catch (error) {
+            console.error("Error fetching abilities or moves:", error);
           }
         }
       });
     });
-  }
-
-  private calculateCurrentHp(baseHp: number): number {
-    return ((2 * baseHp + 31 + (150 / 4)) * 50) / 100 + 50 + 10;
   }
 
   private loadItemSelector(container: HTMLElement): void {
@@ -683,7 +655,7 @@ export class TeamBuilderView {
 
       try {
         const teamData: { id: number; name: string; pokemons: 
-          { id: number; slot: number; pokemon_name: string; moves: any[]; first_type: string; second_type: string;
+          { id: number; slot: number; pokemon_name: string; moves: PokemonMove[]; first_type: string; second_type: string;
             hp: number; atk: number; def: number; spe_atk: number; spe_def: number; speed: number;
             ability: PokemonAbility; item: PokemonItem; nature: PokemonNature; 
             possibleAbilities: PokemonAbility[]; possibleMoves: PokemonMove[]}[] } =
@@ -691,105 +663,78 @@ export class TeamBuilderView {
 
         console.log("Selected team data:", teamData);
 
-        this.currentTeam = teamData.pokemons.map((apiPokemon) => ({
-          id: apiPokemon.id,
-          name: apiPokemon.pokemon_name,
-          types: [
-            apiPokemon.first_type,
-            apiPokemon.second_type
-          ],
-          baseStats: {
-            hp: apiPokemon.hp,
-            attack: apiPokemon.atk,
-            defense: apiPokemon.def,
-            specialAttack: apiPokemon.spe_atk,
-            specialDefense: apiPokemon.spe_def,
-            speed: apiPokemon.speed,
-            accuracy: 0,
-            evasion: 0,
-          },
-          currentStats: {
-            hp: apiPokemon.hp,
-            attack: apiPokemon.atk,
-            defense: apiPokemon.def,
-            specialAttack: apiPokemon.spe_atk,
-            specialDefense: apiPokemon.spe_def,
-            speed: apiPokemon.speed,
-            accuracy: 0,
-            evasion: 0,
-          },
-          currentHp: this.calculateCurrentHp(apiPokemon.hp),
-          level: 50,
-          moves: apiPokemon.moves.map((move: PokemonMove) => ({
-            id: move.id,
-            name: move.name,
-            type: move.type,
-            power: move.power,
-            accuracy: move.accuracy,
-            pp: move.pp,
-            currentPP: move.pp,
-            category: move.category,
-            priority: move.priority,
-            description: move.description,
-            target: null,
-            effects: []
-          })),
-          possibleMoves: apiPokemon.possibleMoves.map((move: PokemonMove) => ({
-            id: move.id,
-            name: move.name,
-            type: move.type,
-            power: move.power,
-            accuracy: move.accuracy,
-            pp: move.pp,
-            currentPP: move.pp,
-            category: move.category,
-            priority: move.priority,
-            description: move.description,
-            target: null,
-            effects: []
-          })),
-          ability: {
-            id: apiPokemon.ability.id,
-            name: apiPokemon.ability.name,
-            description: apiPokemon.ability.description,
-            effects: [],
-          },
-          possibleAbilities: apiPokemon.possibleAbilities.map((ability: PokemonAbility) => ({
-            id: ability.id,
-            name: ability.name,
-            description: ability.description,
-            effects: [],
-          })),
-          nature: {
-            id: apiPokemon.nature.id,
-            name: apiPokemon.nature.name,
-            description: apiPokemon.nature.description,
-            effects: [],
-          },
-          item: {
-            id: apiPokemon.item.id,
-            name: apiPokemon.item.name,
-            description: apiPokemon.item.description,
-            effects: [],
-          },
-          status: null,
-          statModifiers: {
-            hp: 0,
-            attack: 0,
-            defense: 0,
-            specialAttack: 0,
-            specialDefense: 0,
-            speed: 0,
-            accuracy: 0,
-            evasion: 0,
-          },
-          isAlive: true,
-          trainer: null,
-          terrain: null,
-          calculateStats(): PokemonStats {
-            return this.calculateStats();
-          }
-        }));
+        this.currentTeam = teamData.pokemons.map((apiPokemon) => {
+          return new Pokemon({
+            id: apiPokemon.id,
+            name: apiPokemon.pokemon_name,
+            types: [
+              apiPokemon.first_type,
+              apiPokemon.second_type
+            ],
+            baseStats: {
+              hp: apiPokemon.hp,
+              attack: apiPokemon.atk,
+              defense: apiPokemon.def,
+              specialAttack: apiPokemon.spe_atk,
+              specialDefense: apiPokemon.spe_def,
+              speed: apiPokemon.speed,
+              accuracy: 0,
+              evasion: 0,
+            },
+            moves: apiPokemon.moves.map((move: PokemonMove) => ({
+              id: move.id,
+              name: move.name,
+              type: move.type,
+              power: move.power,
+              accuracy: move.accuracy,
+              pp: move.pp,
+              currentPP: move.pp,
+              category: move.category,
+              priority: move.priority,
+              description: move.description,
+              target: null,
+              effects: []
+            })),
+            possibleMoves: apiPokemon.possibleMoves.map((move: PokemonMove) => ({
+              id: move.id,
+              name: move.name,
+              type: move.type,
+              power: move.power,
+              accuracy: move.accuracy,
+              pp: move.pp,
+              currentPP: move.pp,
+              category: move.category,
+              priority: move.priority,
+              description: move.description,
+              target: null,
+              effects: []
+            })),
+            ability: {
+              id: apiPokemon.ability.id,
+              name: apiPokemon.ability.name,
+              description: apiPokemon.ability.description,
+              effects: [],
+            },
+            possibleAbilities: apiPokemon.possibleAbilities.map((ability: PokemonAbility) => ({
+              id: ability.id,
+              name: ability.name,
+              description: ability.description,
+              effects: [],
+            })),
+            nature: {
+              id: apiPokemon.nature.id,
+              name: apiPokemon.nature.name,
+              description: apiPokemon.nature.description,
+              effects: [],
+            },
+            item: {
+              id: apiPokemon.item.id,
+              name: apiPokemon.item.name,
+              description: apiPokemon.item.description,
+              effects: [],
+            }
+          });
+        });
 
         Store.setState({ currentTeam: [...this.currentTeam], currentTeamIndex: selectedTeamId, currentTeamName: teamData.name });
 
