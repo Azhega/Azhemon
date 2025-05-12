@@ -61,6 +61,7 @@ export class Pokemon {
   baseStats: PokemonStats;
   currentStats: PokemonStats;
   currentHp: number;
+  maxHp: number;
   level: number = 50; // Default level, to implement if in advance
   moves: (PokemonMove | null)[];
   possibleMoves: PokemonMove[];
@@ -103,6 +104,7 @@ export class Pokemon {
     // Calculate current stats based on base stats, level, and EV/IV later
     this.currentStats = this.calculateStats();
     this.currentHp = this.currentStats.hp;
+    this.maxHp = this.currentStats.hp;
   }
   
   public calculateStats(): PokemonStats {

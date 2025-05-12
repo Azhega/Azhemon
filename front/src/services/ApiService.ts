@@ -116,7 +116,7 @@ export class ApiService {
 
   async getTeamPokemonMoveByTeamId(teamId: number): Promise<
   { id: number; name: string; pokemons: 
-            { id: number; slot: number; pokemon_name: string; moves: any[]; first_type: string; second_type: string;
+            { id: number; slot: number; pokemon_name: string; moves: PokemonMove[]; first_type: string; second_type: string;
               hp: number; atk: number; def: number; spe_atk: number; spe_def: number; speed: number;
               ability: PokemonAbility; item: PokemonItem; nature: PokemonNature; possibleAbilities: PokemonAbility[]; possibleMoves: PokemonMove[] }[] }> {
     return this.getById('team_pokemon_move/team_id', teamId);
