@@ -31,7 +31,7 @@
   flex-direction: row;
 }
 
-.pokemon-sprite {
+.pokemon-battle-sprite {
   width: 150px;
   height: 150px;
   background-size: contain;
