@@ -148,7 +148,7 @@ export class BattleView {
     console.log(`Rendering ${side} Pokemon:`, pokemon);
     // Create sprite container
     const spriteContainer = document.createElement('div');
-    spriteContainer.className = 'pokemon-sprite';
+    spriteContainer.className = 'pokemon-battle-sprite';
     
     // Set sprite image based on pokemon name and side
     const spriteUrl = side === 'player' 
