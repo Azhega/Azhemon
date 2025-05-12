@@ -1,20 +1,14 @@
 import EventBus from '../utils/EventBus';
 import Store from '../utils/Store';
 import { MenuView } from './MenuView.ts';
-import { TeamBuilderView } from './TeamBuilderView';
-import { BattleView } from './BattleView';
 
 export class MainView {
   private menuView: MenuView;
-  private teamBuilderView: TeamBuilderView;
-  private battleView: BattleView;
   private loadingScreen: HTMLElement;
   
   constructor() {
     this.loadingScreen = document.getElementById('loading-screen') as HTMLElement;
     this.menuView = new MenuView();
-    this.teamBuilderView = new TeamBuilderView();
-    this.battleView = new BattleView();
 
     // Listen to screen change events
     EventBus.on('screen:changed', (screen) => this.updateScreen(screen));
