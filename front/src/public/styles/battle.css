@@ -86,3 +86,104 @@
 .battle-log p {
   margin: 3px 0;
 }
+
+.action-menu {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 10px;
+  padding: 10px;
+  background-color: #eee;
+}
+
+.move-menu, .team-menu {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 10px;
+  padding: 10px;
+  background-color: #ddd;
+}
+
+.action-button, .move-button, .team-button {
+  padding: 10px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.action-button {
+  background-color: #3498db;
+  color: white;
+}
+
+.move-button {
+  background-color: #ff9800;
+  color: white;
+}
+
+.team-button {
+  background-color: #4caf50;
+  color: white;
+}
+
+.back-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.message-box {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 18px;
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.message-visible {
+  opacity: 1;
+}
+
+.status-icon {
+  width: 20px;
+  height: 20px;
+  margin-left: 5px;
+  display: inline-block;
+}
+
+.status-brn {
+  background-color: #ff7f00;
+}
+
+.status-psn {
+  background-color: #a040a0;
+}
+
+.status-par {
+  background-color: #f8d030;
+}
+
+.status-slp {
+  background-color: #808080;
+}
+
+.status-frz {
+  background-color: #98d8d8;
+}
+
+.animation {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: 50;
+  pointer-events: none;
+}

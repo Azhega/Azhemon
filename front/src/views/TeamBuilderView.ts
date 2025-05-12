@@ -574,7 +574,7 @@ export class TeamBuilderView {
       
       const payload = {
         player_id: 1, //To implement later
-        name: teamNameInputValue ? teamNameInputValue : Store.getState().currentTeamName, // To implement later
+        name: teamNameInputValue ? teamNameInputValue : Store.getState().currentTeamName,
         pokemons: pokemonsPayload
       };
       
