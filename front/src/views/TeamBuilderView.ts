@@ -346,7 +346,7 @@ export class TeamBuilderView {
               ],
               baseStats: baseStats,
               currentStats: baseStats,
-              currentHp: baseStats.hp,
+              currentHp: this.calculateCurrentHp(baseStats.hp),
               level: 50,
               moves: [],
               possibleMoves: selectedPokemon.possibleMoves,
@@ -381,6 +381,10 @@ export class TeamBuilderView {
         }
       });
     });
+  }
+
+  private calculateCurrentHp(baseHp: number): number {
+    return ((2 * baseHp + 31 + (150 / 4)) * 50) / 100 + 50 + 10;
   }
 
   private loadItemSelector(container: HTMLElement): void {
@@ -714,7 +718,7 @@ export class TeamBuilderView {
             accuracy: 0,
             evasion: 0,
           },
-          currentHp: apiPokemon.hp,
+          currentHp: this.calculateCurrentHp(apiPokemon.hp),
           level: 50,
           moves: apiPokemon.moves.map((move: PokemonMove) => ({
             id: move.id,
