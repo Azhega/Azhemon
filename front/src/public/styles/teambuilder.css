@@ -199,8 +199,8 @@
 }
 
 .pokemon-sprite {
-  width: 50px;
-  height: 50px;
+  width: 100px;
+  height: 100px;
   margin-right: 10px;
 }
 
@@ -324,8 +324,8 @@
 }
 
 .pokemon-avatar {
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   margin-right: 16px;
 }
 
