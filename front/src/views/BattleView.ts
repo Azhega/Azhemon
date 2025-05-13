@@ -300,7 +300,7 @@ export class BattleView {
       this.moveMenu?.appendChild(moveButton);
     });
     
-    // Add back button to fill remaining slots
+    // Add empty buttons to fill remaining slots
     const remainingSlots = 4 - playerPokemon.moves.length;
     for (let i = 0; i < remainingSlots; i++) {
       const emptyButton = document.createElement('button');
