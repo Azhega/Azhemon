@@ -287,6 +287,9 @@ export class BattleEngine {
         defender.isAlive = false;
       }
     }
+
+    // Handle effects WIP (hardest part)
+    const statChanges = this.applyMoveEffects(move, attacker, defender, battleState);
     
     // Result message
     let message = `${attacker.name} utilise ${move.name}`;
@@ -308,7 +311,133 @@ export class BattleEngine {
       damage: damageResult.damage,
       criticalHit: damageResult.critical,
       effectiveness: damageResult.effectiveness,
+      statChanges: statChanges,
       message: message
     };
+  }
+
+// Apply effects WIP (hardest part)
+  applyMoveEffects(move: PokemonMove, attacker: Pokemon, defender: Pokemon, battleState: BattleState): any[] {
+    const statChanges = [];
+    
+    // If move has effects
+    if (move.effects) {
+      // For each effect (Because move can have multiple effects)
+      for (const effect of move.effects) {
+        // Chance of effect activation
+        if (Math.random() * 100 <= (effect.chance || 100)) {
+          
+          // Status application
+          if (effect.status) {
+            // Check if the defender already has a status
+            if (!defender.status) {
+              defender.status = effect.status;
+              statChanges.push({
+                type: 'status',
+                status: effect.status,
+                target: defender === battleState.activePokemon.player ? 'player' : 'cpu'
+              });
+            }
+          }
+          
+          // Stat changes
+          if (effect.statChanges) {
+            for (const statChange of effect.statChanges) {
+              const targetPokemon = statChange.target === 'self' ? attacker : defender;
+              const statKey = statChange.stat as keyof typeof targetPokemon.statModifiers;
+              
+              // Limiting stat changes to -6 to +6
+              targetPokemon.statModifiers[statKey] = Math.max(-6, Math.min(6, targetPokemon.statModifiers[statKey] + statChange.value));
+              
+              statChanges.push({
+                stat: statChange.stat,
+                change: statChange.value,
+                target: targetPokemon === battleState.activePokemon.player ? 'player' : 'cpu'
+              });
+            }
+          }
+        }
+      }
+    }
+    
+    return statChanges;
+  }
+  
+  // Apply status effects before action
+  applyStatusEffectsPreAction(pokemon: Pokemon): {canAct: boolean, message: string} {
+    let canAct = true;
+    let message = '';
+    
+    // If the Pokémon has a status
+    if (pokemon.status) {
+      switch (pokemon.status.name) {
+        case 'paralysis':
+          // 25% chance to be paralyzed
+          if (Math.random() < 0.25) {
+            canAct = false;
+            message = `${pokemon.name} est paralysé et ne peut pas bouger !`;
+          }
+          break;
+          
+        case 'sleep':
+          // WIP sleep mechanic
+          // 33% chance to wake up for now
+          if (Math.random() < 0.33) {
+            pokemon.status = null;
+            message = `${pokemon.name} se réveille !`;
+          } else {
+            canAct = false;
+            message = `${pokemon.name} dort profondément !`;
+          }
+          break;
+          
+        case 'freeze':
+          // 20% chance to thaw
+          if (Math.random() < 0.2) {
+            pokemon.status = null;
+            message = `${pokemon.name} n'est plus gelé !`;
+          } else {
+            canAct = false;
+            message = `${pokemon.name} est gelé !`;
+          }
+          break;
+      }
+    }
+    
+    return { canAct, message };
+  }
+  
+  // Apply status effects after action
+  applyStatusEffectsPostTurn(pokemon: Pokemon): string {
+    let message = '';
+    
+    // If the Pokémon has a status
+    if (pokemon.status) {
+      switch (pokemon.status.name) {
+        case 'burn':
+          // Burn damage is 1/16 of max HP and divide attack by 2
+          const burnDamage = Math.max(1, Math.floor(pokemon.baseStats.hp / 16));
+          pokemon.currentHp = Math.max(0, pokemon.currentHp - burnDamage);
+          message = `${pokemon.name} souffre de sa brûlure !`;
+          
+          if (pokemon.currentHp <= 0) {
+            pokemon.isAlive = false;
+          }
+          break;
+          
+        case 'poison':
+          // Poison damage is 1/8 of max HP (soft poison for now)
+          const poisonDamage = Math.max(1, Math.floor(pokemon.baseStats.hp / 8));
+          pokemon.currentHp = Math.max(0, pokemon.currentHp - poisonDamage);
+          message = `${pokemon.name} souffre du poison !`;
+          
+          if (pokemon.currentHp <= 0) {
+            pokemon.isAlive = false;
+          }
+          break;
+      }
+    }
+    
+    return message;
   }
 }
