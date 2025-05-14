@@ -35,6 +35,7 @@ export class BattleView {
   
   private registerEventListeners(): void {
     EventBus.on('battle:turn-start', (turnNumber) => this.onTurnStart(turnNumber));
+    EventBus.on('battle:show-pokemon-selection', () => this.showTeamSelection(true));
 
     // Store changes
     Store.subscribe(() => {
@@ -42,6 +43,11 @@ export class BattleView {
         this.render();
       }
     });
+  }
+
+  // When the player selects a Pokémon, emit the selection event
+  onPokemonSelected(selectedPokemonIndex: number): void {
+    EventBus.emit('battle:pokemon-selected', selectedPokemonIndex);
   }
   
   private createBattleContainer(): void {
@@ -262,7 +268,7 @@ export class BattleView {
     const pokemonButton = document.createElement('button');
     pokemonButton.className = 'action-button';
     pokemonButton.textContent = 'Pokémon';
-    pokemonButton.onclick = () => this.showTeamSelection();
+    pokemonButton.onclick = () => this.showTeamSelection(false);
     this.actionMenu.appendChild(pokemonButton);
   }
 
@@ -319,7 +325,7 @@ export class BattleView {
     this.moveMenu.appendChild(backButton);
   }
   
-  private showTeamSelection(): void {
+  private showTeamSelection(activePokemonFainted: boolean): void {
     if (!this.actionMenu || !this.teamMenu) {
       console.error('Action or team menu not found');
       return;
@@ -338,6 +344,9 @@ export class BattleView {
     // Hide action menu, show team menu
     this.actionMenu.style.display = 'none';
     this.teamMenu.style.display = 'grid';
+    if (this.moveMenu) {
+      this.moveMenu.style.display = 'none';
+    }
     
     // Clear existing content
     this.teamMenu.innerHTML = '';
@@ -368,7 +377,12 @@ export class BattleView {
         ${!isAlive ? '<br><small>(K.O.)</small>' : ''}
       `;
       
-      teamButton.onclick = () => EventBus.emit('battle:switch-pokemon', { pokemonIndex: index });
+      if (!activePokemonFainted) {
+        teamButton.onclick = () => EventBus.emit('battle:switch-pokemon', { pokemonIndex: index });
+      } else {
+        teamButton.onclick = () => this.onPokemonSelected(index);
+      }
+      
       this.teamMenu?.appendChild(teamButton);
     });
     
@@ -382,13 +396,15 @@ export class BattleView {
       this.teamMenu.appendChild(emptyButton);
     }
     
-    // Add back button
-    const backButton = document.createElement('button');
-    backButton.className = 'back-button';
-    backButton.textContent = 'Retour';
-    backButton.style.gridColumn = '1 / span 2';
-    backButton.onclick = () => this.showActionSelection();
-    this.teamMenu.appendChild(backButton);
+    if (!activePokemonFainted) {
+      // Add back button
+      const backButton = document.createElement('button');
+      backButton.className = 'back-button';
+      backButton.textContent = 'Retour';
+      backButton.style.gridColumn = '1 / span 2';
+      backButton.onclick = () => this.showActionSelection();
+      this.teamMenu.appendChild(backButton);
+    }
   }
 
   showBattleResult(result: 'won' | 'lost'): void {
