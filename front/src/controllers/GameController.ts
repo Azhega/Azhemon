@@ -4,11 +4,15 @@ import { ApiService } from '../services/ApiService';
 import { MainView } from '../views/MainView';
 import { Pokemon, PokemonAbility, PokemonItem, PokemonMove } from '../models/PokemonModel';
 import { TeamBuilderView } from '../views/TeamBuilderView';
+import { BattleView } from '../views/BattleView';
+import { BattleController } from './BattleController';
 
 export class GameController {
   private apiService: ApiService;
   private mainView: MainView;
   private teamBuilderView: TeamBuilderView | null = null;
+  private battleView: BattleView | null = null;
+  private battleController: BattleController | null = null;
   
   constructor() {
     this.apiService = new ApiService();
@@ -80,6 +84,11 @@ export class GameController {
 
     if (screen === 'teambuilder' && !this.teamBuilderView) {
       this.teamBuilderView = new TeamBuilderView();
+    }
+
+    if (screen === 'battle' && !this.battleView) {
+      this.battleController = new BattleController();
+      this.battleController.initialize();
     }
   }
   
