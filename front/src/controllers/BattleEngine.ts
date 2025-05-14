@@ -241,7 +241,7 @@ export class BattleEngine {
     
     // Final Damage
     const finalDamage = Math.floor(baseDamage * stab * effectiveness * critMod * randomMod);
-    console.log('Base Damage:', baseDamage, 'Final Damage:', finalDamage, 'CriticalMod:', critMod, 'Effectiveness:', effectiveness, 'STAB:', stab);
+    console.log('Base Damage:', baseDamage, 'Final Damage:', finalDamage, 'CriticalMod:', critMod, 'Effectiveness:', effectiveness, 'STAB:', stab, 'RandomMod:', randomMod);
     
     return {
       damage: finalDamage,
