@@ -2,7 +2,7 @@ import EventBus from '../utils/EventBus';
 import Store from '../utils/Store';
 import { BattleEngine } from './BattleEngine.ts';
 import { BattleView } from '../views/BattleView';
-import { Pokemon } from '../models/PokemonModel';
+import { Pokemon, PokemonMove } from '../models/PokemonModel';
 import { TurnManager } from './TurnManager.ts';
 import { BattleAction, BattleState, BattleTurn } from '../models/BattleModel.ts';
 
@@ -176,9 +176,56 @@ export class BattleController {
   }
   
   private exitBattle(): void {
-    Store.setState({ battle: null });
+    const state = Store.getState();
+    console.log('Exiting battle...', state);
+    console.log('Current Team : ', state.currentTeam);
+
+    const currentTeam = state.currentTeam;
+
+    // Reset Current Team
+    const resetTeam = currentTeam.map((pokemon: Pokemon | null) => {
+        if (pokemon) {
+            // Create a new instance of the Pokemon class
+            const resetPokemon = new Pokemon({
+                ...pokemon,
+                currentHp: pokemon.maxHp,
+                moves: pokemon.moves.map((move: PokemonMove | null) => ({
+                  ...move,
+                  currentPP: move?.pp
+                })),
+                isAlive: true,
+                status: null,
+                terrain: null,
+                statModifiers: {
+                    hp: 0,
+                    attack: 0,
+                    defense: 0,
+                    specialAttack: 0,
+                    specialDefense: 0,
+                    speed: 0,
+                    accuracy: 0,
+                    evasion: 0,
+                },
+            });
+
+            // Recalculate stats
+            resetPokemon.currentStats = resetPokemon.calculateStats();
+
+            return resetPokemon;
+        }
+        return null;
+    });
+
+    console.log('Reset Team : ', resetTeam);
+
+    // Update the state with the reset team
+    Store.setState({
+        currentTeam: resetTeam,
+        battle: null,
+    });
+
     EventBus.emit('screen:changed', 'menu');
-  }
+}
   
   private generateCpuTeam(size: number): Pokemon[] {
     // WIP CPU team
