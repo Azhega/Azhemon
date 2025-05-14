@@ -177,7 +177,7 @@ export class BattleController {
   
   private exitBattle(): void {
     Store.setState({ battle: null });
-    EventBus.emit('screen:change', 'menu');
+    EventBus.emit('screen:changed', 'menu');
   }
   
   private generateCpuTeam(size: number): Pokemon[] {

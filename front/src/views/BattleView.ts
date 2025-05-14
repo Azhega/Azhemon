@@ -12,6 +12,7 @@ export class BattleView {
   private actionMenu: HTMLElement | null = null;
   private moveMenu: HTMLElement | null = null;
   private teamMenu: HTMLElement | null = null;
+  private unsubscribe: () => void = () => {};
   
   constructor() {
     this.registerEventListeners();
@@ -38,11 +39,13 @@ export class BattleView {
     EventBus.on('battle:show-pokemon-selection', () => this.showTeamSelection(true));
 
     // Store changes
-    Store.subscribe(() => {
+    const unsubscribe = Store.subscribe(() => {
       if (this.isInitialized) {
         this.render();
       }
     });
+
+    this.unsubscribe = unsubscribe;
   }
 
   // When the player selects a Pokémon, emit the selection event
@@ -447,7 +450,10 @@ export class BattleView {
     returnButton.className = 'action-button';
     returnButton.textContent = 'Retour au menu';
     returnButton.style.marginTop = '20px';
-    returnButton.onclick = () => EventBus.emit('battle:back-to-menu');
+    returnButton.onclick = () => {
+      this.unsubscribe();
+      EventBus.emit('battle:back-to-menu');
+    }
     resultContainer.appendChild(returnButton);
     
     if (this.battleContainer) {
