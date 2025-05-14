@@ -19,7 +19,7 @@ export class TeamBuilderView {
     
     // Subscribe to team changes in the store
     Store.subscribe((state) => {
-      if (state.currentTeam) {
+      if (state.currentTeam && state.game.screen === 'teambuilder') {
         this.currentTeam = state.currentTeam;
         this.updateTeamDisplay();
       }

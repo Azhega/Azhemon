@@ -193,7 +193,7 @@ export class BattleEngine {
     
     const hitChance = move.accuracy * (accuracy / evasion);
     const roll = Math.random() * 100;
-    
+    console.log('Hit chance:', hitChance, 'Roll:', roll, 'Accuracy:', accuracy, 'Evasion:', evasion);
     return roll <= hitChance;
   }
   
@@ -204,17 +204,18 @@ export class BattleEngine {
   } {
     // No damage move
     if (move.power === 0) {
+      console.log('Move power : ', move.power);
       return { damage: 0, effectiveness: 1, critical: false };
     }
-    
+    console.log('Move power : ', move.power);
     // Determine if the move is physical or special
     let attackStat: number;
     let defenseStat: number;
     
-    if (move.category === 'Physical') {
+    if (move.category === 'Physique') {
       attackStat = attacker.currentStats.attack * (1 + attacker.statModifiers.attack / 3);
       defenseStat = defender.currentStats.defense * (1 + defender.statModifiers.defense / 3);
-    } else if (move.category === 'Special') {
+    } else if (move.category === 'Spécial') {
       attackStat = attacker.currentStats.specialAttack * (1 + attacker.statModifiers.specialAttack / 3);
       defenseStat = defender.currentStats.specialDefense * (1 + defender.statModifiers.specialDefense / 3);
     } else {
@@ -240,6 +241,7 @@ export class BattleEngine {
     
     // Final Damage
     const finalDamage = Math.floor(baseDamage * stab * effectiveness * critMod * randomMod);
+    console.log('Base Damage:', baseDamage, 'Final Damage:', finalDamage, 'CriticalMod:', critMod, 'Effectiveness:', effectiveness, 'STAB:', stab);
     
     return {
       damage: finalDamage,
@@ -250,15 +252,42 @@ export class BattleEngine {
   
   calculateTypeEffectiveness(moveType: string, defenderTypes: string[]): number {
     let effectiveness = 1.0;
+    const moveTypeName = this.getTypeName(moveType);
     
     // Apply type effectiveness
-    for (const defenderType of defenderTypes) {
-      if (defenderType && TYPE_CHART[moveType] && TYPE_CHART[moveType][defenderType] !== undefined) {
-        effectiveness *= TYPE_CHART[moveType][defenderType];
+    for (let defenderType of defenderTypes) {
+      defenderType = this.getTypeName(defenderType);
+      if (defenderType && TYPE_CHART[moveTypeName] && TYPE_CHART[moveTypeName][defenderType] !== undefined) {
+        effectiveness *= TYPE_CHART[moveTypeName][defenderType];
       }
     }
     
     return effectiveness;
+  }
+
+  getTypeName(type: string): string {
+    const typeNames: Record<string, string> = {
+      Normal: 'Normal',
+      Feu: 'Fire',
+      Eau: 'Water',
+      Électrik: 'Electric',
+      Plante: 'Grass',
+      Glace: 'Ice',
+      Combat: 'Fighting',
+      Poison: 'Poison',
+      Sol: 'Ground',
+      Vol: 'Flying',
+      Psy: 'Psychic',
+      Insecte: 'Bug',
+      Roche: 'Rock',
+      Spectre: 'Ghost',
+      Dragon: 'Dragon',
+      Ténèbres: 'Dark',
+      Acier: 'Steel',
+      Fée: 'Fairy'
+    };
+    
+    return typeNames[type];
   }
   
   executeMove(move: PokemonMove, attacker: Pokemon, defender: Pokemon): MoveResult {
@@ -266,6 +295,7 @@ export class BattleEngine {
     
     // Check if the move hits
     const hits = this.calculateHit(move, attacker, defender);
+    console.log('Hits:', hits);
     
     if (!hits) {
       return {
@@ -280,8 +310,9 @@ export class BattleEngine {
     // Apply damage
     if (damageResult.damage > 0) {
       // HP cannot go below 0
+      console.log('defender hp before:', defender.currentHp);
       defender.currentHp = Math.max(0, defender.currentHp - damageResult.damage);
-      
+      console.log('defender hp after:', defender.currentHp);
       // Check if the defender is knocked out
       if (defender.currentHp <= 0) {
         defender.isAlive = false;
@@ -305,7 +336,7 @@ export class BattleEngine {
     } else if (damageResult.effectiveness === 0) {
       message += ' - Ça n\'affecte pas le Pokémon ennemi...';
     }
-    
+    console.log('Message execute move:', message);
     return {
       success: true,
       damage: damageResult.damage,
