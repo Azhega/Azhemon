@@ -302,7 +302,12 @@ export class BattleView {
       moveButton.className = 'move-button';
       moveButton.style.backgroundColor = this.getTypeColor(move.type);
       moveButton.innerHTML = `${move.name}<br><small>${move.type} | PP: ${move.currentPP}/${move.pp}</small>`;
-      moveButton.onclick = () => EventBus.emit('battle:select-move', { moveIndex: index });
+      moveButton.onclick = () => {
+        EventBus.emit('battle:select-move', { moveIndex: index });
+        if (this.moveMenu) {
+          this.moveMenu.style.display = 'none';
+        }
+      }
       this.moveMenu?.appendChild(moveButton);
     });
     
@@ -378,7 +383,12 @@ export class BattleView {
       `;
       
       if (!activePokemonFainted) {
-        teamButton.onclick = () => EventBus.emit('battle:switch-pokemon', { pokemonIndex: index });
+        teamButton.onclick = () => {
+          EventBus.emit('battle:switch-pokemon', { pokemonIndex: index });
+          if (this.teamMenu) {
+            this.teamMenu.style.display = 'none';
+          }
+        }
       } else {
         teamButton.onclick = () => this.onPokemonSelected(index);
       }
