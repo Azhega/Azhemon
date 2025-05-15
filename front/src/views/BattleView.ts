@@ -33,6 +33,36 @@ export class BattleView {
     
     this.render();
   }
+
+  destroy(): void {
+    console.log('Destroying BattleView...');
+
+    // Remove event listeners
+    EventBus.off('battle:turn-start', this.onTurnStart);
+    EventBus.off('battle:show-pokemon-selection', this.showTeamSelection);
+
+    // Unsubscribe from the store
+    if (this.unsubscribe) {
+        this.unsubscribe();
+        this.unsubscribe = () => {};
+    }
+
+    // Remove DOM elements
+    if (this.battleContainer) {
+        this.battleContainer.remove();
+        this.battleContainer = null;
+    }
+
+    // Clear references to other elements
+    this.playerField = null;
+    this.cpuField = null;
+    this.battleLog = null;
+    this.actionMenu = null;
+    this.moveMenu = null;
+    this.teamMenu = null;
+
+    console.log('BattleView destroyed.');
+  }
   
   private registerEventListeners(): void {
     EventBus.on('battle:turn-start', (turnNumber) => this.onTurnStart(turnNumber));

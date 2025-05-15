@@ -86,7 +86,12 @@ export class GameController {
       this.teamBuilderView = new TeamBuilderView();
     }
 
-    if (screen === 'battle' && !this.battleView) {
+    if (screen === 'battle') {
+      if (this.battleController) {
+        this.battleController.destroy();
+        this.battleController = null;
+      }
+
       this.battleController = new BattleController();
       this.battleController.initialize();
     }
