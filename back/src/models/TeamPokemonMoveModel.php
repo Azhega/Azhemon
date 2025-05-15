@@ -286,7 +286,7 @@ class TeamPokemonMoveModel extends SqlConnect {
       SELECT 
         team.id AS team_id,
         team.name AS team_name,
-        pokemon_species.id AS team_pokemon_id,
+        pokemon_species_id AS team_pokemon_id,
         team_pokemon.slot AS pokemon_slot,
         pokemon_species.name AS pokemon_name,
         pokemon_species.hp AS pokemon_hp,
@@ -367,41 +367,43 @@ class TeamPokemonMoveModel extends SqlConnect {
     $stmt = $this->db->prepare($query);
     $stmt->execute(["teamID" => $teamID]);
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    if(!$results){
+    if (!$results) {
       throw new HttpException("No data found for team ID : $teamID", 404);
     }
-    
+
     $team = [
       "id"       => $results[0]["team_id"],
       "name"     => $results[0]["team_name"],
       "pokemons" => []
     ];
+
     foreach ($results as $row) {
-      $pokemonId = $row['team_pokemon_id'];
-      if(!isset($team['pokemons'][$pokemonId])){
-        $team['pokemons'][$pokemonId] = [
-          "id"           => $pokemonId,
+      $uniqueKey = $row['team_pokemon_id'] . '-' . $row['pokemon_slot'];
+
+      if (!isset($team['pokemons'][$uniqueKey])) {
+        $team['pokemons'][$uniqueKey] = [
+          "id"           => $row['team_pokemon_id'],
           "slot"         => $row['pokemon_slot'],
           "pokemon_name" => $row['pokemon_name'],
           "first_type"   => $row["first_type_name"],
           "second_type"  => $row["second_type_name"],
-          "hp"          => $row["pokemon_hp"],
-          "atk"      => $row["pokemon_atk"],
-          "def"     => $row["pokemon_def"],
-          "spe_atk" => $row["pokemon_spe_atk"],
-          "spe_def" => $row["pokemon_spe_def"],
-          "speed"       => $row["pokemon_speed"],
-          "ability"     => [
+          "hp"           => $row["pokemon_hp"],
+          "atk"          => $row["pokemon_atk"],
+          "def"          => $row["pokemon_def"],
+          "spe_atk"      => $row["pokemon_spe_atk"],
+          "spe_def"      => $row["pokemon_spe_def"],
+          "speed"        => $row["pokemon_speed"],
+          "ability"      => [
             "id"          => $row["ability_id"],
             "name"        => $row["ability_name"],
             "description" => $row["ability_description"]
           ],
-          "item"        => [
+          "item"         => [
             "id"          => $row["item_id"],
             "name"        => $row["item_name"],
             "description" => $row["item_description"]
           ],
-          "nature"      => [
+          "nature"       => [
             "id"          => $row["nature_id"],
             "name"        => $row["nature_name"],
             "description" => $row["nature_description"],
@@ -416,20 +418,24 @@ class TeamPokemonMoveModel extends SqlConnect {
           "possibleMoves"     => $row["possibleMoves"] ? json_decode($row["possibleMoves"], true) : []
         ];
       }
-      $team['pokemons'][$pokemonId]['moves'][] = [
-        "id"   => $row['move_id'],
-        "slot" => $row['move_slot'],
-        "name" => $row['move_name'],
-        "type" => $row['move_type'],
-        "category" => $row['move_category'],
-        "power" => $row['move_power'],
-        "accuracy" => $row['move_accuracy'],
-        "pp" => $row['move_pp'],
-        "priority" => $row['move_priority'],
+
+      $team['pokemons'][$uniqueKey]['moves'][] = [
+        "id"          => $row['move_id'],
+        "slot"        => $row['move_slot'],
+        "name"        => $row['move_name'],
+        "type"        => $row['move_type'],
+        "category"    => $row['move_category'],
+        "power"       => $row['move_power'],
+        "accuracy"    => $row['move_accuracy'],
+        "pp"          => $row['move_pp'],
+        "priority"    => $row['move_priority'],
         "description" => $row['move_description']
       ];
     }
+
+    // Reset the keys to be sequential
     $team['pokemons'] = array_values($team['pokemons']);
+
     return $team;
   }
 
