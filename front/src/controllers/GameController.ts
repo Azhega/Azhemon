@@ -54,13 +54,14 @@ export class GameController {
     try {
       const pokemonSpecies = await this.apiService.getAll('pokemon_species');
       const items = await this.apiService.getAll('item');
+      const natures = await this.apiService.getAll('nature');
       
       // Store data in the store
       Store.setState({ 
         pokemonSpecies: pokemonSpecies,
         availableItems: items,
+        natures: natures,
         currentTeam: [null, null, null, null, null, null],
-        savedTeams: []
       });
 
       console.log('Initial data loaded successfully');

@@ -157,6 +157,10 @@ export class TeamBuilderView {
             <span class="attribute-label">Talent</span>
             <span class="attribute-value editable" data-attribute="ability">${pokemon?.ability.name || 'Aucun'}</span>
           </div>
+          <div class="attribute-row">
+            <span class="attribute-label">Nature</span>
+            <span class="attribute-value editable" data-attribute="nature">${pokemon?.nature.name || 'Aucun'}</span>
+          </div>
         </div>
         
         <div class="pokemon-moves">
@@ -224,6 +228,9 @@ export class TeamBuilderView {
         break;
       case 'move':
         this.loadMoveSelector(selectorPanel, data);
+        break;
+      case 'nature':
+        this.loadNatureSelector(selectorPanel);
         break;
       default:
         selectorPanel.innerHTML = `
@@ -440,6 +447,53 @@ export class TeamBuilderView {
     });
   }
 
+  private loadNatureSelector(container: HTMLElement): void {
+    const state = Store.getState();
+    const natures = state.natures;
+    
+    container.innerHTML = `
+      <div class="selector-header">
+        <h3>Choisir un talent</h3>
+      </div>
+      <div class="selector-list">
+        ${natures.map((nature: PokemonNature) => `
+          <div class="selector-item nature-element" data-nature-id="${nature.id}" data-nature-name="${nature.name}"
+              data-atk="${nature.atk}" data-def="${nature.def}" data-spa="${nature.spa}"
+              data-spd="${nature.spd}" data-spe="${nature.spe}">
+            <span>${nature.name}</span>
+            <small>${nature.description}</small>
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    // WIP click events
+
+    const natureElements = container.querySelectorAll('.nature-element');
+    natureElements.forEach(nature => {
+      nature.addEventListener('click', () => {
+        if (this.selectedPokemonIndex !== null) {
+          const natureId = parseInt((nature as HTMLElement).dataset.natureId!);
+          const natureName = (nature as HTMLElement).dataset.natureName!;
+          const atk = parseFloat((nature as HTMLElement).dataset.atk!);
+          const def = parseFloat((nature as HTMLElement).dataset.def!);
+          const spa = parseFloat((nature as HTMLElement).dataset.spa!);
+          const spd = parseFloat((nature as HTMLElement).dataset.spd!);
+          const spe = parseFloat((nature as HTMLElement).dataset.spe!);
+          console.log("nature : ", nature, "atk :", atk);
+          const selectedPokemon = this.currentTeam[this.selectedPokemonIndex!];
+          if (selectedPokemon) {
+            selectedPokemon.nature = { id: natureId, name: natureName, description: '', atk: atk, def: def, spa: spa, spd: spd, spe: spe};
+            this.updatePokemonInSlot(this.selectedPokemonIndex!, selectedPokemon);
+            // Reset the selector
+            this.selectedAttributeType = null;
+            this.loadSelector('');
+          }
+        }
+      });
+    });
+  }
+
   private loadMoveSelector(container: HTMLElement, data?: { moveIndex: number; selectedPokemon: Pokemon }): void {
     const moves = data?.selectedPokemon.possibleMoves || [];
     console.log("moves : ", moves);
@@ -563,7 +617,7 @@ export class TeamBuilderView {
             pokemon_species_id: pokemon.id,
             ability_id: pokemon.ability.id,
             item_id: pokemon.item?.id,
-            nature_id: 1, // To implement later
+            nature_id: pokemon.nature.id, // To implement later
             moves: (pokemon.moves || []).map((move: any, index: number) => ({
               slot: index + 1,
               move_id: move?.id
@@ -646,7 +700,7 @@ export class TeamBuilderView {
         console.error("Invalid Team ID:", selectedValue);
         return;
       }
-      if (selectedTeamId === 0) {
+      if (selectedTeamId === 0) { // "Sélectionner une équipe" button
         this.currentTeam = [null, null, null, null, null, null];
         Store.setState({ currentTeam: this.currentTeam , currentTeamIndex: null });
         this.updateTeamDisplay();
@@ -725,7 +779,11 @@ export class TeamBuilderView {
               id: apiPokemon.nature.id,
               name: apiPokemon.nature.name,
               description: apiPokemon.nature.description,
-              effects: [],
+              atk: apiPokemon.nature.atk,
+              def: apiPokemon.nature.def,
+              spa: apiPokemon.nature.spa,
+              spd: apiPokemon.nature.spd,
+              spe: apiPokemon.nature.spe,
             },
             item: {
               id: apiPokemon.item.id,
@@ -765,6 +823,8 @@ export class TeamBuilderView {
             this.loadSelector('item');
           } else if (attribute === 'ability') {
             this.loadSelector('ability', this.currentTeam[this.selectedPokemonIndex!]);
+          } else if (attribute === 'nature') {
+            this.loadSelector('nature');
           } else if (attribute === 'move') {
             const moveIndex = parseInt(editable.getAttribute('data-move-index') || '0');
             const selectedPokemon = this.currentTeam[this.selectedPokemonIndex!];

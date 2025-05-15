@@ -316,6 +316,11 @@ class TeamPokemonMoveModel extends SqlConnect {
         nature.id AS nature_id,
         nature.name AS nature_name,
         nature.description AS nature_description,
+        nature.atk AS nature_atk,
+        nature.def AS nature_def,
+        nature.spa AS nature_spa,
+        nature.spd AS nature_spd,
+        nature.spe AS nature_spe,
         (
           SELECT JSON_ARRAYAGG(JSON_OBJECT(
             'id', a.id,
@@ -399,7 +404,12 @@ class TeamPokemonMoveModel extends SqlConnect {
           "nature"      => [
             "id"          => $row["nature_id"],
             "name"        => $row["nature_name"],
-            "description" => $row["nature_description"]
+            "description" => $row["nature_description"],
+            "atk"         => $row["nature_atk"],
+            "def"         => $row["nature_def"],
+            "spa"         => $row["nature_spa"],
+            "spd"         => $row["nature_spd"],
+            "spe"         => $row["nature_spe"],
           ],
           "moves"        => [],
           "possibleAbilities" => $row["possibleAbilities"] ? json_decode($row["possibleAbilities"], true) : [],
