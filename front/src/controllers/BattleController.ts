@@ -1,18 +1,15 @@
 import EventBus from '../utils/EventBus';
 import Store from '../utils/Store';
-import { BattleEngine } from './BattleEngine.ts';
 import { BattleView } from '../views/BattleView';
 import { Pokemon, PokemonMove } from '../models/PokemonModel';
 import { TurnManager } from './TurnManager.ts';
 import { BattleAction, BattleState, BattleTurn } from '../models/BattleModel.ts';
 
 export class BattleController {
-  private battleEngine: BattleEngine;
-  private battleView: BattleView;
-  private turnManager: TurnManager;
+  private battleView: BattleView | null;
+  private turnManager: TurnManager | null;
   
   constructor() {
-    this.battleEngine = new BattleEngine();
     this.battleView = new BattleView();
     this.turnManager = new TurnManager();
     
@@ -52,9 +49,29 @@ export class BattleController {
     
     Store.setState({ battle: battleState });
     
-    this.battleView.initialize();
+    this.battleView?.initialize();
     
     this.startBattle();
+  }
+
+  destroy(): void {
+    console.log('Destroying BattleController...');
+
+    // Remove event listeners
+    EventBus.off('battle:start', this.startBattle);
+    EventBus.off('battle:select-move', this.selectMove);
+    EventBus.off('battle:switch-pokemon', this.switchPokemon);
+    EventBus.off('battle:back-to-menu', this.exitBattle);
+
+    // Clean up views
+    if (this.battleView) {
+        this.battleView.destroy();
+        this.battleView = null;
+    }
+
+    this.turnManager = null;
+
+    console.log('BattleController destroyed.');
   }
   
   private registerEventListeners(): void {
@@ -85,7 +102,7 @@ export class BattleController {
     
     EventBus.emit('battle:turn-start', 1);
     
-    this.battleView.showActionSelection();
+    this.battleView?.showActionSelection();
   }
   
   private selectMove(moveIndex: number): void {
@@ -313,7 +330,7 @@ export class BattleController {
   }
   
   private executeTurn(turn: BattleTurn): void {
-    this.turnManager.executeTurn(turn, () => {
+    this.turnManager?.executeTurn(turn, () => {
       // Callback after turn execution
       this.checkBattleState();
     });
@@ -336,7 +353,7 @@ export class BattleController {
         }
       });
       
-      this.battleView.showBattleResult('lost');
+      this.battleView?.showBattleResult('lost');
       return;
     }
     
@@ -349,7 +366,7 @@ export class BattleController {
         }
       });
       
-      this.battleView.showBattleResult('won');
+      this.battleView?.showBattleResult('won');
       return;
     }
     
@@ -364,6 +381,6 @@ export class BattleController {
     // Prepare for next turn
     EventBus.emit('battle:turn-start', battleState.turn + 1);
     
-    this.battleView.showActionSelection();
+    this.battleView?.showActionSelection();
   }
 }
