@@ -240,7 +240,7 @@ export class BattleView {
     hpBar.className = 'hp-bar';
     
     const hpPercentage = (pokemon.currentHp / pokemon.maxHp) * 100;
-    const hpColor = hpPercentage > 50 ? '#44ff44' : hpPercentage > 20 ? '#ffff44' : '#ff4444';
+    const hpColor = hpPercentage > 50 ? '#38cd38' : hpPercentage > 20 ? '#dcdc3b' : '#d63939';
     
     const hpFill = document.createElement('div');
     hpFill.className = 'hp-fill';
