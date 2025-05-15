@@ -349,7 +349,7 @@ export class TurnManager {
       id: 0,
       name: 'Lutte',
       type: 'Normal',
-      category: 'Physical',
+      category: 'Physique',
       power: 50,
       accuracy: 100,
       pp: 1,

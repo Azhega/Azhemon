@@ -277,6 +277,10 @@ export class BattleView {
   }
 
   showActionSelection(): void {
+    const state = Store.getState();
+    const battleState = state.battle;
+    const playerPokemon = battleState.activePokemon.player;
+
     console.log('Showing action selection...');
     if (!this.actionMenu || !this.moveMenu || !this.teamMenu) {
       console.error('Action, move or team menu not found');
@@ -295,7 +299,17 @@ export class BattleView {
     const fightButton = document.createElement('button');
     fightButton.className = 'action-button';
     fightButton.textContent = 'Combat';
-    fightButton.onclick = () => this.showMoveSelection();
+    fightButton.onclick = () => {
+      if (playerPokemon.moves.every((move: PokemonMove) => move.currentPP <= 0)) {
+        console.log('No moves available, using struggle');
+        if (this.actionMenu?.style.display) {
+          this.actionMenu.style.display = 'none';
+        } 
+        EventBus.emit('battle:select-move', { moveIndex: -1 });
+        return;
+      }
+      this.showMoveSelection();
+    }
     this.actionMenu.appendChild(fightButton);
     
     const pokemonButton = document.createElement('button');
@@ -336,6 +350,12 @@ export class BattleView {
       moveButton.style.backgroundColor = this.getTypeColor(move.type);
       moveButton.innerHTML = `${move.name}<br><small>${move.type} | PP: ${move.currentPP}/${move.pp}</small>`;
       moveButton.onclick = () => {
+        if (move.currentPP <= 0) {
+          console.log('No more PP left for this move');
+          return;
+        }
+
+        move.currentPP--;
         EventBus.emit('battle:select-move', { moveIndex: index });
         if (this.moveMenu) {
           this.moveMenu.style.display = 'none';

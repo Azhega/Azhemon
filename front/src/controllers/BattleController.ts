@@ -110,38 +110,64 @@ export class BattleController {
     const battleState = state.battle;
     const activePokemon = battleState.activePokemon.player;
     
-    if (moveIndex < 0 || moveIndex >= activePokemon.moves.length) {
+    if (moveIndex >= activePokemon.moves.length) {
       console.error('Invalid move index');
       return;
     }
     
-    const selectedMove = activePokemon.moves[moveIndex];
-    
-    // Create player action
-    const playerAction: BattleAction = {
-      type: 'move',
+    if (moveIndex === -1) {
+      console.log('Struggle move selected');
+
+      const playerAction: BattleAction = {
+      type: 'struggle',
       user: 'player',
       target: 'cpu',
       data: {
-        moveIndex: moveIndex,
-        move: selectedMove
-      }
-    };
+        moveIndex: -1,
+        move: null
+      }};
+
+      const cpuAction = this.generateCpuAction();
+      
+      // Create turn
+      const currentTurn: BattleTurn = {
+        turnNumber: battleState.turn,
+        actions: {
+          player: playerAction,
+          cpu: cpuAction
+        }
+      };
+      
+      console.log('Executing turn:', currentTurn);
+      this.executeTurn(currentTurn);
+
+    } else {
+      const selectedMove = activePokemon.moves[moveIndex];
     
-    // Generate CPU action
-    const cpuAction = this.generateCpuAction();
-    
-    // Create turn
-    const currentTurn: BattleTurn = {
-      turnNumber: battleState.turn,
-      actions: {
-        player: playerAction,
-        cpu: cpuAction
-      }
-    };
-    
-    console.log('Executing turn:', currentTurn);
-    this.executeTurn(currentTurn);
+      const playerAction: BattleAction = {
+        type: 'move',
+        user: 'player',
+        target: 'cpu',
+        data: {
+          moveIndex: moveIndex,
+          move: selectedMove
+        }
+      };
+
+      const cpuAction = this.generateCpuAction();
+      
+      // Create turn
+      const currentTurn: BattleTurn = {
+        turnNumber: battleState.turn,
+        actions: {
+          player: playerAction,
+          cpu: cpuAction
+        }
+      };
+      
+      console.log('Executing turn:', currentTurn);
+      this.executeTurn(currentTurn);
+    }
   }
   
   private switchPokemon(pokemonIndex: number): void {
