@@ -274,7 +274,16 @@ export class BattleController {
         ability: this.generateRandomAbility(species),
         item: null,
         status: null,
-        nature: { id: 1, name: 'Docile', description: 'Nature neutre', effects: [] }
+        nature: { 
+          id: 2, 
+          name: 'Bizarre', 
+          description: 'Aucun changement',
+          atk: 1,
+          def: 1,
+          spa: 1,
+          spd: 1,
+          spe: 1
+        }
       });
       
       cpuTeam.push(cpuPokemon);
