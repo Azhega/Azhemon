@@ -404,13 +404,13 @@ export class BattleView {
       }
       
       // HP percentage for color
-      const hpPercentage = (pokemon.currentHp / pokemon.baseStats.hp) * 100;
+      const hpPercentage = (pokemon.currentHp / pokemon.maxHp) * 100;
       const borderColor = hpPercentage > 50 ? '#44ff44' : hpPercentage > 20 ? '#ffff44' : '#ff4444';
       teamButton.style.borderLeft = `5px solid ${borderColor}`;
       
       teamButton.innerHTML = `
         ${pokemon.name} Nv.${pokemon.level}<br>
-        <small>PV: ${pokemon.currentHp}/${pokemon.baseStats.hp}</small>
+        <small>PV: ${pokemon.currentHp}/${pokemon.maxHp}</small>
         ${isActive ? '<br><small>(Actif)</small>' : ''}
         ${!isAlive ? '<br><small>(K.O.)</small>' : ''}
       `;
