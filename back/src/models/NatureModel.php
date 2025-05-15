@@ -8,7 +8,7 @@ use back\utils\{HttpException};
 
 class NatureModel extends SqlConnect {
   private $table = "nature";
-  public $authorized_fields_to_update = ['name', 'description'];
+  public $authorized_fields_to_update = ['name', 'description', 'atk', 'def', 'spa', 'spd', 'spe'];
 
   /*========================= ADD ===========================================*/
 
@@ -22,8 +22,8 @@ class NatureModel extends SqlConnect {
     }
 
     $query = "
-      INSERT INTO $this->table (name, description)
-      VALUES (:name, :description)
+      INSERT INTO $this->table (name, description, atk, def, spa, spd, spe)
+      VALUES (:name, :description, :atk, :def, :spa, :spd, :spe)
     ";
 
     $req = $this->db->prepare($query);

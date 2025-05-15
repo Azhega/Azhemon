@@ -44,7 +44,11 @@ export interface PokemonNature {
   id: number;
   name: string;
   description: string;
-  effects: Effect[]; // Effects to implement later
+  atk: number;
+  def: number;
+  spa: number;
+  spd: number;
+  spe: number;
 }
 
 export interface PokemonStatus {
@@ -111,11 +115,11 @@ export class Pokemon {
     // To develop later: Nature and EV/IV calculations
     return {
       hp: Math.floor(((2 * this.baseStats.hp + 31) * this.level) / 100) + this.level + 10,
-      attack: Math.floor(((2 * this.baseStats.attack + 31) * this.level) / 100) + 5,
-      defense: Math.floor(((2 * this.baseStats.defense + 31) * this.level) / 100) + 5,
-      specialAttack: Math.floor(((2 * this.baseStats.specialAttack + 31) * this.level) / 100) + 5,
-      specialDefense: Math.floor(((2 * this.baseStats.specialDefense + 31) * this.level) / 100) + 5,
-      speed: Math.floor(((2 * this.baseStats.speed + 31) * this.level) / 100) + 5,
+      attack: Math.floor((((2 * this.baseStats.attack + 31) * this.level) / 100) + 5) * this.nature.atk,
+      defense: Math.floor((((2 * this.baseStats.defense + 31) * this.level) / 100) + 5) * this.nature.def,
+      specialAttack: Math.floor((((2 * this.baseStats.specialAttack + 31) * this.level) / 100) + 5) * this.nature.spa,
+      specialDefense: Math.floor((((2 * this.baseStats.specialDefense + 31) * this.level) / 100) + 5) * this.nature.spd,
+      speed: Math.floor((((2 * this.baseStats.speed + 31) * this.level) / 100) + 5) * this.nature.spe,
       accuracy: 100,
       evasion: 100
     };
