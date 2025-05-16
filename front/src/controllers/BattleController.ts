@@ -153,7 +153,10 @@ export class BattleController {
           move: selectedMove
         }
       };
-
+      const state = Store.getState();
+      const battleState = state.battle;
+      const cpuPokemon = battleState.activePokemon.cpu;
+      console.log('CPU Pokemon move pp before generating action : ', cpuPokemon.moves[0].currentPP);
       const cpuAction = this.generateCpuAction();
       
       // Create turn
@@ -318,10 +321,16 @@ export class BattleController {
     return cpuTeam;
   }
   
-  private generateRandomMoves(species: any): any[] {
+  private generateRandomMoves(species: any): PokemonMove[] {
     // WIP Random moves
     const state = Store.getState();
-    return state.currentTeam[0].moves;
+    const cpuMoves = state.currentTeam[0].moves.map((move: PokemonMove) => ({
+      ...move,
+      currentPP: move.pp
+    }));
+    console.log('CPU Pokemon Moves : ', cpuMoves);
+    console.log('CPU Pokemon Moves currentPP : ', cpuMoves[0].currentPP);
+    return cpuMoves;
   }
   
   private generateRandomAbility(species: any): any {
@@ -339,28 +348,47 @@ export class BattleController {
     const state = Store.getState();
     const battleState = state.battle;
     const cpuPokemon = battleState.activePokemon.cpu;
-    
-    if (cpuPokemon.moves.length > 0) {
-      const randomMoveIndex = Math.floor(Math.random() * cpuPokemon.moves.length);
-      const randomMove = cpuPokemon.moves[randomMoveIndex];
-      
+    console.log('CPU Pokemon move pp : ', cpuPokemon.moves[0].currentPP);
+
+    if (cpuPokemon.moves.every((move: PokemonMove) => move.currentPP <= 0)) {
+      console.log('CPU Pokemon move pp : ', cpuPokemon.moves[0].currentPP);
+      console.log('CPU Moves every :', cpuPokemon.moves.every((move: PokemonMove) => move.currentPP <= 0));
+      console.log('CPU Pokemon has no moves left');
+      // Struggle if no moves available
       return {
-        type: 'move',
+        type: 'struggle',
         user: 'cpu',
         target: 'player',
-        data: {
-          moveIndex: randomMoveIndex,
-          move: randomMove
-        }
+        data: {}
+      };
+    }
+
+    if (cpuPokemon.moves.length === 0) {
+      console.error('CPU Pokemon has no moves');
+      return {
+        type: 'struggle',
+        user: 'cpu',
+        target: 'player',
+        data: {}
       };
     }
     
-    // Struggle if no moves available
+    const randomMoveIndex = Math.floor(Math.random() * cpuPokemon.moves.length);
+    const randomMove = cpuPokemon.moves[randomMoveIndex];
+    cpuPokemon.moves[randomMoveIndex].currentPP -= 1;
+    if (randomMove.currentPP === 0) {
+      cpuPokemon.moves.splice(randomMoveIndex, 1);
+    }
+     
+    console.log('CPU selected move:', randomMove);
     return {
-      type: 'struggle',
+      type: 'move',
       user: 'cpu',
       target: 'player',
-      data: {}
+      data: {
+        moveIndex: randomMoveIndex,
+        move: randomMove
+      }
     };
   }
   

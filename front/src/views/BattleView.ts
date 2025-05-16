@@ -335,6 +335,8 @@ export class BattleView {
     }
 
     const playerPokemon = battleState.activePokemon.player;
+    const cpuPokemon = battleState.activePokemon.cpu;
+    console.log('CPU Pokemon currentPP :', cpuPokemon.moves[0].currentPP);
     
     // Hide action menu, show move menu
     this.actionMenu.style.display = 'none';
@@ -354,8 +356,9 @@ export class BattleView {
           console.log('No more PP left for this move');
           return;
         }
-
+        console.log('CPU Pokemon currentPP before :', cpuPokemon.moves[0].currentPP);
         move.currentPP--;
+        console.log('CPU Pokemon currentPP after :', cpuPokemon.moves[0].currentPP);
         EventBus.emit('battle:select-move', { moveIndex: index });
         if (this.moveMenu) {
           this.moveMenu.style.display = 'none';
