@@ -1,6 +1,11 @@
 import EventBus from '../utils/EventBus';
 import Store from '../utils/Store';
-import { Pokemon, PokemonStats, PokemonAbility, PokemonNature, PokemonItem, PokemonMove } from '../models/PokemonModel';
+import { Pokemon, PokemonAbility, PokemonNature, PokemonItem, PokemonMove } from '../models/PokemonModel';
+import { Pokedex } from '../data/pokedex';
+import { items } from '../data/items';
+import { moves } from '../data/moves';
+import { abilities } from '../data/abilities';
+import { createBattlePokemon } from '../utils/PokemonFactory';
 import ApiService from '../services/ApiService';
 
 export class TeamBuilderView {
@@ -107,7 +112,7 @@ export class TeamBuilderView {
               <h3 class="pokemon-name">${pokemon.name}</h3>
               <div class="pokemon-types">
                 <span class="type ${pokemon.types[0].toLowerCase()}">${pokemon.types[0]}</span>
-                <span class="type ${pokemon.types[1].toLowerCase()}">${pokemon.types[1]}</span>
+                ${pokemon.types[1] ? `<span class="type ${pokemon.types[1]?.toLowerCase()}">${pokemon.types[1]}</span>` : ''}
               </div>
             </div>
           </div>
@@ -243,7 +248,7 @@ export class TeamBuilderView {
 
   private loadPokemonSelector(container: HTMLElement): void {
     const state = Store.getState();
-    const pokemonSpecies = state.pokemonSpecies || [];
+    const pokemonSpecies = Object.entries(Pokedex);
     console.log("pokemonSpecies : ", pokemonSpecies);
     console.log("state : ", state);
     
@@ -253,14 +258,17 @@ export class TeamBuilderView {
         <input type="text" id="pokemon-search" placeholder="Rechercher..." class="search-input">
       </div>
       <div class="selector-list pokemon-list">
-        ${pokemonSpecies.map((pokemon: any) => `
-          <div class="selector-item pokemon-element" data-pokemon-id="${pokemon.id}" data-pokemon-name="${pokemon.name}">
+        ${pokemonSpecies.map(([key, pokemon]: [string, any]) => `
+          <div class="selector-item pokemon-element" 
+            data-pokemon-key="${key}" 
+            data-pokemon-id="${pokemon.id}" 
+            data-pokemon-name="${pokemon.name}">
             <img src="src/public/images/sprites/${pokemon.name.toLowerCase()}/${pokemon.name.toLowerCase()}_face.png" 
                 alt="${pokemon.name}" class="pokemon-icon">
             <span>${pokemon.name}</span>
             <div class="pokemon-types small">
-              <span class="type ${pokemon.first_type.toLowerCase()}">${pokemon.first_type}</span>
-              <span class="type ${pokemon.second_type.toLowerCase()}">${pokemon.second_type}</span>
+              <span class="type ${pokemon.types[0].toLowerCase()}">${pokemon.types[0]}</span>
+              ${pokemon.types[1] ? `<span class="type ${pokemon.types[1]?.toLowerCase()}">${pokemon.types[1]}</span>` : ''}
             </div>
           </div>
         `).join('')}
@@ -286,89 +294,39 @@ export class TeamBuilderView {
     pokemonItems.forEach(pokemon => {
       pokemon.addEventListener('click', async () => {
         if (this.selectedPokemonIndex !== null) {
-          const pokemonId = parseInt((pokemon as HTMLElement).dataset.pokemonId!);
-          const apiPokemon = pokemonSpecies.find((p: Pokemon) => p.id === pokemonId);
+          const pokemonKey = (pokemon as HTMLElement).dataset.pokemonKey!;
+          const PokemonEntry = pokemonSpecies.find(([key, _]) => key === pokemonKey);
 
-          if (!apiPokemon) {
+          if (!PokemonEntry) {
             console.error("Pokemon not found in species list.");
             return;
           }
+          const [key, _] = PokemonEntry;
 
-          try {
-            const selectedPokemonPossibleAbilities = await ApiService.getAll(
-              'species_ability/pokemon_name/' + apiPokemon.name
-            );
-
-            const selectedPokemonPossibleMoves = await ApiService.getAll(
-              'species_move/pokemon_name/' + apiPokemon.name
-            );
-
-            const selectedPokemon = new Pokemon({
-              id: apiPokemon.id,
-              name: apiPokemon.name,
-              types: [apiPokemon.first_type, apiPokemon.second_type],
-              baseStats: {
-                hp: apiPokemon.hp,
-                attack: apiPokemon.atk,
-                defense: apiPokemon.def,
-                specialAttack: apiPokemon.spe_atk,
-                specialDefense: apiPokemon.spe_def,
-                speed: apiPokemon.speed,
-                accuracy: 0,
-                evasion: 0,
+          const selectedPokemon = createBattlePokemon(
+            key as keyof typeof Pokedex, 
+            {
+              nature: { 
+                id: 0, name: 'Aucun', description: '',
+                atk: 1, def: 1, spa: 1, spd: 1, spe: 1
               },
               moves: [],
-              possibleMoves: selectedPokemonPossibleMoves.map((move: PokemonMove) => ({
-                id: move.id,
-                name: move.name,
-                type: move.type,
-                category: move.category,
-                power: move.power,
-                accuracy: move.accuracy,
-                pp: move.pp,
-                currentPP: move.pp,
-                priority: move.priority,
-                description: move.description,
-                target: null,
-                effects: [],
-              })),
-              ability: {
-                id: 0,
-                name: 'Aucun',
-                description: 'Aucun talent',
-                effects: [],
-              },
-              possibleAbilities: selectedPokemonPossibleAbilities.map((ability: PokemonAbility) => ({
-                id: ability.id,
-                name: ability.name,
-                description: ability.description,
-                effects: [],
-              })),
-              nature: {
-                id: 0,
-                name: 'Aucun',
-                description: 'Aucune nature',
-                effects: [],
-              },
+              ability: { id: 0, name: 'Aucun', description: ''},
               item: null
             });
 
-            this.updatePokemonInSlot(this.selectedPokemonIndex, selectedPokemon);
+          this.updatePokemonInSlot(this.selectedPokemonIndex, selectedPokemon);
 
-            // Reset the selector
-            this.selectedAttributeType = null;
-            this.loadSelector('');
-          } catch (error) {
-            console.error("Error fetching abilities or moves:", error);
-          }
+          // Reset the selector
+          this.selectedAttributeType = null;
+          this.loadSelector('');
         }
       });
     });
   }
 
   private loadItemSelector(container: HTMLElement): void {
-    const state = Store.getState();
-    const items = state.availableItems;
+    const availableItems = Object.entries(items);
     
     container.innerHTML = `
       <div class="selector-header">
@@ -379,8 +337,11 @@ export class TeamBuilderView {
         <div class="selector-item item-element" data-item-id="0">
           <span>Aucun</span>
         </div>
-        ${items.map((item: PokemonItem) => `
-          <div class="selector-item item-element" data-item-id="${item.id}" data-item-name="${item.name}">
+        ${availableItems.map(([key, item]: [string, any]) => `
+          <div class="selector-item item-element" 
+            data-item-key="${key}"
+            data-item-id="${item.id}" 
+            data-item-name="${item.name}">
             <span>${item.name}</span>
             <small>${item.description}</small>
           </div>
@@ -394,11 +355,10 @@ export class TeamBuilderView {
     itemElements.forEach(item => {
       item.addEventListener('click', () => {
         if (this.selectedPokemonIndex !== null) {
-          const itemId = parseInt((item as HTMLElement).dataset.itemId!);
-          const itemName = (item as HTMLElement).dataset.itemName!;
+          const itemKey = (item as HTMLElement).dataset.itemKey!;
           const selectedPokemon = this.currentTeam[this.selectedPokemonIndex!];
           if (selectedPokemon) {
-            selectedPokemon.item = { id: itemId, name: itemName, description: '', effects: [] };
+            selectedPokemon.item = items[itemKey as keyof typeof items];
             this.updatePokemonInSlot(this.selectedPokemonIndex!, selectedPokemon);
             // Reset the selector
             this.selectedAttributeType = null;
@@ -410,15 +370,20 @@ export class TeamBuilderView {
   }
 
   private loadAbilitySelector(container: HTMLElement, pokemonData?: Pokemon): void {
-    const abilities = pokemonData?.possibleAbilities || [];
-    
+    const availableAbilities = pokemonData?.possibleAbilities || [];
+    const filteredAbilities = Object.entries(abilities)
+      .filter(([key]) => availableAbilities.includes(key));
+
     container.innerHTML = `
       <div class="selector-header">
         <h3>Choisir un talent</h3>
       </div>
       <div class="selector-list">
-        ${abilities.map(ability => `
-          <div class="selector-item ability-element" data-ability-id="${ability.id}" data-ability-name="${ability.name}">
+        ${filteredAbilities.map(([key, ability]) => `
+          <div class="selector-item ability-element" 
+            data-ability-key="${key}"
+            data-ability-id="${ability.id}" 
+            data-ability-name="${ability.name}">
             <span>${ability.name}</span>
             <small>${ability.description}</small>
           </div>
@@ -432,11 +397,10 @@ export class TeamBuilderView {
     abilityElements.forEach(ability => {
       ability.addEventListener('click', () => {
         if (this.selectedPokemonIndex !== null) {
-          const abilityId = parseInt((ability as HTMLElement).dataset.abilityId!);
-          const abilityName = (ability as HTMLElement).dataset.abilityName!;
+          const abilityKey = (ability as HTMLElement).dataset.abilityKey!;
           const selectedPokemon = this.currentTeam[this.selectedPokemonIndex!];
           if (selectedPokemon) {
-            selectedPokemon.ability = { id: abilityId, name: abilityName, description: '', effects: [] };
+            selectedPokemon.ability = abilities[abilityKey as keyof typeof abilities]
             this.updatePokemonInSlot(this.selectedPokemonIndex!, selectedPokemon);
             // Reset the selector
             this.selectedAttributeType = null;
@@ -484,6 +448,7 @@ export class TeamBuilderView {
           const selectedPokemon = this.currentTeam[this.selectedPokemonIndex!];
           if (selectedPokemon) {
             selectedPokemon.nature = { id: natureId, name: natureName, description: '', atk: atk, def: def, spa: spa, spd: spd, spe: spe};
+            selectedPokemon.currentStats = selectedPokemon.calculateStats();
             this.updatePokemonInSlot(this.selectedPokemonIndex!, selectedPokemon);
             // Reset the selector
             this.selectedAttributeType = null;
@@ -495,7 +460,10 @@ export class TeamBuilderView {
   }
 
   private loadMoveSelector(container: HTMLElement, data?: { moveIndex: number; selectedPokemon: Pokemon }): void {
-    const moves = data?.selectedPokemon.possibleMoves || [];
+    const availableMoves = data?.selectedPokemon.possibleMoves || [];
+    const filteredMoves = Object.entries(moves)
+      .filter(([key]) => availableMoves.includes(key));
+
     console.log("moves : ", moves);
     container.innerHTML = `
       <div class="selector-header">
@@ -503,8 +471,13 @@ export class TeamBuilderView {
         <input type="text" id="move-search" placeholder="Rechercher..." class="search-input">
       </div>
       <div class="selector-list">
-        ${moves.map((move: PokemonMove) => `
-          <div class="selector-item move-element" data-move-id="${move.id}" data-move-name="${move.name}" data-move-index="${data?.moveIndex || 0}" data-move-type="${move.type}">
+        ${filteredMoves.map(([key, move]) => `
+          <div class="selector-item move-element" 
+          data-move-key="${key}"
+          data-move-id="${move.id}" 
+          data-move-name="${move.name}" 
+          data-move-index="${data?.moveIndex || 0}" 
+          data-move-type="${move.type}">
             <div class="move-header">
               <span>${move.name}</span>
               <span class="type ${move.type.toLowerCase()}">${move.type}</span>
@@ -525,9 +498,8 @@ export class TeamBuilderView {
       move.addEventListener('click', () => {
         if (this.selectedPokemonIndex !== null) {
           const moveId = parseInt((move as HTMLElement).dataset.moveId!);
-          const moveName = (move as HTMLElement).dataset.moveName!;
+          const moveKey = (move as HTMLElement).dataset.moveKey!;
           const moveIndex = parseInt((move as HTMLElement).dataset.moveIndex!);
-          const moveType = (move as HTMLElement).dataset.moveType!;
           const selectedPokemon = this.currentTeam[this.selectedPokemonIndex!];
 
           if (selectedPokemon?.moves.some((m: PokemonMove | null) => m?.id === moveId)) {
@@ -536,20 +508,12 @@ export class TeamBuilderView {
           }
 
           if (selectedPokemon) {
-            selectedPokemon.moves[moveIndex] = { 
-              id: moveId,
-              name: moveName,
-              type: moveType,
-              power: 0,
-              accuracy: 0,
-              pp: 0,
-              currentPP: 0,
-              category: '',
-              priority: 0,
-              description: '',
-              target: null,
-              effects: [],
-            }; // Default values that'll be updated when saving
+            const baseMove = moves[moveKey as keyof typeof moves];
+            selectedPokemon.moves[moveIndex] = {
+              ...baseMove,
+              currentPP: baseMove.pp,
+              target: null
+            };
             this.updatePokemonInSlot(this.selectedPokemonIndex!, selectedPokemon);
             // Reset the selector
             this.selectedAttributeType = null;
