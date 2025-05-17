@@ -22,7 +22,6 @@ export interface PokemonMove {
   currentPP: number;
   description: string;
   priority: number;
-  effects: Effect[]; // Effects to implement later
   target: Pokemon | null;
 }
 
@@ -30,14 +29,12 @@ export interface PokemonAbility {
   id: number;
   name: string;
   description: string;
-  effects: Effect[]; // Effects to implement later
 }
 
 export interface PokemonItem {
   id: number;
   name: string;
   description: string;
-  effects: Effect[]; // Effects to implement later
 }
 
 export interface PokemonNature {
@@ -68,9 +65,9 @@ export class Pokemon {
   maxHp: number;
   level: number = 50; // Default level, to implement if in advance
   moves: (PokemonMove | null)[];
-  possibleMoves: PokemonMove[];
+  possibleMoves: string[];
   ability: PokemonAbility;
-  possibleAbilities: PokemonAbility[];
+  possibleAbilities: string[];
   item: PokemonItem | null;
   nature: PokemonNature;
   status: PokemonStatus | null;
@@ -159,4 +156,8 @@ export class PokemonTeam {
   isEmpty(): boolean {
     return !this.members.some(pokemon => pokemon !== null);
   }
+}
+
+export interface PokemonDataTable {
+  [speciesName: string]: Pokemon;
 }
