@@ -12,6 +12,7 @@ export interface PokemonStats {
 }
 
 export interface PokemonMove {
+  moveKey: string;
   id: number;
   name: string;
   type: string;
@@ -56,6 +57,7 @@ export interface PokemonStatus {
 }
 
 export class Pokemon {
+  key: string;
   id: number;
   name: string;
   types: string[];
@@ -67,9 +69,12 @@ export class Pokemon {
   moves: (PokemonMove | null)[];
   possibleMoves: string[];
   ability: PokemonAbility;
+  abilityKey: string;
   possibleAbilities: string[];
   item: PokemonItem | null;
+  itemKey: string;
   nature: PokemonNature;
+  natureKey: string;
   status: PokemonStatus | null;
   statModifiers: Record<keyof PokemonStats, number>;
   isAlive: boolean = true;
@@ -77,6 +82,7 @@ export class Pokemon {
   terrain: /*Terrain |*/ any = null; // Terrain, to implement later
   
   constructor(data: any) {
+    this.key = data.key;
     this.id = data.id;
     this.name = data.name;
     this.types = data.types;
@@ -85,9 +91,12 @@ export class Pokemon {
     this.moves = data.moves || [];
     this.possibleMoves = data.possibleMoves;
     this.ability = data.ability;
+    this.abilityKey = data.abilityKey;
     this.possibleAbilities = data.possibleAbilities;
     this.item = data.item || null;
+    this.itemKey = data.itemKey || null;
     this.nature = data.nature;
+    this.natureKey = data.natureKey;
     this.status = null;
     
     // Initialize stat modifiers to 0

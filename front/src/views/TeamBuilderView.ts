@@ -5,6 +5,7 @@ import { Pokedex } from '../data/pokedex';
 import { items } from '../data/items';
 import { moves } from '../data/moves';
 import { abilities } from '../data/abilities';
+import { natures } from '../data/natures';
 import { createBattlePokemon } from '../utils/PokemonFactory';
 import ApiService from '../services/ApiService';
 
@@ -314,6 +315,7 @@ export class TeamBuilderView {
               ability: { id: 0, name: 'Aucun', description: ''},
               item: null
             });
+          selectedPokemon.key = key;
 
           this.updatePokemonInSlot(this.selectedPokemonIndex, selectedPokemon);
 
@@ -337,7 +339,7 @@ export class TeamBuilderView {
         <div class="selector-item item-element" data-item-id="0">
           <span>Aucun</span>
         </div>
-        ${availableItems.map(([key, item]: [string, any]) => `
+        ${availableItems.map(([key, item]: [string, PokemonItem]) => `
           <div class="selector-item item-element" 
             data-item-key="${key}"
             data-item-id="${item.id}" 
@@ -359,6 +361,7 @@ export class TeamBuilderView {
           const selectedPokemon = this.currentTeam[this.selectedPokemonIndex!];
           if (selectedPokemon) {
             selectedPokemon.item = items[itemKey as keyof typeof items];
+            selectedPokemon.itemKey = itemKey;
             this.updatePokemonInSlot(this.selectedPokemonIndex!, selectedPokemon);
             // Reset the selector
             this.selectedAttributeType = null;
@@ -379,7 +382,7 @@ export class TeamBuilderView {
         <h3>Choisir un talent</h3>
       </div>
       <div class="selector-list">
-        ${filteredAbilities.map(([key, ability]) => `
+        ${filteredAbilities.map(([key, ability]: [string, PokemonAbility]) => `
           <div class="selector-item ability-element" 
             data-ability-key="${key}"
             data-ability-id="${ability.id}" 
@@ -401,6 +404,7 @@ export class TeamBuilderView {
           const selectedPokemon = this.currentTeam[this.selectedPokemonIndex!];
           if (selectedPokemon) {
             selectedPokemon.ability = abilities[abilityKey as keyof typeof abilities]
+            selectedPokemon.abilityKey = abilityKey;
             this.updatePokemonInSlot(this.selectedPokemonIndex!, selectedPokemon);
             // Reset the selector
             this.selectedAttributeType = null;
@@ -412,18 +416,18 @@ export class TeamBuilderView {
   }
 
   private loadNatureSelector(container: HTMLElement): void {
-    const state = Store.getState();
-    const natures = state.natures;
+    const availableNatures = Object.entries(natures);
     
     container.innerHTML = `
       <div class="selector-header">
         <h3>Choisir un talent</h3>
       </div>
       <div class="selector-list">
-        ${natures.map((nature: PokemonNature) => `
-          <div class="selector-item nature-element" data-nature-id="${nature.id}" data-nature-name="${nature.name}"
-              data-atk="${nature.atk}" data-def="${nature.def}" data-spa="${nature.spa}"
-              data-spd="${nature.spd}" data-spe="${nature.spe}">
+        ${availableNatures.map(([key, nature]: [string, PokemonNature]) => `
+          <div class="selector-item nature-element" 
+            data-nature-key="${key}"
+            data-nature-id="${nature.id}" 
+            data-nature-name="${nature.name}"
             <span>${nature.name}</span>
             <small>${nature.description}</small>
           </div>
@@ -437,17 +441,11 @@ export class TeamBuilderView {
     natureElements.forEach(nature => {
       nature.addEventListener('click', () => {
         if (this.selectedPokemonIndex !== null) {
-          const natureId = parseInt((nature as HTMLElement).dataset.natureId!);
-          const natureName = (nature as HTMLElement).dataset.natureName!;
-          const atk = parseFloat((nature as HTMLElement).dataset.atk!);
-          const def = parseFloat((nature as HTMLElement).dataset.def!);
-          const spa = parseFloat((nature as HTMLElement).dataset.spa!);
-          const spd = parseFloat((nature as HTMLElement).dataset.spd!);
-          const spe = parseFloat((nature as HTMLElement).dataset.spe!);
-          console.log("nature : ", nature, "atk :", atk);
+          const natureKey = (nature as HTMLElement).dataset.natureKey!;
           const selectedPokemon = this.currentTeam[this.selectedPokemonIndex!];
           if (selectedPokemon) {
-            selectedPokemon.nature = { id: natureId, name: natureName, description: '', atk: atk, def: def, spa: spa, spd: spd, spe: spe};
+            selectedPokemon.nature = natures[natureKey as keyof typeof natures];
+            selectedPokemon.natureKey = natureKey;
             selectedPokemon.currentStats = selectedPokemon.calculateStats();
             this.updatePokemonInSlot(this.selectedPokemonIndex!, selectedPokemon);
             // Reset the selector
@@ -511,6 +509,7 @@ export class TeamBuilderView {
             const baseMove = moves[moveKey as keyof typeof moves];
             selectedPokemon.moves[moveIndex] = {
               ...baseMove,
+              moveKey: moveKey,
               currentPP: baseMove.pp,
               target: null
             };
@@ -529,7 +528,7 @@ export class TeamBuilderView {
       EventBus.emit('teambuilder:back-to-menu');
     });
 
-    document.getElementById('delete-team')?.addEventListener('click', (e) => {
+    document.getElementById('delete-team')?.addEventListener('click', () => {
       const teamIndex = Store.getState().currentTeamIndex;
       if (teamIndex) {
         ApiService.delete('team/' + teamIndex)
@@ -578,13 +577,13 @@ export class TeamBuilderView {
   
           return {
             slot: index + 1, 
-            pokemon_species_id: pokemon.id,
-            ability_id: pokemon.ability.id,
-            item_id: pokemon.item?.id,
-            nature_id: pokemon.nature.id, // To implement later
+            pokemon_species: pokemon.key,
+            ability: pokemon.abilityKey,
+            item: pokemon.itemKey,
+            nature: pokemon.natureKey, // To implement later
             moves: (pokemon.moves || []).map((move: any, index: number) => ({
               slot: index + 1,
-              move_id: move?.id
+              move: move?.moveKey
             }))
           };
         })
@@ -673,89 +672,39 @@ export class TeamBuilderView {
 
       try {
         const teamData: { id: number; name: string; pokemons: 
-          { id: number; slot: number; pokemon_name: string; moves: PokemonMove[]; first_type: string; second_type: string;
-            hp: number; atk: number; def: number; spe_atk: number; spe_def: number; speed: number;
-            ability: PokemonAbility; item: PokemonItem; nature: PokemonNature; 
-            possibleAbilities: PokemonAbility[]; possibleMoves: PokemonMove[]}[] } =
+          { slot: number; pokemon_name: string; moves: PokemonMove[]; 
+            ability: string; item: string; nature: string; }[] } =
         await ApiService.getTeamPokemonMoveByTeamId(selectedTeamId);
 
         console.log("Selected team data:", teamData);
 
         this.currentTeam = teamData.pokemons.map((apiPokemon) => {
-          return new Pokemon({
-            id: apiPokemon.id,
-            name: apiPokemon.pokemon_name,
-            types: [
-              apiPokemon.first_type,
-              apiPokemon.second_type
-            ],
-            baseStats: {
-              hp: apiPokemon.hp,
-              attack: apiPokemon.atk,
-              defense: apiPokemon.def,
-              specialAttack: apiPokemon.spe_atk,
-              specialDefense: apiPokemon.spe_def,
-              speed: apiPokemon.speed,
-              accuracy: 0,
-              evasion: 0,
-            },
-            moves: apiPokemon.moves.map((move: PokemonMove) => ({
-              id: move.id,
-              name: move.name,
-              type: move.type,
-              power: move.power,
-              accuracy: move.accuracy,
-              pp: move.pp,
-              currentPP: move.pp,
-              category: move.category,
-              priority: move.priority,
-              description: move.description,
-              target: null,
-              effects: []
-            })),
-            possibleMoves: apiPokemon.possibleMoves.map((move: PokemonMove) => ({
-              id: move.id,
-              name: move.name,
-              type: move.type,
-              power: move.power,
-              accuracy: move.accuracy,
-              pp: move.pp,
-              currentPP: move.pp,
-              category: move.category,
-              priority: move.priority,
-              description: move.description,
-              target: null,
-              effects: []
-            })),
-            ability: {
-              id: apiPokemon.ability.id,
-              name: apiPokemon.ability.name,
-              description: apiPokemon.ability.description,
-              effects: [],
-            },
-            possibleAbilities: apiPokemon.possibleAbilities.map((ability: PokemonAbility) => ({
-              id: ability.id,
-              name: ability.name,
-              description: ability.description,
-              effects: [],
-            })),
-            nature: {
-              id: apiPokemon.nature.id,
-              name: apiPokemon.nature.name,
-              description: apiPokemon.nature.description,
-              atk: apiPokemon.nature.atk,
-              def: apiPokemon.nature.def,
-              spa: apiPokemon.nature.spa,
-              spd: apiPokemon.nature.spd,
-              spe: apiPokemon.nature.spe,
-            },
-            item: {
-              id: apiPokemon.item.id,
-              name: apiPokemon.item.name,
-              description: apiPokemon.item.description,
-              effects: [],
+          const apiPokemonNature = natures[apiPokemon.nature as keyof typeof natures];
+          const apiPokemonAbility = abilities[apiPokemon.ability as keyof typeof abilities];
+          const apiPokemonItem = items[apiPokemon.item as keyof typeof items];
+
+          const apiPokemonMoves = apiPokemon.moves.map((move: PokemonMove) => {
+            const baseMove = moves[move.name as keyof typeof moves];
+            return {
+              ...baseMove,
+              moveKey: baseMove.moveKey,
+              currentPP: baseMove.pp,
+              target: null
             }
           });
+
+          const battlePokemon = createBattlePokemon(apiPokemon.pokemon_name as keyof typeof Pokedex, {
+            nature: apiPokemonNature,
+            moves: apiPokemonMoves,
+            ability: apiPokemonAbility,
+            item: apiPokemonItem
+          })
+
+          battlePokemon.abilityKey = apiPokemon.ability;
+          battlePokemon.natureKey = apiPokemon.nature;
+          battlePokemon.itemKey = apiPokemon.item;
+
+          return battlePokemon;
         });
 
         Store.setState({ currentTeam: [...this.currentTeam], currentTeamIndex: selectedTeamId, currentTeamName: teamData.name });

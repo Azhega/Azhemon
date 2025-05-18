@@ -1,5 +1,6 @@
 export const moves = {
   auraSphere: {
+    moveKey: 'auraSphere',
     id: 1,
     name: 'Aurasphère',
     type: 'Combat',
@@ -11,6 +12,7 @@ export const moves = {
     description: 'N\'échoue jamais',
   },
   airSlash: {
+    moveKey: 'airSlash',
     id: 2,
     name: 'Lame d\'air',
     type: 'Vol',
@@ -22,6 +24,7 @@ export const moves = {
     description: ''
   },
   dazzlingGleam: {
+    moveKey: 'dazzlingGleam',
     id: 3,
     name: 'Éclat Magique',
     type: 'Fée',
@@ -33,6 +36,7 @@ export const moves = {
     description: ''
   },
   scald: {
+    moveKey: 'scald',
     id: 4,
     name: 'Ébullition',
     type: 'Eau',
@@ -44,6 +48,7 @@ export const moves = {
     description: 'Peut brûler la cible'
   },
   shadowBall: {
+    moveKey: 'shadowBall',
     id: 5,
     name: 'Ball\'ombre',
     type: 'Spectre',
@@ -55,6 +60,7 @@ export const moves = {
     description: 'Peut baisser la Défense Spéciale de la cible'
   },
   x_scissor: {
+    moveKey: 'x_scissor',
     id: 6,
     name: 'Plaie-Croix',
     type: 'Insecte',
@@ -66,6 +72,7 @@ export const moves = {
     description: ''
   },
   dragonClaw: {
+    moveKey: 'dragonClaw',
     id: 7,
     name: 'Draco-Griffe',
     type: 'Dragon',
@@ -77,6 +84,7 @@ export const moves = {
     description: ''
   },
   thunderbolt: {
+    moveKey: 'thunderbolt',
     id: 8,
     name: 'Tonnerre',
     type: 'Électrik',
@@ -88,6 +96,7 @@ export const moves = {
     description: 'Peut paralyser la cible'
   },
   stoneEdge: {
+    moveKey: 'stoneEdge',
     id: 9,
     name: 'Lame de Roc',
     type: 'Roche',
@@ -99,6 +108,7 @@ export const moves = {
     description: 'Taux de critiques élevé'
   },
   closeCombat: {
+    moveKey: 'closeCombat',
     id: 10,
     name: 'Close Combat',
     type: 'Combat',
@@ -110,6 +120,7 @@ export const moves = {
     description: 'Baisse la Défense et la Défense Spéciale du lanceur'
   },
   crossPoison: {
+    moveKey: 'crossPoison',
     id: 11,
     name: 'Poison-Croix',
     type: 'Poison',
@@ -121,6 +132,7 @@ export const moves = {
     description: 'Taux de critiques élevé, peut empoisonner la cible'
   },
   iceBeam: {
+    moveKey: 'iceBeam',
     id: 12,
     name: 'Laser Glace',
     type: 'Glace',
@@ -132,6 +144,7 @@ export const moves = {
     description: 'Peut geler la cible'
   },
   psychic: {
+    moveKey: 'psychic',
     id: 13,
     name: 'Psyko',
     type: 'Psy',
@@ -143,6 +156,7 @@ export const moves = {
     description: 'Peut baisser la Défense Spéciale de la cible'
   },
   triAttack: {
+    moveKey: 'triAttack',
     id: 14,
     name: 'Triplattaque',
     type: 'Normal',
@@ -154,6 +168,7 @@ export const moves = {
     description: 'Peut paralyser, brûler ou geler la cible'
   },
   flameThrower: {
+    moveKey: 'v',
     id: 15,
     name: 'Lance-Flammes',
     type: 'Feu',
@@ -165,6 +180,7 @@ export const moves = {
     description: 'Peut brûler la cible'
   },
   energyBall: {
+    moveKey: 'energyBall',
     id: 16,
     name: 'Éco-Sphère',
     type: 'Plante',
@@ -176,6 +192,7 @@ export const moves = {
     description: 'Peut baisser la Défense Spéciale de la cible'
   },
   earthquake: {
+    moveKey: 'earthquake',
     id: 17,
     name: 'Séisme',
     type: 'Sol',
@@ -187,6 +204,7 @@ export const moves = {
     description: ''
   },
   nightSlash: {
+    moveKey: 'nightSlash',
     id: 18,
     name: 'Tranche-Nuit',
     type: 'Ténèbres',
@@ -198,6 +216,7 @@ export const moves = {
     description: 'Taux de critiques élevé'
   },
   ironHead: {
+    moveKey: 'ironHead',
     id: 19,
     name: 'Tête de Fer',
     type: 'Acier',
