@@ -40,18 +40,18 @@ class TeamModel extends SqlConnect {
 
     foreach ($data["pokemons"] as $pokemon) {
       $query2 = "
-        INSERT INTO team_pokemon (team_id, slot, pokemon_species_id, ability_id, item_id, nature_id)
-        VALUES (:team_id, :slot, :pokemon_species_id, :ability_id, :item_id, :nature_id)
+        INSERT INTO team_pokemon (team_id, slot, pokemon_species, ability, item, nature)
+        VALUES (:team_id, :slot, :pokemon_species, :ability, :item, :nature)
       ";
 
       $req = $this->db->prepare($query2);
       $req->execute([
         "team_id" => $teamId,
         "slot" => $pokemon["slot"],
-        "pokemon_species_id" => $pokemon["pokemon_species_id"],
-        "ability_id" => $pokemon["ability_id"],
-        "item_id" => $pokemon["item_id"],
-        "nature_id" => $pokemon["nature_id"]
+        "pokemon_species" => $pokemon["pokemon_species"],
+        "ability" => $pokemon["ability"],
+        "item" => $pokemon["item"],
+        "nature" => $pokemon["nature"]
       ]);
 
       $teamPokemonId = $this->db->lastInsertId();
@@ -59,14 +59,14 @@ class TeamModel extends SqlConnect {
       foreach ($pokemon["moves"] as $move) {
         if ($move) {
           $query3 = "
-            INSERT INTO team_pokemon_move (team_pokemon_id, move_id, slot)
-            VALUES (:team_pokemon_id, :move_id, :slot)
+            INSERT INTO team_pokemon_move (team_pokemon_id, move, slot)
+            VALUES (:team_pokemon_id, :move, :slot)
           ";
 
           $req = $this->db->prepare($query3);
           $req->execute([
             "team_pokemon_id" => $teamPokemonId,
-            "move_id" => $move["move_id"],
+            "move" => $move["move"],
             "slot" => $move["slot"]
           ]);
         }
@@ -174,18 +174,18 @@ class TeamModel extends SqlConnect {
     // Re-insert updated team_pokemon entries
     foreach ($data["pokemons"] as $pokemon) {
       $query3 = "
-      INSERT INTO team_pokemon (team_id, slot, pokemon_species_id, ability_id, item_id, nature_id)
-      VALUES (:team_id, :slot, :pokemon_species_id, :ability_id, :item_id, :nature_id)
+      INSERT INTO team_pokemon (team_id, slot, pokemon_species, ability, item, nature)
+      VALUES (:team_id, :slot, :pokemon_species, :ability, :item, :nature)
       ";
 
       $req = $this->db->prepare($query3);
       $req->execute([
       "team_id" => $id,
       "slot" => $pokemon["slot"],
-      "pokemon_species_id" => $pokemon["pokemon_species_id"],
-      "ability_id" => $pokemon["ability_id"],
-      "item_id" => $pokemon["item_id"],
-      "nature_id" => $pokemon["nature_id"]
+      "pokemon_species" => $pokemon["pokemon_species"],
+      "ability" => $pokemon["ability"],
+      "item" => $pokemon["item"],
+      "nature" => $pokemon["nature"]
       ]);
 
       $teamPokemonId = $this->db->lastInsertId();
@@ -197,16 +197,16 @@ class TeamModel extends SqlConnect {
 
       // Re-insert updated moves for the team_pokemon
       foreach ($pokemon["moves"] as $move) {
-        if ($move["move_id"] !== null) {
+        if ($move["move"] !== null) {
           $query5 = "
-            INSERT INTO team_pokemon_move (team_pokemon_id, move_id, slot)
-            VALUES (:team_pokemon_id, :move_id, :slot)
+            INSERT INTO team_pokemon_move (team_pokemon_id, move, slot)
+            VALUES (:team_pokemon_id, :move, :slot)
           ";
 
           $req = $this->db->prepare($query5);
           $req->execute([
             "team_pokemon_id" => $teamPokemonId,
-            "move_id" => $move["move_id"],
+            "move" => $move["move"],
             "slot" => $move["slot"]
           ]);
         }
