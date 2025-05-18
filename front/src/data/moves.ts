@@ -6,7 +6,7 @@ export const moves = {
     type: 'Combat',
     category: 'Spécial',
     power: 80,
-    accuracy: -1,
+    accuracy: 100,
     pp: 20,
     priority: 0,
     description: 'N\'échoue jamais',

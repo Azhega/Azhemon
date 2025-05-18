@@ -18,7 +18,6 @@ export class Store {
       currentTeam: [],
       currentTeamIndex: null,
       currentTeamName: '',
-      pokemonSpecies: []
     };
   }
   

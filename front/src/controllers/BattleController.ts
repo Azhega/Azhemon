@@ -4,6 +4,8 @@ import { BattleView } from '../views/BattleView';
 import { Pokemon, PokemonMove } from '../models/PokemonModel';
 import { TurnManager } from './TurnManager.ts';
 import { BattleAction, BattleState, BattleTurn } from '../models/BattleModel.ts';
+import { Pokedex } from '../data/pokedex.ts';
+import { createBattlePokemon } from '../utils/PokemonFactory.ts';
 
 export class BattleController {
   private battleView: BattleView | null;
@@ -275,45 +277,28 @@ export class BattleController {
   
   private generateCpuTeam(size: number): Pokemon[] {
     // WIP CPU team
-    const state = Store.getState();
-    const pokemonSpecies = state.pokemonSpecies || [];
+    const pokemonSpecies = Pokedex;
     const cpuTeam: Pokemon[] = [];
     
     // Same team size as player
     for (let i = 0; i < size; i++) {
-      const randomIndex = Math.floor(Math.random() * pokemonSpecies.length);
-      const species = pokemonSpecies[randomIndex];
+      const randomIndex = Math.floor(Math.random() * Object.keys(pokemonSpecies).length);
+      const randomKey = Object.keys(pokemonSpecies)[randomIndex];
+      const species = pokemonSpecies[randomKey as keyof typeof Pokedex];
       
       // Create Pokemon object
-      const cpuPokemon = new Pokemon({
-        id: species.id,
-        name: species.name,
-        types: [species.first_type, species.second_type],
-        baseStats: {
-          hp: species.hp,
-          attack: species.atk,
-          defense: species.def,
-          specialAttack: species.spe_atk,
-          specialDefense: species.spe_def,
-          speed: species.speed,
-          accuracy: 100,
-          evasion: 100
-        },
-        moves: this.generateRandomMoves(species),
-        ability: this.generateRandomAbility(species),
-        item: null,
-        status: null,
-        nature: { 
-          id: 2, 
-          name: 'Bizarre', 
-          description: 'Aucun changement',
-          atk: 1,
-          def: 1,
-          spa: 1,
-          spd: 1,
-          spe: 1
-        }
-      });
+      const cpuPokemon = createBattlePokemon(
+        randomKey as keyof typeof Pokedex, 
+        {
+          nature: { 
+            id: 2, name: 'Bizarre', description: 'Nature neutre',
+            atk: 1.0, def: 1.0, spa: 1.0, spd: 1.0, spe: 1.0
+          },
+          moves: this.generateRandomMoves(),
+          ability: { id: 0, name: 'Aucun', description: ''},
+          item: null
+        });
+      cpuPokemon.key = randomKey;
       
       cpuTeam.push(cpuPokemon);
     }
@@ -321,7 +306,7 @@ export class BattleController {
     return cpuTeam;
   }
   
-  private generateRandomMoves(species: any): PokemonMove[] {
+  private generateRandomMoves(): PokemonMove[] {
     // WIP Random moves
     const state = Store.getState();
     const cpuMoves = state.currentTeam[0].moves.map((move: PokemonMove) => ({
@@ -348,7 +333,16 @@ export class BattleController {
     const state = Store.getState();
     const battleState = state.battle;
     const cpuPokemon = battleState.activePokemon.cpu;
-    console.log('CPU Pokemon move pp : ', cpuPokemon.moves[0].currentPP);
+
+    if (cpuPokemon.moves.length === 0) {
+      console.error('CPU Pokemon has no moves available');
+      return {
+        type: 'struggle',
+        user: 'cpu',
+        target: 'player',
+        data: {}
+      };
+    }
 
     if (cpuPokemon.moves.every((move: PokemonMove) => move.currentPP <= 0)) {
       console.log('CPU Pokemon move pp : ', cpuPokemon.moves[0].currentPP);
@@ -363,16 +357,6 @@ export class BattleController {
       };
     }
 
-    if (cpuPokemon.moves.length === 0) {
-      console.error('CPU Pokemon has no moves');
-      return {
-        type: 'struggle',
-        user: 'cpu',
-        target: 'player',
-        data: {}
-      };
-    }
-    
     const randomMoveIndex = Math.floor(Math.random() * cpuPokemon.moves.length);
     const randomMove = cpuPokemon.moves[randomMoveIndex];
     cpuPokemon.moves[randomMoveIndex].currentPP -= 1;
