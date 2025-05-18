@@ -284,7 +284,6 @@ export class BattleController {
     for (let i = 0; i < size; i++) {
       const randomIndex = Math.floor(Math.random() * Object.keys(pokemonSpecies).length);
       const randomKey = Object.keys(pokemonSpecies)[randomIndex];
-      const species = pokemonSpecies[randomKey as keyof typeof Pokedex];
       
       // Create Pokemon object
       const cpuPokemon = createBattlePokemon(
