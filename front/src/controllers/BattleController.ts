@@ -6,18 +6,19 @@ import { TurnManager } from './TurnManager.ts';
 import { BattleAction, BattleState, BattleTurn } from '../models/BattleModel.ts';
 import { Pokedex } from '../data/pokedex.ts';
 import { createBattlePokemon } from '../utils/PokemonFactory.ts';
+import EffectManager from './EffectManager.ts';
 
 export class BattleController {
   private battleView: BattleView | null;
   private turnManager: TurnManager | null;
-  
+
   constructor() {
     this.battleView = new BattleView();
     this.turnManager = new TurnManager();
-    
+
     this.registerEventListeners();
   }
-  
+
   initialize(): void {
     console.log('Initializing battle controller...');
     const state = Store.getState();
@@ -102,8 +103,18 @@ export class BattleController {
       }
     });
     
-    EventBus.emit('battle:turn-start', 1);
-    
+    EventBus.emit('battle:turn-start', 1); // console.log('Turn started:', 1);
+
+    // Register abilities and items effects for both Pokemon
+    EffectManager.unregisterAllEffects();
+    EffectManager.registerPokemonEffects(battleState.activePokemon.player);
+    EffectManager.registerPokemonEffects(battleState.activePokemon.cpu);
+
+    // Run onTurnStart effects
+    EffectManager.applyTurnStartEffects(battleState);
+    // Run onSwitch effects (as the battle kinda starts with a switch)
+    EffectManager.applyOnSwitchEffects(battleState);
+
     this.battleView?.showActionSelection();
   }
   
@@ -111,7 +122,10 @@ export class BattleController {
     const state = Store.getState();
     const battleState = state.battle;
     const activePokemon = battleState.activePokemon.player;
-    
+
+    // Run onPreMove effects
+    EffectManager.applyPreMoveEffects(battleState);
+
     if (moveIndex >= activePokemon.moves.length) {
       console.error('Invalid move index');
       return;
@@ -298,6 +312,8 @@ export class BattleController {
           item: null
         });
       cpuPokemon.key = randomKey;
+      cpuPokemon.abilityKey = "sniper"; // default abilitykey
+      cpuPokemon.itemKey = "leftovers"; // default itemkey
       
       cpuTeam.push(cpuPokemon);
     }
@@ -426,6 +442,9 @@ export class BattleController {
     
     // Prepare for next turn
     EventBus.emit('battle:turn-start', battleState.turn + 1);
+
+    // Run onTurnStart effects
+    EffectManager.applyTurnStartEffects(battleState);
     
     this.battleView?.showActionSelection();
   }

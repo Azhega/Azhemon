@@ -15,11 +15,21 @@ type EffectHook =
 type EffectFunction = (...args: any[]) => any;
 
 export class EffectManager {
+  private static instance: EffectManager;
   // Map each hooks to an array of effect functions
   private hooks: Map<EffectHook, EffectFunction[]> = new Map();
   private moveHooks: Map<EffectHook, EffectFunction[]> = new Map();
+
+  private constructor() {}
+
+  public static getInstance(): EffectManager {
+    if (!EffectManager.instance) {
+      EffectManager.instance = new EffectManager();
+    }
+    return EffectManager.instance;
+  }
   
-  private registerPokemonEffects(pokemon: Pokemon): void {
+  public registerPokemonEffects(pokemon: Pokemon): void {
     // Register ability effects
     const abilityObj = abilities[pokemon.abilityKey as keyof typeof abilities];
     if (abilityObj) {
@@ -28,8 +38,10 @@ export class EffectManager {
         if (typeof value === 'function') {
           const hook = key as EffectHook;
           if (!this.hooks.has(hook)) {
+            console.log(`Registering ability hook : ${hook}`);
             this.hooks.set(hook, []);
           }
+          console.log(`pushing ability hook ${abilityObj.name}: ${hook}`);
           this.hooks.get(hook)!.push((value as Function).bind(abilityObj));
         }
       }
@@ -43,8 +55,10 @@ export class EffectManager {
         if (typeof value === 'function') {
           const hook = key as EffectHook;
           if (!this.hooks.has(hook)) {
+            console.log(`Registering item hook ${itemObj.name}: ${hook}`);
             this.hooks.set(hook, []);
           }
+          console.log(`pushing item hook ${itemObj.name}: ${hook}`);
           this.hooks.get(hook)!.push((value as Function).bind(itemObj));
         }
       }
@@ -59,8 +73,10 @@ export class EffectManager {
         if (typeof value === 'function') {
           const hook = key as EffectHook;
           if (!this.hooks.has(hook)) {
+            console.log(`Registering move hook ${moveObj.name}: ${hook}`);
             this.hooks.set(hook, []);
           }
+          console.log(`pushing move hook ${moveObj.name}: ${hook}`);
           this.hooks.get(hook)!.push((value as Function).bind(moveObj));
         }
       }
@@ -76,12 +92,12 @@ export class EffectManager {
     this.moveHooks.clear();
   }
 
-  public runHook(hook: EffectHook, ...args: any[]): any[] {
+  public runHook(hook: EffectHook, context: any): any[] {
     const results: any[] = [];
     const functions = this.hooks.get(hook) || [];
     for (const fn of functions) {
       try {
-        results.push(fn(...args));
+        results.push(fn(context));
       } catch (error) {
         console.error(`Error occurred while running hook "${hook}":`, error);
       } 
@@ -89,10 +105,13 @@ export class EffectManager {
     return results;
   }
 
-  public chainHook<T>(hook: EffectHook, initialValue: T, ...args: any[]): T {
+  public chainHook<T>(hook: EffectHook, initialValue: T, context: any): T {
     let value = initialValue;
     const functions = this.hooks.get(hook) || [];
+    console.log(`Running chainHook for ${hook} with initial value:`, initialValue);
+    console.log(`Functions for ${hook}:`, functions);
     for (const fn of functions) {
+      console.log(`Running function:`, fn);
       try {
         if (typeof fn !== 'function') {
           throw new Error(`Hook "${hook}" is not a function`);
@@ -100,7 +119,9 @@ export class EffectManager {
       } catch (error) {
         console.error(`Error occurred while running hook "${hook}":`, error);
       }
-      const result = fn(value, ...args);
+      const result = fn(value, context);
+      console.log('context:', context);
+      console.log(`Result of function:`, result);
       if (result !== undefined) {
         value = result;
       }
@@ -108,25 +129,24 @@ export class EffectManager {
     return value;
   }
 
-  public applyTurnStartEffects(...args: any[]) {
-    this.runHook('onTurnStart', ...args);
+  public applyTurnStartEffects(context: any) {
+    this.runHook('onTurnStart', context);
   }
-  public applyPreMoveEffects(...args: any[]) {
-    this.runHook('onPreMove', ...args);
+  public applyPreMoveEffects(context: any) {
+    this.runHook('onPreMove', context);
   }
-  public applyDamageModifierEffects(damage: number, ...args: any[]): number {
-    return this.chainHook('onDamageModifier', damage, ...args);
+  public applyDamageModifierEffects(damage:number, context: any): number {
+    return this.chainHook('onDamageModifier', damage, context);
   }
-  public applyOnDamageTakenEffects(...args: any[]) {
-    this.runHook('onDamageTaken', ...args);
+  public applyPostMoveEffects(context: any) {
+    this.runHook('onPostMove', context);
   }
-  public applyPostMoveEffects(...args: any[]) {
-    this.runHook('onPostMove', ...args);
+  public applyTurnEndEffects(context: any) {
+    this.runHook('onTurnEnd', context);
   }
-  public applyTurnEndEffects(...args: any[]) {
-    this.runHook('onTurnEnd', ...args);
-  }
-  public applyOnSwitchEffects(...args: any[]) {
-    this.runHook('onSwitch', ...args);
+  public applyOnSwitchEffects(context: any) {
+    this.runHook('onSwitch', context);
   }
 }
+
+export default EffectManager.getInstance();
