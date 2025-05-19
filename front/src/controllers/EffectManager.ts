@@ -17,6 +17,7 @@ type EffectFunction = (...args: any[]) => any;
 export class EffectManager {
   // Map each hooks to an array of effect functions
   private hooks: Map<EffectHook, EffectFunction[]> = new Map();
+  private moveHooks: Map<EffectHook, EffectFunction[]> = new Map();
   
   private registerPokemonEffects(pokemon: Pokemon): void {
     // Register ability effects
@@ -48,30 +49,31 @@ export class EffectManager {
         }
       }
     }
-
-    // Register moves effects
-    pokemon.moves.map((move) => {
-      if (move) {
-        const moveObj = moves[move.moveKey as keyof typeof moves];
-        if (moveObj) {
-          for (const key of Object.keys(moveObj)) {
-            const value = moveObj[key as keyof typeof moveObj];
-            if (typeof value === 'function') {
-              const hook = key as EffectHook;
-              if (!this.hooks.has(hook)) {
-                this.hooks.set(hook, []);
-              }
-              this.hooks.get(hook)!.push((value as Function).bind(moveObj));
-            }
+  }
+  
+  public registerMoveEffects(moveKey: string) {
+    const moveObj = moves[moveKey as keyof typeof moves];
+    if (moveObj) {
+      for (const key of Object.keys(moveObj)) {
+        const value = moveObj[key as keyof typeof moveObj];
+        if (typeof value === 'function') {
+          const hook = key as EffectHook;
+          if (!this.hooks.has(hook)) {
+            this.hooks.set(hook, []);
           }
+          this.hooks.get(hook)!.push((value as Function).bind(moveObj));
         }
       }
-    });
-  }
+    }
+  };
 
   // To clear effects when a Pokemon leaves the battle
   public unregisterAllEffects() {
     this.hooks.clear();
+  }
+
+  public unregisterMoveEffects() {
+    this.moveHooks.clear();
   }
 
   public runHook(hook: EffectHook, ...args: any[]): any[] {
