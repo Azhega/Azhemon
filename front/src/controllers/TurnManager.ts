@@ -3,6 +3,7 @@ import { Pokemon } from '../models/PokemonModel';
 import { BattleEngine } from './BattleEngine';
 import EventBus from '../utils/EventBus';
 import Store from '../utils/Store';
+import EffectManager from './EffectManager';
 
 export class TurnManager {
   private battleEngine: BattleEngine;
@@ -129,8 +130,8 @@ export class TurnManager {
         }
         console.log('Battle is not over after second action');
 
-        // End of turn effects
-        this.applyEndTurnEffects();
+        // Run onTurnEnd effects
+        EffectManager.applyTurnEndEffects(battleState);
 
         if (!firstActorPokemon.isAlive) {
           console.log('First Pokemon is KO');
@@ -248,6 +249,8 @@ export class TurnManager {
     });
     
     setTimeout(() => {
+      EffectManager.applyPostMoveEffects(battleState);
+
       // Display any stat changes
       if (moveResult.statChanges && moveResult.statChanges.length > 0) {
         for (const statChange of moveResult.statChanges) {
@@ -339,6 +342,9 @@ export class TurnManager {
     // Update state
     Store.setState({ battle: updatedBattleState });
     
+    // Run onSwitch effects
+    EffectManager.applyOnSwitchEffects(battleState);
+
     // Timer before continuing
     setTimeout(callback, 1000);
   }
@@ -346,6 +352,7 @@ export class TurnManager {
   private executeStruggle(isPlayer: boolean, actor: Pokemon, target: Pokemon, callback: () => void): void {
     // "Lutte" used when no pp left on other moves"
     const struggleMove = {
+      moveKey: 'struggle',
       id: 0,
       name: 'Lutte',
       type: 'Normal',
@@ -356,7 +363,6 @@ export class TurnManager {
       currentPP: 1,
       priority: 0,
       target: null,
-      effects: [],
       description: 'Utilisé quand aucune autre attaque n\'est disponible. Inflige des dégâts à l\'utilisateur.'
     };
     
@@ -546,6 +552,9 @@ export class TurnManager {
             log: [...battleState.log, switchMessage],
           },
         });
+
+        // Run onSwitch effects
+        EffectManager.applyOnSwitchEffects(battleState);
 
         // Continue execution
         callback();

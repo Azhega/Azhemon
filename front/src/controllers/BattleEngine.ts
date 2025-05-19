@@ -1,6 +1,7 @@
 import { Pokemon, PokemonMove } from '../models/PokemonModel';
 import { MoveResult, BattleState, WeatherType } from '../models/BattleModel';
 import Store from '../utils/Store';
+import EffectManager from './EffectManager';
 
 const TYPE_CHART: Record<string, Record<string, number>> = {
   Normal: {
@@ -240,9 +241,23 @@ export class BattleEngine {
     const baseDamage = ((((2 * attacker.level) / 5 + 2) * move.power * (attackStat / defenseStat)) / 50) + 2;
     
     // Final Damage
-    const finalDamage = Math.floor(baseDamage * stab * effectiveness * critMod * randomMod);
+    let finalDamage = Math.floor(baseDamage * stab * effectiveness * critMod * randomMod);
     console.log('Base Damage:', baseDamage, 'Final Damage:', finalDamage, 'CriticalMod:', critMod, 'Effectiveness:', effectiveness, 'STAB:', stab, 'RandomMod:', randomMod);
-    
+
+    const context = {
+      damage: finalDamage,
+      move: move,
+      moveType: move.type,
+      attacker: attacker,
+      defender: defender,
+      effectiveness: effectiveness,
+      critical: critical
+    }
+
+    // Run onDamageModifier effects
+    finalDamage = EffectManager.applyDamageModifierEffects(finalDamage, context);
+    console.log('Final Damage after hooks:', finalDamage);
+
     return {
       damage: finalDamage,
       effectiveness: effectiveness,
@@ -320,7 +335,7 @@ export class BattleEngine {
     }
 
     // Handle effects WIP (hardest part)
-    const statChanges = this.applyMoveEffects(move, attacker, defender, battleState);
+    // const statChanges = this.applyMoveEffects(move, attacker, defender, battleState);
     
     // Result message
     let message = `${attacker.name} utilise ${move.name}`;
@@ -342,57 +357,57 @@ export class BattleEngine {
       damage: damageResult.damage,
       criticalHit: damageResult.critical,
       effectiveness: damageResult.effectiveness,
-      statChanges: statChanges,
+      // statChanges: statChanges,
       message: message
     };
   }
 
 // Apply effects WIP (hardest part)
-  applyMoveEffects(move: PokemonMove, attacker: Pokemon, defender: Pokemon, battleState: BattleState): any[] {
-    const statChanges = [];
+  // applyMoveEffects(move: PokemonMove, attacker: Pokemon, defender: Pokemon, battleState: BattleState): any[] {
+  //   const statChanges = [];
     
-    // If move has effects
-    if (move.effects) {
-      // For each effect (Because move can have multiple effects)
-      for (const effect of move.effects) {
-        // Chance of effect activation
-        if (Math.random() * 100 <= (effect.chance || 100)) {
+  //   // If move has effects
+  //   if (move.effects) {
+  //     // For each effect (Because move can have multiple effects)
+  //     for (const effect of move.effects) {
+  //       // Chance of effect activation
+  //       if (Math.random() * 100 <= (effect.chance || 100)) {
           
-          // Status application
-          if (effect.status) {
-            // Check if the defender already has a status
-            if (!defender.status) {
-              defender.status = effect.status;
-              statChanges.push({
-                type: 'status',
-                status: effect.status,
-                target: defender === battleState.activePokemon.player ? 'player' : 'cpu'
-              });
-            }
-          }
+  //         // Status application
+  //         if (effect.status) {
+  //           // Check if the defender already has a status
+  //           if (!defender.status) {
+  //             defender.status = effect.status;
+  //             statChanges.push({
+  //               type: 'status',
+  //               status: effect.status,
+  //               target: defender === battleState.activePokemon.player ? 'player' : 'cpu'
+  //             });
+  //           }
+  //         }
           
-          // Stat changes
-          if (effect.statChanges) {
-            for (const statChange of effect.statChanges) {
-              const targetPokemon = statChange.target === 'self' ? attacker : defender;
-              const statKey = statChange.stat as keyof typeof targetPokemon.statModifiers;
+  //         // Stat changes
+  //         if (effect.statChanges) {
+  //           for (const statChange of effect.statChanges) {
+  //             const targetPokemon = statChange.target === 'self' ? attacker : defender;
+  //             const statKey = statChange.stat as keyof typeof targetPokemon.statModifiers;
               
-              // Limiting stat changes to -6 to +6
-              targetPokemon.statModifiers[statKey] = Math.max(-6, Math.min(6, targetPokemon.statModifiers[statKey] + statChange.value));
+  //             // Limiting stat changes to -6 to +6
+  //             targetPokemon.statModifiers[statKey] = Math.max(-6, Math.min(6, targetPokemon.statModifiers[statKey] + statChange.value));
               
-              statChanges.push({
-                stat: statChange.stat,
-                change: statChange.value,
-                target: targetPokemon === battleState.activePokemon.player ? 'player' : 'cpu'
-              });
-            }
-          }
-        }
-      }
-    }
+  //             statChanges.push({
+  //               stat: statChange.stat,
+  //               change: statChange.value,
+  //               target: targetPokemon === battleState.activePokemon.player ? 'player' : 'cpu'
+  //             });
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
     
-    return statChanges;
-  }
+  //   return statChanges;
+  // }
   
   // Apply status effects before action
   applyStatusEffectsPreAction(pokemon: Pokemon): {canAct: boolean, message: string} {
