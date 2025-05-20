@@ -58,8 +58,6 @@ export class BattleController {
   }
 
   destroy(): void {
-    console.log('Destroying BattleController...');
-
     // Remove event listeners
     EventBus.off('battle:start', this.startBattle);
     EventBus.off('battle:select-move', this.selectMove);
@@ -73,8 +71,6 @@ export class BattleController {
     }
 
     this.turnManager = null;
-
-    console.log('BattleController destroyed.');
   }
   
   private registerEventListeners(): void {
@@ -172,7 +168,6 @@ export class BattleController {
       const state = Store.getState();
       const battleState = state.battle;
       const cpuPokemon = battleState.activePokemon.cpu;
-      console.log('CPU Pokemon move pp before generating action : ', cpuPokemon.moves[0].currentPP);
       const cpuAction = this.generateCpuAction();
       
       // Create turn
@@ -312,7 +307,7 @@ export class BattleController {
           item: null
         });
       cpuPokemon.key = randomKey;
-      cpuPokemon.abilityKey = "sniper"; // default abilitykey
+      cpuPokemon.abilityKey = "sereneGrace"; // default abilitykey
       cpuPokemon.itemKey = "leftovers"; // default itemkey
       
       cpuTeam.push(cpuPokemon);
@@ -329,7 +324,6 @@ export class BattleController {
       currentPP: move.pp
     }));
     console.log('CPU Pokemon Moves : ', cpuMoves);
-    console.log('CPU Pokemon Moves currentPP : ', cpuMoves[0].currentPP);
     return cpuMoves;
   }
   
@@ -360,8 +354,6 @@ export class BattleController {
     }
 
     if (cpuPokemon.moves.every((move: PokemonMove) => move.currentPP <= 0)) {
-      console.log('CPU Pokemon move pp : ', cpuPokemon.moves[0].currentPP);
-      console.log('CPU Moves every :', cpuPokemon.moves.every((move: PokemonMove) => move.currentPP <= 0));
       console.log('CPU Pokemon has no moves left');
       // Struggle if no moves available
       return {

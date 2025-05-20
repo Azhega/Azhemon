@@ -565,6 +565,10 @@ export class TeamBuilderView {
           alert('Un Pokémon doit avoir un talent !');
           return;
         }
+        if (pokemon.nature.id === 0) {
+          alert('Un Pokémon doit avoir une nature !');
+          return; 
+        }
         if (pokemon.moves.length === 0) {
           alert('Un Pokémon doit avoir au moins une attaque !');
           return; 

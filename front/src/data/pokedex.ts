@@ -120,6 +120,7 @@ export const Pokedex = {
       'thunderbolt',
       'closeCombat',
       'flameThrower',
+      'earthquake'
     ]
   },
   tyranitar: {

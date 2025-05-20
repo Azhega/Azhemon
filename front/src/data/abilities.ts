@@ -11,10 +11,9 @@ export const abilities = {
     name: 'Lavabo',
     description: 'Le Pokémon absorbe les attaques de type Eau et les neutralise tout en augmentant son Attaque Spéciale',
     onDamageModifier: (damage:number, context: any): number => {
-      console.log('context', context);
       if (context.defender.abilityKey === 'stormDrain' && context.moveType === 'Eau') {
         console.log('Defender has Storm Drain ! Absorbing water attack !');
-        return 0; // Absorbs the damage
+        return 0;
       }
       return context.damage;
     }
@@ -23,9 +22,10 @@ export const abilities = {
     id: 3,
     name: 'Torche',
     description: 'Le Pokémon absorbe les capacités de type Feu et augmente la puissance des siennes',
-    onDamageModifier: (context: any): number => {
-      if (context.type === 'Fire') {
-        return 0; // Absorbs the damage
+    onDamageModifier: (damage: number, context: any): number => {
+      if (context.defender.abilityKey === 'flashFire' && context.moveType === 'Feu') {
+        console.log('Defender has Flash Fire ! Absorbing fire attack !');
+        return 0;
       }
       return context.damage;
     }
@@ -34,9 +34,11 @@ export const abilities = {
     id: 4,
     name: 'Essaim',
     description: 'Augmente la puissance des attaques Insecte de 50% lorsque les PV du Pokémon sont inférieurs à 1/3 des PV max',
-    onDamageModifier: (context: any): number => {
-      if (context.type === 'Bug' && context.hp < context.maxHp / 3) {
-        return context.damage * 1.5; // Increases damage by 50%
+    onDamageModifier: (damage: number, context: any): number => {
+      if (context.attacker.abilityKey === 'swarm' && context.moveType === 'Insecte' 
+        && context.attacker.currentHp < context.attacker.maxHp / 3) {
+        console.log('Attacker has Swarm ! Increasing Bug move power !');
+        return Math.floor(context.damage * 1.5);
       }
       return context.damage;
     }
@@ -45,7 +47,7 @@ export const abilities = {
     id: 5,
     name: 'Brise Moule',
     description: 'Le Pokémon ignore les talents adverses qui auraient un effet sur ses capacités',
-    onDamageModifier: (context: any): number => {
+    onDamageModifier: (damage:number, context: any): number => {
       // Logic to ignore target's ability effects
       return context.damage;
     }
@@ -54,9 +56,10 @@ export const abilities = {
     id: 6,
     name: 'Lévitation',
     description: 'Le Pokémon flotte, ce qui l\'immunise contre les capacités de type Sol',
-    onDamageModifier: (context: any): number => {
-      if (context.type === 'Ground') {
-        return 0; // Immune to Ground-type moves
+    onDamageModifier: (damage: number, context: any): number => {
+      if (context.defender.abilityKey === 'levitate' && context.moveType === 'Sol') {
+        console.log('Defender has Levitate ! Immunity to Ground moves !');
+        return 0;
       }
       return context.damage;
     }
@@ -66,7 +69,7 @@ export const abilities = {
     name: 'Sable Volant',
     description: 'Le Pokémon invoque une tempête de sable quand il entre au combat',
     onTurnStart: (context: any): string => {
-      return 'Sandstorm'; // Sets the weather to Sandstorm
+      return 'Sandstorm'; // Weather to implement later
     }
   },
   poisonHeal: {
@@ -84,9 +87,10 @@ export const abilities = {
     id: 9,
     name: 'Sniper',
     description: 'Augmente la puissance des coups critiques de 50%',
-    onDamageModifier: (context: any): number => {
-      if (context.isCriticalHit) {
-        return context.damage * 1.5; // Increases critical hit damage by 50%
+    onDamageModifier: (damage: number, context: any): number => {
+      if (context.attacker.abilityKey === 'sniper' && context.critical) {
+        console.log('Attacker has Sniper ! Increasing critical hit damage !');
+        return context.damage * 1.5;
       }
       return context.damage;
     }
@@ -106,9 +110,10 @@ export const abilities = {
     id: 11,
     name: 'Absorbe-Eau',
     description: 'Si le Pokémon est touché par une capacité Eau, il ne subit aucun dégât et regagne des PV à la place',
-    onDamageModifier: (context: any): number => {
-      if (context.type === 'Water') {
-        context.defender.currentHp = Math.min(context.defender.maxHp, context.defender.currentHp + Math.floor(context.defender.maxHp / 4));
+    onDamageModifier: (damage: number, context: any): number => {
+      if (context.defender.abilityKey === 'waterAbsorb' && context.moveType === 'Eau') {
+        console.log('Defender has Water Absorb ! Absorbing water attack and healing !');
+        context.defender.currentHp = Math.min(context.defender.maxHp, context.defender.currentHp + Math.floor(context.defender.maxHp / 5));
         return 0; // Absorbs the damage
       }
       return context.damage;
@@ -126,9 +131,10 @@ export const abilities = {
     id: 13,
     name: 'Adaptabilité',
     description: 'Quand le Pokémon utilise une capacité du même type que lui, le bonus de puissance qu\'elle reçoit est encore plus important que normalement',
-    onDamageModifier: (context: any): number => {
-      if (context.sameType) {
-        return context.damage * 1.5; // Increases damage when using STAB moves
+    onDamageModifier: (damage: number, context: any): number => {
+      if (context.attacker.abilityKey === 'adaptability' && context.attacker.types.includes(context.moveType)) {
+        console.log('Attacker has Adaptability ! Increasing STAB move power !');
+        return Math.floor((context.damage / 1.5) * 2); // Increases damage when using STAB moves
       }
       return context.damage;
     }
