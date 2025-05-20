@@ -20,7 +20,6 @@ export class BattleView {
   
   initialize(): void {
     this.isInitialized = true;
-    console.log('Initializing battle view...');
     
     this.createBattleContainer();
     
@@ -35,8 +34,6 @@ export class BattleView {
   }
 
   destroy(): void {
-    console.log('Destroying BattleView...');
-
     // Remove event listeners
     EventBus.off('battle:turn-start', this.onTurnStart);
     EventBus.off('battle:show-pokemon-selection', this.showTeamSelection);
@@ -60,8 +57,6 @@ export class BattleView {
     this.actionMenu = null;
     this.moveMenu = null;
     this.teamMenu = null;
-
-    console.log('BattleView destroyed.');
   }
   
   private registerEventListeners(): void {
@@ -99,7 +94,6 @@ export class BattleView {
   }
   
   private createBattleField(): void {
-    console.log('Creating battle field...');
     if (!this.battleContainer) {
       console.error('Battle container not found');
       return;
@@ -122,7 +116,6 @@ export class BattleView {
   }
 
   private createBattleLog(): void {
-    console.log('Creating battle log...');
     if (!this.battleContainer) { 
       console.error('Battle container not found');
       return;
@@ -134,7 +127,6 @@ export class BattleView {
   }
   
   private createActionMenu(): void {
-    console.log('Creating action menu...');
     if (!this.battleContainer) {
       console.error('Battle container not found');
       return;
@@ -164,7 +156,6 @@ export class BattleView {
       return;
     }
 
-    console.log('Rendering battle view...');
     const state = Store.getState();
     const battleState = state.battle;
     
@@ -178,10 +169,6 @@ export class BattleView {
   }
 
   private renderPokemon(battleState: BattleState): void {
-    console.log('Rendering Pokemon...');
-    console.log('Battle state:', battleState);
-    console.log('Player field:', this.playerField);
-    console.log('CPU field:', this.cpuField);
     if (!this.playerField || !this.cpuField) {
       console.error('Player or CPU field not found');
       return;
@@ -254,9 +241,6 @@ export class BattleView {
   }
   
   private renderBattleLog(battleState: BattleState): void {
-    console.log('Rendering battle log...');
-    console.log('Battle state:', battleState);
-    console.log('Battle log:', this.battleLog);
     if (!this.battleLog) {
       console.error('Battle log not found');
       return;
@@ -281,7 +265,6 @@ export class BattleView {
     const battleState = state.battle;
     const playerPokemon = battleState.activePokemon.player;
 
-    console.log('Showing action selection...');
     if (!this.actionMenu || !this.moveMenu || !this.teamMenu) {
       console.error('Action, move or team menu not found');
       return;
@@ -320,7 +303,6 @@ export class BattleView {
   }
 
   private showMoveSelection(): void {
-    console.log('Showing move selection...');
     if (!this.actionMenu || !this.moveMenu) {
       console.error('Action or move menu not found');
       return;
@@ -336,7 +318,6 @@ export class BattleView {
 
     const playerPokemon = battleState.activePokemon.player;
     const cpuPokemon = battleState.activePokemon.cpu;
-    console.log('CPU Pokemon currentPP :', cpuPokemon.moves[0].currentPP);
     
     // Hide action menu, show move menu
     this.actionMenu.style.display = 'none';
@@ -356,9 +337,7 @@ export class BattleView {
           console.log('No more PP left for this move');
           return;
         }
-        console.log('CPU Pokemon currentPP before :', cpuPokemon.moves[0].currentPP);
         move.currentPP--;
-        console.log('CPU Pokemon currentPP after :', cpuPokemon.moves[0].currentPP);
         EventBus.emit('battle:select-move', { moveIndex: index });
         if (this.moveMenu) {
           this.moveMenu.style.display = 'none';
