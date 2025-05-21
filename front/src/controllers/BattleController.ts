@@ -34,6 +34,17 @@ export class BattleController {
     
     // Generate a CPU team (to implement later)
     const cpuTeam = this.generateCpuTeam(validPlayerTeam.length);
+
+    const context = {
+      damage: null,
+      move: null,
+      moveType: null,
+      attacker: null,
+      defender: null,
+      effectiveness: null,
+      critical: null,
+      pendingLogs: [],
+    }
     
     // Initialize battle state
     const battleState: BattleState = {
@@ -48,7 +59,7 @@ export class BattleController {
       terrain: null, // to implement later
       status: 'initializing',
       log: [],
-      context: null
+      context: context,
     };
     
     Store.setState({ battle: battleState });

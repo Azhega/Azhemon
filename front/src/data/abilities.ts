@@ -1,4 +1,5 @@
 import { Pokemon } from "../models/PokemonModel";
+import Store from "../utils/Store";
 
 export const abilities = {
   sereneGrace: {
@@ -12,7 +13,8 @@ export const abilities = {
     description: 'Le Pokémon absorbe les attaques de type Eau et les neutralise tout en augmentant son Attaque Spéciale',
     onDamageModifier: (damage:number, context: any): number => {
       if (context.defender.abilityKey === 'stormDrain' && context.moveType === 'Eau') {
-        console.log('Defender has Storm Drain ! Absorbing water attack !');
+        const abilityMessage = `Talent Lavabo ! ${context.defender.name} absorbe les dégâts Eau !`;
+        context.pendingLogs.push(abilityMessage);
         return 0;
       }
       return context.damage;
@@ -24,7 +26,8 @@ export const abilities = {
     description: 'Le Pokémon absorbe les capacités de type Feu et augmente la puissance des siennes',
     onDamageModifier: (damage: number, context: any): number => {
       if (context.defender.abilityKey === 'flashFire' && context.moveType === 'Feu') {
-        console.log('Defender has Flash Fire ! Absorbing fire attack !');
+        const abilityMessage = `Talent Torche ! ${context.defender.name} absorbe les dégâts Feu !`;
+        context.pendingLogs.push(abilityMessage);
         return 0;
       }
       return context.damage;
@@ -37,7 +40,8 @@ export const abilities = {
     onDamageModifier: (damage: number, context: any): number => {
       if (context.attacker.abilityKey === 'swarm' && context.moveType === 'Insecte' 
         && context.attacker.currentHp < context.attacker.maxHp / 3) {
-        console.log('Attacker has Swarm ! Increasing Bug move power !');
+        const abilityMessage = `Talent Essaim ! ${context.attacker.name} augmente ses dégâts Insecte !`;
+        context.pendingLogs.push(abilityMessage);
         return Math.floor(context.damage * 1.5);
       }
       return context.damage;
@@ -58,7 +62,8 @@ export const abilities = {
     description: 'Le Pokémon flotte, ce qui l\'immunise contre les capacités de type Sol',
     onDamageModifier: (damage: number, context: any): number => {
       if (context.defender.abilityKey === 'levitate' && context.moveType === 'Sol') {
-        console.log('Defender has Levitate ! Immunity to Ground moves !');
+        const abilityMessage = `Talent Lévitation ! ${context.defender.name} est immunisé contre les attaques de type Sol !`;
+        context.pendingLogs.push(abilityMessage);
         return 0;
       }
       return context.damage;
@@ -89,7 +94,8 @@ export const abilities = {
     description: 'Augmente la puissance des coups critiques de 50%',
     onDamageModifier: (damage: number, context: any): number => {
       if (context.attacker.abilityKey === 'sniper' && context.critical) {
-        console.log('Attacker has Sniper ! Increasing critical hit damage !');
+        const abilityMessage = `Talent Sniper ! ${context.attacker.name} augmente les dégâts de ses coups critiques !`;
+        context.pendingLogs.push(abilityMessage);
         return context.damage * 1.5;
       }
       return context.damage;
@@ -101,7 +107,8 @@ export const abilities = {
     description: 'Quand le Pokémon met un ennemi K.O., son Attaque augmente',
     onPostMove: (context: any): void => {
       if (context.attacker.abilityKey === 'moxie' && context.defender.isAlive === false) {
-        console.log('Attacker has Moxie ! Increasing Attack after KO !');
+        const abilityMessage = `Talent Impudence ! ${context.attacker.name} augmente son attaque de 1 !`;
+        context.pendingLogs.push(abilityMessage);
         context.attacker.statModifiers.attack += 1;
         context.attacker.calculateModifiedStats();
       }
@@ -113,7 +120,8 @@ export const abilities = {
     description: 'Si le Pokémon est touché par une capacité Eau, il ne subit aucun dégât et regagne des PV à la place',
     onDamageModifier: (damage: number, context: any): number => {
       if (context.defender.abilityKey === 'waterAbsorb' && context.moveType === 'Eau') {
-        console.log('Defender has Water Absorb ! Absorbing water attack and healing !');
+        const abilityMessage = `Talent Absorbe-Eau ! ${context.defender.name} absorbe les dégâts Eau et récupère des PV !`;
+        context.pendingLogs.push(abilityMessage);
         context.defender.currentHp = Math.min(context.defender.maxHp, context.defender.currentHp + Math.floor(context.defender.maxHp / 5));
         return 0;
       }
@@ -126,7 +134,8 @@ export const abilities = {
     description: 'Restaure un peu de PV si le Pokémon est retiré du combat',
     onSwitch: (context: any): void => {
       if (context.switchedPokemon.abilityKey === 'regenerator') {
-        console.log('Pokemon has Regenerator ! Healing on switch out !');
+        const abilityMessage = `Talent Régé-Force ! ${context.switchedPokemon.name} récupère des PV après un switch !`;
+        context.pendingLogs.push(abilityMessage);
         context.switchedPokemon.currentHp = Math.min(context.switchedPokemon.maxHp, context.switchedPokemon.currentHp + Math.floor(context.switchedPokemon.maxHp / 3));
       }
     }
@@ -137,7 +146,8 @@ export const abilities = {
     description: 'Quand le Pokémon utilise une capacité du même type que lui, le bonus de puissance qu\'elle reçoit est encore plus important que normalement',
     onDamageModifier: (damage: number, context: any): number => {
       if (context.attacker.abilityKey === 'adaptability' && context.attacker.types.includes(context.moveType)) {
-        console.log('Attacker has Adaptability ! Increasing STAB move power !');
+        const abilityMessage = `Talent Adaptabilité ! ${context.attacker.name} augmente ses dégâts de STAB !`;
+        context.pendingLogs.push(abilityMessage);
         return Math.floor((context.damage / 1.5) * 2);
       }
       return context.damage;
