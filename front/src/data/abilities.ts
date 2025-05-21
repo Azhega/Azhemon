@@ -69,7 +69,7 @@ export const abilities = {
     name: 'Sable Volant',
     description: 'Le Pokémon invoque une tempête de sable quand il entre au combat',
     onTurnStart: (context: any): string => {
-      return 'Sandstorm'; // Weather to implement later
+      return 'Sandstorm';
     }
   },
   poisonHeal: {
@@ -78,7 +78,7 @@ export const abilities = {
     description: 'Quand le Pokémon est empoisonné, il regagne des PV au lieu d\'en perdre',
     onTurnEnd: (context: any): number => {
       if (context.status === 'Poisoned') {
-        return context.hp + 1; // Regains HP instead of losing it
+        return context.hp + 1;
       }
       return context.hp;
     }
@@ -99,11 +99,12 @@ export const abilities = {
     id: 10,
     name: 'Impudence',
     description: 'Quand le Pokémon met un ennemi K.O., son Attaque augmente',
-    onPostMove: (context: any): number => {
-      if (context.defeated) {
-        return context.attack + 1; // Increases attack after defeating an opponent
+    onPostMove: (context: any): void => {
+      if (context.attacker.abilityKey === 'moxie' && context.defender.isAlive === false) {
+        console.log('Attacker has Moxie ! Increasing Attack after KO !');
+        context.attacker.statModifiers.attack += 1;
+        context.attacker.calculateModifiedStats();
       }
-      return context.attack;
     }
   },
   waterAbsorb: {
@@ -114,7 +115,7 @@ export const abilities = {
       if (context.defender.abilityKey === 'waterAbsorb' && context.moveType === 'Eau') {
         console.log('Defender has Water Absorb ! Absorbing water attack and healing !');
         context.defender.currentHp = Math.min(context.defender.maxHp, context.defender.currentHp + Math.floor(context.defender.maxHp / 5));
-        return 0; // Absorbs the damage
+        return 0;
       }
       return context.damage;
     }
@@ -123,8 +124,11 @@ export const abilities = {
     id: 12,
     name: 'Régé-Force',
     description: 'Restaure un peu de PV si le Pokémon est retiré du combat',
-    onSwitch: (context: any): number => {
-      return context.hp + Math.floor(context.maxHp / 3); // Restores a third of max HP when switched out
+    onSwitch: (context: any): void => {
+      if (context.switchedPokemon.abilityKey === 'regenerator') {
+        console.log('Pokemon has Regenerator ! Healing on switch out !');
+        context.switchedPokemon.currentHp = Math.min(context.switchedPokemon.maxHp, context.switchedPokemon.currentHp + Math.floor(context.switchedPokemon.maxHp / 3));
+      }
     }
   },
   adaptability: {
@@ -134,7 +138,7 @@ export const abilities = {
     onDamageModifier: (damage: number, context: any): number => {
       if (context.attacker.abilityKey === 'adaptability' && context.attacker.types.includes(context.moveType)) {
         console.log('Attacker has Adaptability ! Increasing STAB move power !');
-        return Math.floor((context.damage / 1.5) * 2); // Increases damage when using STAB moves
+        return Math.floor((context.damage / 1.5) * 2);
       }
       return context.damage;
     }

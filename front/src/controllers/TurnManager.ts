@@ -249,8 +249,6 @@ export class TurnManager {
     });
     
     setTimeout(() => {
-      EffectManager.applyPostMoveEffects(battleState);
-
       // Display any stat changes
       if (moveResult.statChanges && moveResult.statChanges.length > 0) {
         for (const statChange of moveResult.statChanges) {
@@ -292,12 +290,19 @@ export class TurnManager {
             log: [...latestBattleState.log, faintMessage]
           }
         });
+
+        console.log('latest battle state context : ', latestBattleState.context);
+        EffectManager.applyPostMoveEffects(latestBattleState.context);
         
         console.log('Continuing after target KO');
         // Timer before continuing
         setTimeout(callback, 1000);
       } else {
         // Continue normally
+        const latestState = Store.getState();
+        const latestBattleState = latestState.battle;
+        console.log('latest battle state context : ', latestBattleState.context);
+        EffectManager.applyPostMoveEffects(latestBattleState.context);
         callback();
       }
     }, 1500);
@@ -341,9 +346,11 @@ export class TurnManager {
     
     // Update state
     Store.setState({ battle: updatedBattleState });
-    
+
+    updatedBattleState.context.switchedPokemon = newPokemon;
+
     // Run onSwitch effects
-    EffectManager.applyOnSwitchEffects(battleState);
+    EffectManager.applyOnSwitchEffects(updatedBattleState.context);
 
     // Timer before continuing
     setTimeout(callback, 1000);

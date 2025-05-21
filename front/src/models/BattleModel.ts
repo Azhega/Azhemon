@@ -19,6 +19,7 @@ export interface BattleState {
   terrain: TerrainType | null; // to implement later
   status: BattleStatus;
   log: string[];
+  context: any;
 }
 
 export interface BattleAction {

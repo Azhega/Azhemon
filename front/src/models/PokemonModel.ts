@@ -62,6 +62,7 @@ export class Pokemon {
   name: string;
   types: string[];
   baseStats: PokemonStats;
+  initialCurrentStats: PokemonStats;
   currentStats: PokemonStats;
   currentHp: number;
   maxHp: number;
@@ -113,6 +114,7 @@ export class Pokemon {
     
     // Calculate current stats based on base stats, level, and EV/IV later
     this.currentStats = this.calculateStats();
+    this.initialCurrentStats = this.calculateStats();
     this.currentHp = this.currentStats.hp;
     this.maxHp = this.currentStats.hp;
   }
@@ -130,7 +132,32 @@ export class Pokemon {
       evasion: 100
     };
   }
-  // Other methods to implement later
+
+  public calculateModifiedStats(): void {
+    console.log('current stats before modifiers:', this.currentStats.attack);
+
+    this.currentStats.attack = this.statModifiers.attack >= 0 ? 
+      Math.floor(this.initialCurrentStats.attack * (1 + (this.statModifiers.attack * 0.5))) :
+      Math.floor(this.initialCurrentStats.attack / (1 + (this.statModifiers.attack * 0.5)));
+
+    this.currentStats.defense = this.statModifiers.defense >= 0 ?
+      Math.floor(this.initialCurrentStats.defense * (1 + (this.statModifiers.defense * 0.5))) :
+      Math.floor(this.initialCurrentStats.defense / (1 + (this.statModifiers.defense * 0.5)));
+
+    this.currentStats.specialAttack = this.statModifiers.specialAttack >= 0 ?
+      Math.floor(this.initialCurrentStats.specialAttack * (1 + (this.statModifiers.specialAttack * 0.5))) :
+      Math.floor(this.initialCurrentStats.specialAttack / (1 + (this.statModifiers.specialAttack * 0.5)));
+
+    this.currentStats.specialDefense = this.statModifiers.specialDefense >= 0 ?
+      Math.floor(this.initialCurrentStats.specialDefense * (1 + (this.statModifiers.specialDefense * 0.5))) :
+      Math.floor(this.initialCurrentStats.specialDefense / (1 + (this.statModifiers.specialDefense * 0.5)));
+
+    this.currentStats.speed = this.statModifiers.speed >= 0 ?
+      Math.floor(this.initialCurrentStats.speed * (1 + (this.statModifiers.speed * 0.5))) :
+      Math.floor(this.initialCurrentStats.speed / (1 + (this.statModifiers.speed * 0.5)));
+
+    console.log('current stats after modifiers:', this.currentStats.attack);
+  }
 }
 
 export class PokemonTeam {
