@@ -254,6 +254,8 @@ export class BattleEngine {
       critical: critical
     }
 
+    battleState.context = context;
+
     // Run onDamageModifier effects
     finalDamage = EffectManager.applyDamageModifierEffects(finalDamage, context);
     console.log('Final Damage after hooks:', finalDamage);

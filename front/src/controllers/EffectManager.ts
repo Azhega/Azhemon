@@ -95,11 +95,13 @@ export class EffectManager {
   public runHook(hook: EffectHook, context: any): any[] {
     const results: any[] = [];
     const functions = this.hooks.get(hook) || [];
+    console.log(`Running chainHook for ${hook} with context :`, context);
+    console.log(`Functions for ${hook}:`, functions);
     for (const fn of functions) {
       try {
         results.push(fn(context));
       } catch (error) {
-        console.error(`Error occurred while running hook "${hook}":`, error);
+        console.error(`Error occurred while running hook "${hook}" for function ${fn}:`, error);
       } 
     }
     return results;

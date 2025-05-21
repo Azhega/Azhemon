@@ -47,7 +47,8 @@ export class BattleController {
       weather: null, // to implement later
       terrain: null, // to implement later
       status: 'initializing',
-      log: []
+      log: [],
+      context: null
     };
     
     Store.setState({ battle: battleState });
