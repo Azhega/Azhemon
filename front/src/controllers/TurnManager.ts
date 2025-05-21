@@ -244,7 +244,11 @@ export class TurnManager {
     Store.setState({
       battle: {
         ...battleState,
-        log: [...battleState.log, moveResult.message]
+        log: [
+          ...battleState.log,
+          moveResult.message,
+          battleState.context.pendingLogs.shift() as string
+        ]
       }
     });
     

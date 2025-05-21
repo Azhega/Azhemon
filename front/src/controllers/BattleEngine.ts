@@ -251,7 +251,8 @@ export class BattleEngine {
       attacker: attacker,
       defender: defender,
       effectiveness: effectiveness,
-      critical: critical
+      critical: critical,
+      pendingLogs: []
     }
 
     battleState.context = context;
