@@ -18,7 +18,9 @@ export const Pokedex = {
       'dazzlingGleam',
       'shadowBall',
       'psychic',
-      'flameThrower'
+      'flameThrower',
+      'toxic',
+      'thunderWave'
     ]
   },
   gastrodon: {
@@ -38,7 +40,8 @@ export const Pokedex = {
       'scald',
       'stoneEdge',
       'iceBeam',
-      'earthquake'
+      'earthquake',
+      'toxic'
     ]
   },
   chandelure: {
@@ -59,6 +62,7 @@ export const Pokedex = {
       'psychic',
       'flameThrower',
       'energyBall',
+      'will_o_wisp'
     ]
   },
   escavalier: {
@@ -120,7 +124,8 @@ export const Pokedex = {
       'thunderbolt',
       'closeCombat',
       'flameThrower',
-      'earthquake'
+      'earthquake',
+      'thunderWave',
     ]
   },
   tyranitar: {
@@ -145,7 +150,8 @@ export const Pokedex = {
       'earthquake',
       'nightSlash',
       'ironHead',
-      'closeCombat'
+      'closeCombat',
+      'thunderWave'
     ]
   },
   breloom: {
@@ -165,7 +171,8 @@ export const Pokedex = {
       'stoneEdge',
       'closeCombat',
       'energyBall',
-      'ironHead'
+      'ironHead',
+      'toxic'
     ]
   },
   drapion: {
@@ -187,6 +194,7 @@ export const Pokedex = {
       'crossPoison',
       'earthquake',
       'nightSlash',
+      'toxic'
     ]
   },
   heracross: {
@@ -227,7 +235,8 @@ export const Pokedex = {
       'thunderbolt',
       'iceBeam',
       'earthquake',
-      'ironHead'
+      'ironHead',
+      'iceWave'
     ]
   },
   reuniclus: {
@@ -250,6 +259,8 @@ export const Pokedex = {
       'psychic',
       'flameThrower',
       'energyBall',
+      'thunderWave',
+      'hypnosis'
     ]
   },
   porygon_z: {
@@ -271,6 +282,7 @@ export const Pokedex = {
       'iceBeam',
       'psychic',
       'triAttack',
+      'thunderWave'
     ]
   },
   slowpoke: {
@@ -293,6 +305,7 @@ export const Pokedex = {
       'psychic',
       'flameThrower',
       'earthquake',
+      'thunderWave'
     ]
   },
   quagsire: {
@@ -313,6 +326,8 @@ export const Pokedex = {
       'stoneEdge',
       'iceBeam',
       'earthquake',
+      'toxic',
+      'iceWave'
     ]
   },
 }

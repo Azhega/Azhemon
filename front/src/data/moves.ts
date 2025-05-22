@@ -1,3 +1,5 @@
+import { status } from './status';
+
 export const moves = {
   auraSphere: {
     moveKey: 'auraSphere',
@@ -227,4 +229,110 @@ export const moves = {
     priority: 0,
     description: ''
   },
+  will_o_wisp: {
+    moveKey: 'will_o_wisp',
+    id: 20,
+    name: 'Feu Follet',
+    type: 'Feu',
+    category: 'Statut',
+    power: 0,
+    accuracy: 100,
+    pp: 15,
+    priority: 0,
+    description: 'Brûle la cible',
+    onPostMove: (context: any): void => {
+      if (!context.defender.statusKey) {
+        // const moveMessage = `Feu Follet ! ${context.defender.name} est brûlé !`;
+        // context.pendingLogs.push(moveMessage);
+        console.log('Feu Follet !', context.defender.name, 'est brûlé !');
+        context.defender.statusKey = 'burn';
+        status['burn'].onApply(context.defender);
+      } else {
+        // const moveMessage = `Feu Follet ! ${context.defender.name} a déjà un statut !`;
+        // context.pendingLogs.push(moveMessage);
+        console.log('Feu Follet !', context.defender.name, 'a déjà un statut !');
+      }
+    }
+  },
+  thunderWave: {
+    moveKey: 'thunderWave',
+    id: 21,
+    name: 'Cage-Éclair',
+    type: 'Électrik',
+    category: 'Statut',
+    power: 0,
+    accuracy: 100,
+    pp: 15,
+    priority: 0,
+    description: 'Paralyse la cible',
+    onPostMove: (context: any): void => {
+      if (!context.defender.statusKey) {
+        console.log('Cage-Éclair !', context.defender.name, 'est paralysé !');
+        context.defender.statusKey = 'paralysis';
+        status['paralysis'].onApply(context.defender);
+      } else {
+        console.log('Cage-Éclair !', context.defender.name, 'a déjà un statut !');
+      }
+    }
+  },
+  toxic: {
+    moveKey: 'toxic',
+    id: 22,
+    name: 'Toxik',
+    type: 'Poison',
+    category: 'Statut',
+    power: 0,
+    accuracy: 100,
+    pp: 15,
+    priority: 0,
+    description: 'Empoisonne la cible',
+    onPostMove: (context: any): void => {
+      if (!context.defender.statusKey) {
+        console.log('Toxik !', context.defender.name, 'est empoisonné !');
+        context.defender.statusKey = 'poison';
+      } else {
+        console.log('Toxik !', context.defender.name, 'a déjà un statut !');
+      }
+    }
+  },
+  hypnosis: {
+    moveKey: 'hypnosis',
+    id: 23,
+    name: 'Hypnose',
+    type: 'Psy',
+    category: 'Statut',
+    power: 0,
+    accuracy: 100,
+    pp: 15,
+    priority: 0,
+    description: 'Endort la cible',
+    onPostMove: (context: any): void => {
+      if (!context.defender.statusKey) {
+        console.log('Hypnose !', context.defender.name, 'est endormi !');
+        context.defender.statusKey = 'sleep';
+      } else {
+        console.log('Hypnose !', context.defender.name, 'a déjà un statut !');
+      }
+    }
+  },
+  iceWave: {
+    moveKey: 'iceWave',
+    id: 24,
+    name: 'Vague Glace',
+    type: 'Glace',
+    category: 'Statut',
+    power: 0,
+    accuracy: 100,
+    pp: 10,
+    priority: 0,
+    description: 'Gèle la cible',
+    onPostMove: (context: any): void => {
+      if (!context.defender.statusKey) {
+        console.log('Vague Glace !', context.defender.name, 'est gelé !');
+        context.defender.statusKey = 'freeze';
+      } else {
+        console.log('Vague Glace !', context.defender.name, 'a déjà un statut !');
+      }
+    }
+  }
 }
