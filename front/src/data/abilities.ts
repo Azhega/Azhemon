@@ -122,7 +122,8 @@ export const abilities = {
       if (context.defender.abilityKey === 'waterAbsorb' && context.moveType === 'Eau') {
         const abilityMessage = `Talent Absorbe-Eau ! ${context.defender.name} absorbe les dégâts Eau et récupère des PV !`;
         context.pendingLogs.push(abilityMessage);
-        context.defender.currentHp = Math.min(context.defender.maxHp, context.defender.currentHp + Math.floor(context.defender.maxHp / 5));
+        context.defender.currentHp = Math.min(context.defender.maxHp, 
+          context.defender.currentHp + Math.floor(context.defender.maxHp / 5));
         return 0;
       }
       return context.damage;
@@ -133,10 +134,13 @@ export const abilities = {
     name: 'Régé-Force',
     description: 'Restaure un peu de PV si le Pokémon est retiré du combat',
     onSwitch: (context: any): void => {
-      if (context.switchedPokemon.abilityKey === 'regenerator') {
-        const abilityMessage = `Talent Régé-Force ! ${context.switchedPokemon.name} récupère des PV après un switch !`;
-        context.pendingLogs.push(abilityMessage);
-        context.switchedPokemon.currentHp = Math.min(context.switchedPokemon.maxHp, context.switchedPokemon.currentHp + Math.floor(context.switchedPokemon.maxHp / 3));
+      if (context.switchedPokemon) {
+        if (context.switchedPokemon.abilityKey === 'regenerator') {
+          const abilityMessage = `Talent Régé-Force ! ${context.switchedPokemon.name} récupère des PV après un switch !`;
+          context.pendingLogs.push(abilityMessage);
+          context.switchedPokemon.currentHp = Math.min(context.switchedPokemon.maxHp, 
+            context.switchedPokemon.currentHp + Math.floor(context.switchedPokemon.maxHp / 3));
+        }
       }
     }
   },

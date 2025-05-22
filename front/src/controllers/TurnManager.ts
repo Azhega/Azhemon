@@ -135,6 +135,13 @@ export class TurnManager {
         const battleState = state.battle;
         EffectManager.applyTurnEndEffects(battleState.context);
 
+        Store.setState({
+          battle: {
+            ...battleState,
+            log: [...battleState.log, battleState.context.pendingLogs.shift() as string]
+          }
+        });
+
         if (!firstActorPokemon.isAlive) {
           console.log('First Pokemon is KO');
 
@@ -299,6 +306,13 @@ export class TurnManager {
 
         console.log('latest battle state context : ', latestBattleState.context);
         EffectManager.applyPostMoveEffects(latestBattleState.context);
+
+        Store.setState({
+          battle: {
+            ...latestBattleState,
+            log: [...latestBattleState.log, latestBattleState.context.pendingLogs.shift() as string]
+          }
+        });
         
         console.log('Continuing after target KO');
         // Timer before continuing
@@ -309,6 +323,13 @@ export class TurnManager {
         const latestBattleState = latestState.battle;
         console.log('latest battle state context : ', latestBattleState.context);
         EffectManager.applyPostMoveEffects(latestBattleState.context);
+
+        Store.setState({
+          battle: {
+            ...latestBattleState,
+            log: [...latestBattleState.log, latestBattleState.context.pendingLogs.shift() as string]
+          }
+        });
         callback();
       }
     }, 1500);
@@ -357,6 +378,12 @@ export class TurnManager {
 
     // Run onSwitch effects
     EffectManager.applyOnSwitchEffects(updatedBattleState.context);
+    Store.setState({
+      battle: {
+        ...updatedBattleState,
+        log: [...updatedBattleState.log, updatedBattleState.context.pendingLogs.shift() as string]
+      }
+    });
 
     // Timer before continuing
     setTimeout(callback, 1000);
@@ -567,7 +594,18 @@ export class TurnManager {
         });
 
         // Run onSwitch effects
-        EffectManager.applyOnSwitchEffects(battleState);
+        const updatedBattleState = Store.getState().battle;
+        updatedBattleState.context.switchedPokemon = selectedPokemon;
+        EffectManager.applyOnSwitchEffects(updatedBattleState.context);
+
+        const latestState = Store.getState();
+        const latestBattleState = latestState.battle;
+        Store.setState({
+          battle: {
+            ...latestBattleState,
+            log: [...latestBattleState.log, latestBattleState.context.pendingLogs.shift() as string],
+          },
+        });
 
         // Continue execution
         callback();

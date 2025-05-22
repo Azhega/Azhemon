@@ -168,7 +168,7 @@ export const moves = {
     description: 'Peut paralyser, brûler ou geler la cible'
   },
   flameThrower: {
-    moveKey: 'v',
+    moveKey: 'flameThrower',
     id: 15,
     name: 'Lance-Flammes',
     type: 'Feu',
