@@ -140,9 +140,6 @@ export class BattleController {
     const battleState = state.battle;
     const activePokemon = battleState.activePokemon.player;
 
-    // Run onPreMove effects
-    EffectManager.applyPreMoveEffects(battleState);
-
     if (moveIndex >= activePokemon.moves.length) {
       console.error('Invalid move index');
       return;
@@ -391,6 +388,8 @@ export class BattleController {
     if (randomMove.currentPP === 0) {
       cpuPokemon.moves.splice(randomMoveIndex, 1);
     }
+
+    EffectManager.registerMoveEffects(randomMove.moveKey);
      
     console.log('CPU selected move:', randomMove);
     return {
@@ -455,6 +454,9 @@ export class BattleController {
     
     // Prepare for next turn
     EventBus.emit('battle:turn-start', battleState.turn + 1);
+
+    // Clear all effects and register effects of (new) active Pokemon
+    EffectManager.resetEffects(battleState.activePokemon.player, battleState.activePokemon.cpu); 
 
     // Run onTurnStart effects
     EffectManager.applyTurnStartEffects(battleState);

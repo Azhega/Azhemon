@@ -241,7 +241,7 @@ export const moves = {
     priority: 0,
     description: 'Brûle la cible',
     onPostMove: (context: any): void => {
-      if (!context.defender.statusKey) {
+      if (!context.defender.statusKey || context.defender.statusKey === undefined) {
         // const moveMessage = `Feu Follet ! ${context.defender.name} est brûlé !`;
         // context.pendingLogs.push(moveMessage);
         console.log('Feu Follet !', context.defender.name, 'est brûlé !');
@@ -266,12 +266,16 @@ export const moves = {
     priority: 0,
     description: 'Paralyse la cible',
     onPostMove: (context: any): void => {
-      if (!context.defender.statusKey) {
-        console.log('Cage-Éclair !', context.defender.name, 'est paralysé !');
+      if (context.defender.statusKey === null || context.defender.statusKey === undefined) {
+        const moveMessage = `Cage-Éclair ! ${context.defender.name} est paralysé !`;
+        context.pendingLogs.push(moveMessage);
+        console.log(moveMessage);
         context.defender.statusKey = 'paralysis';
         status['paralysis'].onApply(context.defender);
       } else {
-        console.log('Cage-Éclair !', context.defender.name, 'a déjà un statut !');
+        const moveMessage = `Cage-Éclair ! ${context.defender.name} a déjà un statut !`;
+        context.pendingLogs.push(moveMessage);
+        console.log(moveMessage);
       }
     }
   },
