@@ -144,7 +144,8 @@ export const Pokedex = {
       'flameThrower',
       'earthquake',
       'nightSlash',
-      'ironHead'
+      'ironHead',
+      'closeCombat'
     ]
   },
   breloom: {

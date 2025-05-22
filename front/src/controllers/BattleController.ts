@@ -119,9 +119,18 @@ export class BattleController {
     EffectManager.registerPokemonEffects(battleState.activePokemon.cpu);
 
     // Run onTurnStart effects
-    EffectManager.applyTurnStartEffects(battleState);
+    // EffectManager.applyTurnStartEffects(battleState);
+    
     // Run onSwitch effects (as the battle kinda starts with a switch)
-    EffectManager.applyOnSwitchEffects(battleState);
+    const latestState = Store.getState();
+    const latestBattleState = latestState.battle;
+    EffectManager.applyOnSwitchEffects(latestBattleState.context);
+    Store.setState({
+      battle: {
+        ...latestBattleState,
+        log: [...latestBattleState.log, latestBattleState.context.pendingLogs.shift() as string]
+      }
+    });
 
     this.battleView?.showActionSelection();
   }
