@@ -19,6 +19,8 @@ export class EffectManager {
   // Map each hooks to an array of effect functions
   private hooks: Map<EffectHook, EffectFunction[]> = new Map();
   private moveHooks: Map<EffectHook, EffectFunction[]> = new Map();
+  private registeredItemFunctions: Map<EffectHook, Set<Function>> = new Map();
+
 
   private constructor() {}
 
@@ -58,8 +60,15 @@ export class EffectManager {
             console.log(`Registering item hook ${itemObj.name}: ${hook}`);
             this.hooks.set(hook, []);
           }
-          console.log(`pushing item hook ${itemObj.name}: ${hook}`);
-          this.hooks.get(hook)!.push((value as Function).bind(itemObj));
+          if (!this.registeredItemFunctions.has(hook)) {
+            this.registeredItemFunctions.set(hook, new Set());
+          }
+          const registeredFns = this.registeredItemFunctions.get(hook)!;
+          if (!registeredFns.has(value as Function)) {
+            registeredFns.add(value as Function);
+            console.log(`pushing item hook ${itemObj.name}: ${hook}`);
+            this.hooks.get(hook)!.push((value as Function).bind(itemObj));
+          }
         }
       }
     }

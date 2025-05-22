@@ -92,7 +92,7 @@ export class TurnManager {
 
         if (secondActorPokemon === battleState.activePokemon.player) {
           console.log('Player Pokemon is KO, player must select another Pokemon');
-          this.applyEndTurnEffects();
+          // this.applyEndTurnEffects();
 
           // Event to show Pokemon selection for the player to select another Pokemon
           EventBus.emit('battle:show-pokemon-selection');
@@ -103,7 +103,7 @@ export class TurnManager {
           });
         } else if (secondActorPokemon === battleState.activePokemon.cpu) {
           console.log('CPU Pokemon is KO, CPU must select another Pokemon');
-          this.applyEndTurnEffects();
+          // this.applyEndTurnEffects();
 
           // Automatically switch to the next available Pokémon for the CPU
           this.switchCpuPokemon();
@@ -131,7 +131,9 @@ export class TurnManager {
         console.log('Battle is not over after second action');
 
         // Run onTurnEnd effects
-        EffectManager.applyTurnEndEffects(battleState);
+        const state = Store.getState();
+        const battleState = state.battle;
+        EffectManager.applyTurnEndEffects(battleState.context);
 
         if (!firstActorPokemon.isAlive) {
           console.log('First Pokemon is KO');
