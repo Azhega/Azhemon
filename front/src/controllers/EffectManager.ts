@@ -2,6 +2,7 @@ import { abilities } from '../data/abilities';
 import { items } from '../data/items';
 import { moves } from '../data/moves';
 import { Pokemon } from '../models/PokemonModel';
+import State from '../utils/Store';
 
 type EffectHook = 
   | 'onTurnStart'
@@ -81,12 +82,12 @@ export class EffectManager {
         const value = moveObj[key as keyof typeof moveObj];
         if (typeof value === 'function') {
           const hook = key as EffectHook;
-          if (!this.hooks.has(hook)) {
+          if (!this.moveHooks.has(hook)) {
             console.log(`Registering move hook ${moveObj.name}: ${hook}`);
-            this.hooks.set(hook, []);
+            this.moveHooks.set(hook, []);
           }
           console.log(`pushing move hook ${moveObj.name}: ${hook}`);
-          this.hooks.get(hook)!.push((value as Function).bind(moveObj));
+          this.moveHooks.get(hook)!.push((value as Function).bind(moveObj));
         }
       }
     }
@@ -94,17 +95,39 @@ export class EffectManager {
 
   // To clear effects when a Pokemon leaves the battle
   public unregisterAllEffects() {
+    console.log('hooks:', this.hooks);
+    console.log('Unregistering all items/abilities effects', this.hooks);
     this.hooks.clear();
   }
 
   public unregisterMoveEffects() {
+    console.log('moveHooks:', this.moveHooks);
+    console.log('Unregistering all move effects : ', this.moveHooks);
     this.moveHooks.clear();
+  }
+
+  public unregisterItemFunctions() {
+    console.log('registeredItemFunctions:', this.registeredItemFunctions);
+    console.log('Unregistering all item functions');
+    this.registeredItemFunctions.clear();
+  }
+
+  public resetEffects(firstPokemon: Pokemon, secondPokemon: Pokemon) {
+    console.log('Resetting all effects');
+    this.unregisterAllEffects();
+    this.unregisterMoveEffects();
+    this.unregisterItemFunctions();
+    this.registerPokemonEffects(firstPokemon);
+    this.registerPokemonEffects(secondPokemon);
   }
 
   public runHook(hook: EffectHook, context: any): any[] {
     const results: any[] = [];
-    const functions = this.hooks.get(hook) || [];
-    console.log(`Running chainHook for ${hook} with context :`, context);
+    const functions = [
+    ...(this.hooks.get(hook) || []),
+    ...(this.moveHooks.get(hook) || [])
+    ];
+    console.log(`Running Hook for ${hook} with context :`, context);
     console.log(`Functions for ${hook}:`, functions);
     for (const fn of functions) {
       try {

@@ -4,6 +4,7 @@ import { BattleEngine } from './BattleEngine';
 import EventBus from '../utils/EventBus';
 import Store from '../utils/Store';
 import EffectManager from './EffectManager';
+import { Effect } from '../models/EffectModel';
 
 export class TurnManager {
   private battleEngine: BattleEngine;
@@ -244,6 +245,18 @@ export class TurnManager {
   }
   
   private executeMove(action: BattleAction, isPlayer: boolean, actor: Pokemon, target: Pokemon, callback: () => void): void {
+    // Register move effects
+    EffectManager.registerMoveEffects(action.data.move.moveKey);
+    // Run onPreMove effects
+    const firstBattleState = Store.getState().battle;
+    EffectManager.applyPreMoveEffects(firstBattleState.context);
+    // Store.setState({
+    //   battle: {
+    //     ...firstBattleState,
+    //     log: [...firstBattleState.log, firstBattleState.context.pendingLogs.shift() as string]
+    //   }
+    // });
+
     const move = action.data.move;
     const moveResult = this.battleEngine.executeMove(move, actor, target);
     console.log('Move result:', moveResult)
@@ -313,6 +326,8 @@ export class TurnManager {
             log: [...latestBattleState.log, latestBattleState.context.pendingLogs.shift() as string]
           }
         });
+
+        EffectManager.unregisterMoveEffects();
         
         console.log('Continuing after target KO');
         // Timer before continuing
@@ -330,6 +345,8 @@ export class TurnManager {
             log: [...latestBattleState.log, latestBattleState.context.pendingLogs.shift() as string]
           }
         });
+
+        EffectManager.unregisterMoveEffects();
         callback();
       }
     }, 1500);

@@ -205,6 +205,16 @@ export class BattleEngine {
   } {
     // No damage move
     if (move.power === 0) {
+      const context = {
+        move: move,
+        moveType: move.type,
+        attacker: attacker,
+        defender: defender,
+        pendingLogs: []
+      }
+
+      battleState.context = context;
+      
       console.log('Move power : ', move.power);
       return { damage: 0, effectiveness: 1, critical: false };
     }
