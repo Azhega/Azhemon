@@ -53,7 +53,7 @@ export interface PokemonStatus {
   id: number;
   name: string;
   description: string;
-  effects: Effect[]; // Effects to implement later
+  sleepTurns?: number;
 }
 
 export class Pokemon {
@@ -77,10 +77,12 @@ export class Pokemon {
   nature: PokemonNature;
   natureKey: string;
   status: PokemonStatus | null;
+  statusKey: string | null = null;
   statModifiers: Record<keyof PokemonStats, number>;
   isAlive: boolean = true;
   trainer: number | null = null; // Trainer ID, to implement later
   terrain: /*Terrain |*/ any = null; // Terrain, to implement later
+  canAct: boolean = true;
   
   constructor(data: any) {
     this.key = data.key;
