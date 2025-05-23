@@ -194,7 +194,7 @@ export class BattleEngine {
     
     const hitChance = move.accuracy * (accuracy / evasion);
     const roll = Math.random() * 100;
-    console.log('Hit chance:', hitChance, 'Roll:', roll, 'Accuracy:', accuracy, 'Evasion:', evasion);
+    console.log('BattleEngine : Hit chance:', hitChance, 'Roll:', roll, 'Accuracy:', accuracy, 'Evasion:', evasion);
     return roll <= hitChance;
   }
   
@@ -206,19 +206,17 @@ export class BattleEngine {
     // No damage move
     if (move.power === 0) {
       const context = {
+        ...battleState.context,
         move: move,
         moveType: move.type,
         attacker: attacker,
         defender: defender,
-        pendingLogs: []
       }
-
       battleState.context = context;
-      
-      console.log('Move power : ', move.power);
+
       return { damage: 0, effectiveness: 1, critical: false };
     }
-    console.log('Move power : ', move.power);
+    console.log('Battle Engine : Move power : ', move.power);
     // Determine if the move is physical or special
     let attackStat: number;
     let defenseStat: number;
@@ -252,9 +250,10 @@ export class BattleEngine {
     
     // Final Damage
     let finalDamage = Math.floor(baseDamage * stab * effectiveness * critMod * randomMod);
-    console.log('Base Damage:', baseDamage, 'Final Damage:', finalDamage, 'CriticalMod:', critMod, 'Effectiveness:', effectiveness, 'STAB:', stab, 'RandomMod:', randomMod);
+    console.log('BattleEngine : Base Damage:', baseDamage, 'Final Damage:', finalDamage, 'CriticalMod:', critMod, 'Effectiveness:', effectiveness, 'STAB:', stab, 'RandomMod:', randomMod);
 
     const context = {
+      ...battleState.context,
       damage: finalDamage,
       move: move,
       moveType: move.type,
@@ -267,9 +266,13 @@ export class BattleEngine {
 
     battleState.context = context;
 
-    // Run onDamageModifier effects
+    /*
+    ============================================================================
+    - HOOK : ON DAMAGE MODIFIER ===> WHEN CALCULATING DAMAGE
+    ============================================================================
+    */
     finalDamage = EffectManager.applyDamageModifierEffects(finalDamage, context);
-    console.log('Final Damage after hooks:', finalDamage);
+    console.log('BattleEngine : Final Damage after hooks:', finalDamage);
 
     return {
       damage: finalDamage,
@@ -319,8 +322,6 @@ export class BattleEngine {
   }
   
   executeMove(move: PokemonMove, attacker: Pokemon, defender: Pokemon): MoveResult {
-    const battleState = Store.getState().battle;
-    console.log('attacker canAct :', attacker.canAct);
     if (!attacker.canAct) {
       return {
         success: false,
@@ -330,7 +331,7 @@ export class BattleEngine {
     
     // Check if the move hits
     const hits = this.calculateHit(move, attacker, defender);
-    console.log('Hits:', hits);
+    console.log('BattleEngine : Hits :', hits);
     
     if (!hits) {
       return {
@@ -339,15 +340,16 @@ export class BattleEngine {
       };
     }
     
+    let battleState = Store.getState().battle;
     // Calculate damage
     const damageResult = this.calculateDamage(move, attacker, defender, battleState);
     
     // Apply damage
     if (damageResult.damage > 0) {
       // HP cannot go below 0
-      console.log('defender hp before:', defender.currentHp);
+      console.log('BattleEngine : Defender hp before:', defender.currentHp);
       defender.currentHp = Math.max(0, defender.currentHp - damageResult.damage);
-      console.log('defender hp after:', defender.currentHp);
+      console.log('BattleEngine : Defender hp after:', defender.currentHp);
       // Check if the defender is knocked out
       if (defender.currentHp <= 0) {
         defender.isAlive = false;
@@ -371,7 +373,6 @@ export class BattleEngine {
     } else if (damageResult.effectiveness === 0) {
       message += ' - Ça n\'affecte pas le Pokémon ennemi...';
     }
-    console.log('Message execute move:', message);
     return {
       success: true,
       damage: damageResult.damage,
@@ -381,51 +382,4 @@ export class BattleEngine {
       message: message
     };
   }
-
-// Apply effects WIP (hardest part)
-  // applyMoveEffects(move: PokemonMove, attacker: Pokemon, defender: Pokemon, battleState: BattleState): any[] {
-  //   const statChanges = [];
-    
-  //   // If move has effects
-  //   if (move.effects) {
-  //     // For each effect (Because move can have multiple effects)
-  //     for (const effect of move.effects) {
-  //       // Chance of effect activation
-  //       if (Math.random() * 100 <= (effect.chance || 100)) {
-          
-  //         // Status application
-  //         if (effect.status) {
-  //           // Check if the defender already has a status
-  //           if (!defender.status) {
-  //             defender.status = effect.status;
-  //             statChanges.push({
-  //               type: 'status',
-  //               status: effect.status,
-  //               target: defender === battleState.activePokemon.player ? 'player' : 'cpu'
-  //             });
-  //           }
-  //         }
-          
-  //         // Stat changes
-  //         if (effect.statChanges) {
-  //           for (const statChange of effect.statChanges) {
-  //             const targetPokemon = statChange.target === 'self' ? attacker : defender;
-  //             const statKey = statChange.stat as keyof typeof targetPokemon.statModifiers;
-              
-  //             // Limiting stat changes to -6 to +6
-  //             targetPokemon.statModifiers[statKey] = Math.max(-6, Math.min(6, targetPokemon.statModifiers[statKey] + statChange.value));
-              
-  //             statChanges.push({
-  //               stat: statChange.stat,
-  //               change: statChange.value,
-  //               target: targetPokemon === battleState.activePokemon.player ? 'player' : 'cpu'
-  //             });
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-    
-  //   return statChanges;
-  // }
 }

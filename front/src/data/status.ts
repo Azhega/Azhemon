@@ -35,15 +35,14 @@ export const status = {
       // EffectManager.resetEffects(pokemon); IDK how to handle this, will check later
     },
     onPreMove: (context: any) => {
-      console.log('onPreMove paralysis', context);
+      console.log('Status : onPreMove paralysis', context);
       const random = Math.random();
       if (context.attacker.statusKey === 'paralysis' && random < 0.25) {
-        console.log('random act false', random);
+        console.log('Status : random act false', random);
         context.attacker.canAct = false;
-        console.log('onPreMove: attack canAct', context.attacker.canAct);
         console.log(`${context.attacker.name} est paralysé et ne peut pas agir !`);
       } else {
-        console.log('random act true', random);
+        console.log('Status : random act true', random);
         context.attacker.canAct = true;
       }
     }

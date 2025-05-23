@@ -20,7 +20,6 @@ export class BattleController {
   }
 
   initialize(): void {
-    console.log('Initializing battle controller...');
     const state = Store.getState();
     
     const playerTeam = state.currentTeam || [];
@@ -35,6 +34,11 @@ export class BattleController {
     // Generate a CPU team (to implement later)
     const cpuTeam = this.generateCpuTeam(validPlayerTeam.length);
 
+    /*
+    ============================================================================
+    - INITIAL CONTEXT DEFINITION
+    ============================================================================
+    */
     const context = {
       damage: null,
       move: null,
@@ -44,8 +48,8 @@ export class BattleController {
       effectiveness: null,
       critical: null,
       pendingLogs: [],
-    }
-    
+    };
+
     // Initialize battle state
     const battleState: BattleState = {
       turn: 0,
@@ -94,8 +98,7 @@ export class BattleController {
   }
   
   private startBattle(): void {
-    const state = Store.getState();
-    const battleState = state.battle;
+    let battleState = Store.getState().battle;
     
     if (!battleState) {
       console.error('Battle state not initialized');
@@ -110,25 +113,36 @@ export class BattleController {
         log: [...battleState.log, 'La bataille commence !']
       }
     });
-    
-    EventBus.emit('battle:turn-start', 1); // console.log('Turn started:', 1);
 
-    // Register abilities and items effects for both Pokemon
-    EffectManager.unregisterAllEffects();
+    /* 
+    ============================================================================
+    - CLEAR ALL EFFECTS FOR NEW BATTLE
+    - REGISTER ABILITIES/ITEMS EFFECTS FOR BOTH POKEMON
+    - THESE EFFECTS ARE RESET AT THE START OF EACH TURN
+    ============================================================================
+    */
+    EffectManager.clearAllEffects();
     EffectManager.registerPokemonEffects(battleState.activePokemon.player);
     EffectManager.registerPokemonEffects(battleState.activePokemon.cpu);
 
-    // Run onTurnStart effects
-    // EffectManager.applyTurnStartEffects(battleState);
+    /*
+    ============================================================================
+    - HOOK : ON TURN START ===> BEGINNING OF BATTLE
+    ============================================================================
+    */
+    // EffectManager.applyTurnStartEffects(battleState); I don't implement one yet
     
-    // Run onSwitch effects (as the battle kinda starts with a switch)
-    const latestState = Store.getState();
-    const latestBattleState = latestState.battle;
-    EffectManager.applyOnSwitchEffects(latestBattleState.context);
+    /*
+    ============================================================================
+    - HOOK : ON SWITCH ===> BEGINNING OF BATTLE
+    ============================================================================
+    */
+    battleState = Store.getState().battle;
+    EffectManager.applyOnSwitchEffects(battleState.context);
     Store.setState({
       battle: {
-        ...latestBattleState,
-        log: [...latestBattleState.log, latestBattleState.context.pendingLogs.shift() as string]
+        ...battleState,
+        log: [...battleState.log, battleState.context.pendingLogs.shift() as string]
       }
     });
 
@@ -136,46 +150,23 @@ export class BattleController {
   }
   
   private selectMove(moveIndex: number): void {
-    const state = Store.getState();
-    const battleState = state.battle;
+    const battleState = Store.getState().battle;
     const activePokemon = battleState.activePokemon.player;
 
     if (moveIndex >= activePokemon.moves.length) {
       console.error('Invalid move index');
       return;
     }
-    
-    if (moveIndex === -1) {
-      console.log('Struggle move selected');
 
-      const playerAction: BattleAction = {
-      type: 'struggle',
-      user: 'player',
-      target: 'cpu',
-      data: {
-        moveIndex: -1,
-        move: null
-      }};
+    let moveType = 'move';
+    let selectedMove = activePokemon.moves[moveIndex] || null; // To test with struggle
+    if(moveIndex === -1) {
+      moveType = 'struggle';
+      console.log('Battle Controller : Struggle move selected');
+    }
 
-      const cpuAction = this.generateCpuAction();
-      
-      // Create turn
-      const currentTurn: BattleTurn = {
-        turnNumber: battleState.turn,
-        actions: {
-          player: playerAction,
-          cpu: cpuAction
-        }
-      };
-      
-      console.log('Executing turn:', currentTurn);
-      this.executeTurn(currentTurn);
-
-    } else {
-      const selectedMove = activePokemon.moves[moveIndex];
-    
-      const playerAction: BattleAction = {
-        type: 'move',
+    const playerAction: BattleAction = {
+        type: moveType,
         user: 'player',
         target: 'cpu',
         data: {
@@ -183,23 +174,19 @@ export class BattleController {
           move: selectedMove
         }
       };
-      const state = Store.getState();
-      const battleState = state.battle;
-      const cpuPokemon = battleState.activePokemon.cpu;
-      const cpuAction = this.generateCpuAction();
+
+    const cpuAction = this.generateCpuAction();
       
-      // Create turn
-      const currentTurn: BattleTurn = {
-        turnNumber: battleState.turn,
-        actions: {
-          player: playerAction,
-          cpu: cpuAction
-        }
-      };
-      
-      console.log('Executing turn:', currentTurn);
-      this.executeTurn(currentTurn);
-    }
+    // Create turn
+    const currentTurn: BattleTurn = {
+      turnNumber: battleState.turn,
+      actions: {
+        player: playerAction,
+        cpu: cpuAction
+      }
+    };
+    
+    this.executeTurn(currentTurn);
   }
   
   private switchPokemon(pokemonIndex: number): void {
@@ -341,7 +328,6 @@ export class BattleController {
       ...move,
       currentPP: move.pp
     }));
-    console.log('CPU Pokemon Moves : ', cpuMoves);
     return cpuMoves;
   }
   
@@ -372,7 +358,7 @@ export class BattleController {
     }
 
     if (cpuPokemon.moves.every((move: PokemonMove) => move.currentPP <= 0)) {
-      console.log('CPU Pokemon has no moves left');
+      console.log('BattleController : CPU Pokemon has no moves left');
       // Struggle if no moves available
       return {
         type: 'struggle',
@@ -389,7 +375,7 @@ export class BattleController {
       cpuPokemon.moves.splice(randomMoveIndex, 1);
     }
      
-    console.log('CPU selected move:', randomMove);
+    console.log('BattleController : CPU selected move:', randomMove);
     return {
       type: 'move',
       user: 'cpu',
@@ -403,14 +389,13 @@ export class BattleController {
   
   private executeTurn(turn: BattleTurn): void {
     this.turnManager?.executeTurn(turn, () => {
-      // Callback after turn execution
+      // Callback after turn execution, check if battle over, otherwise next turn
       this.checkBattleState();
     });
   }
   
   private checkBattleState(): void {
-    const state = Store.getState();
-    const battleState = state.battle;
+    const battleState = Store.getState().battle;
     
     // Check if any team is defeated
     const isPlayerTeamDefeated = battleState.playerTeam.every((pokemon: Pokemon) => !pokemon.isAlive);
@@ -449,18 +434,26 @@ export class BattleController {
         turn: battleState.turn + 1
       }
     });
-    
+
     // Prepare for next turn
-    EventBus.emit('battle:turn-start', battleState.turn + 1);
 
     battleState.activePokemon.player.canAct = true;
     battleState.activePokemon.cpu.canAct = true;
 
-    // Clear all effects and register effects of (new) active Pokemon
+    /*
+    ============================================================================
+    - RESET ALL EFFECTS FOR NEW TURN
+    - REGISTER EFFECTS FOR (NEW) ACTIVE POKEMON
+    ============================================================================
+    */
     EffectManager.resetEffects(battleState.activePokemon.player, battleState.activePokemon.cpu); 
 
-    // Run onTurnStart effects
-    EffectManager.applyTurnStartEffects(battleState);
+    /*
+    ============================================================================
+    - HOOK : ON TURN START ===> BEGINNING OF TURN
+    ============================================================================
+    */
+    // EffectManager.applyTurnStartEffects(battleState); I don't implemented one yet
     
     this.battleView?.showActionSelection();
   }

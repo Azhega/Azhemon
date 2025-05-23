@@ -3,7 +3,6 @@ import { Pokemon } from './PokemonModel';
 export type BattleStatus = 'initializing' | 'active' | 'won' | 'lost';
 export type WeatherType = 'clear' | 'rain' | 'sun' | 'sandstorm' | 'hail' | 'fog'; // to implement later
 export type TerrainType = 'none' | 'electric' | 'grassy' | 'misty' | 'psychic'; // to implement later
-export type ActionType = 'move' | 'switch' | 'struggle';
 export type UserType = 'player' | 'cpu';
 export type TargetType = 'player' | 'cpu' | 'self' | 'all';
 
@@ -23,7 +22,7 @@ export interface BattleState {
 }
 
 export interface BattleAction {
-  type: ActionType;
+  type: string;
   user: UserType;
   target: TargetType;
   data: any; // Specific data for the action (move, switch, etc.)

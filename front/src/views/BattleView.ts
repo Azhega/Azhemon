@@ -35,7 +35,6 @@ export class BattleView {
 
   destroy(): void {
     // Remove event listeners
-    EventBus.off('battle:turn-start', this.onTurnStart);
     EventBus.off('battle:show-pokemon-selection', this.showTeamSelection);
 
     // Unsubscribe from the store
@@ -60,7 +59,6 @@ export class BattleView {
   }
   
   private registerEventListeners(): void {
-    EventBus.on('battle:turn-start', (turnNumber) => this.onTurnStart(turnNumber));
     EventBus.on('battle:show-pokemon-selection', () => this.showTeamSelection(true));
 
     // Store changes
@@ -187,7 +185,7 @@ export class BattleView {
   }
 
   private renderPokemonSprite(container: HTMLElement, pokemon: Pokemon, side: 'player' | 'cpu'): void {
-    console.log(`Rendering ${side} Pokemon:`, pokemon);
+    console.log(`BattleView : Rendering ${side} Pokemon:`, pokemon);
     // Create sprite container
     const spriteContainer = document.createElement('div');
     spriteContainer.className = 'pokemon-battle-sprite';
@@ -262,8 +260,7 @@ export class BattleView {
   }
 
   showActionSelection(): void {
-    const state = Store.getState();
-    const battleState = state.battle;
+    const battleState = Store.getState().battle;
     const playerPokemon = battleState.activePokemon.player;
 
     if (!this.actionMenu || !this.moveMenu || !this.teamMenu) {
@@ -308,10 +305,9 @@ export class BattleView {
       console.error('Action or move menu not found');
       return;
     }
-    
-    const state = Store.getState();
-    const battleState = state.battle;
-    
+
+    const battleState = Store.getState().battle;
+
     if (!battleState) {
       console.error('Battle state not initialized');
       return;
@@ -492,11 +488,6 @@ export class BattleView {
     if (this.battleContainer) {
       this.battleContainer.appendChild(resultContainer);
     }
-  }
-  
-  private onTurnStart(turnNumber: number): void {
-    console.log(`Turn ${turnNumber} started`);
-    // Additional turn start logic can be added here
   }
 
   private getTypeColor(type: string): string {

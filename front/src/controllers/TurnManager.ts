@@ -14,10 +14,9 @@ export class TurnManager {
   }
   
   executeTurn(turn: BattleTurn, callback: () => void): void {
-    console.log(`Executing turn ${turn.turnNumber}`);
+    console.log(`Turn Manager : Executing turn ${turn.turnNumber} : `, turn);
     
-    const state = Store.getState();
-    const battleState = state.battle;
+    const battleState = Store.getState().battle;
     
     if (!battleState) {
       console.error('Battle state not initialized');
@@ -72,8 +71,11 @@ export class TurnManager {
       }
     }
     
-    // Execute first action
-    console.log('First action:', firstAction);
+    /* 
+    ============================================================================
+    - EXECUTE FIRST ACTION
+    ============================================================================
+    */
     this.executeAction(firstAction, firstIsPlayer, () => {
       // Check if battle is over
       if (this.checkBattleOver()) {
@@ -87,41 +89,12 @@ export class TurnManager {
       // If second Pokemon is KO, skip to end
       const firstActorPokemon = firstIsPlayer ? battleState.activePokemon.player : battleState.activePokemon.cpu;
       const secondActorPokemon = firstIsPlayer ? battleState.activePokemon.cpu : battleState.activePokemon.player;
-      console.log('Second pokemon:', secondActorPokemon);
-      if (!secondActorPokemon.isAlive) {
-        console.log('Second Pokemon is KO, skipping to end');
 
-        if (secondActorPokemon === battleState.activePokemon.player) {
-          console.log('Player Pokemon is KO, player must select another Pokemon');
-          // this.applyEndTurnEffects();
+      this.checkIfPokemonIsAlive(firstActorPokemon, callback);
+      this.checkIfPokemonIsAlive(secondActorPokemon, callback);
 
-          // Event to show Pokemon selection for the player to select another Pokemon
-          EventBus.emit('battle:show-pokemon-selection');
-
-          // Wait for player to select a Pokémon
-          this.waitForPlayerPokemonSelection(() => {
-            callback();
-          });
-        } else if (secondActorPokemon === battleState.activePokemon.cpu) {
-          console.log('CPU Pokemon is KO, CPU must select another Pokemon');
-          // this.applyEndTurnEffects();
-
-          // Automatically switch to the next available Pokémon for the CPU
-          this.switchCpuPokemon();
-
-          callback();
-        } else {
-          console.error('Second Pokemon is not supported :', secondActorPokemon)
-          callback();
-        }
-        return;
-      }
-
-      console.log('Second pokemon is alive');
 
       // Execute second action
-      console.log('Second action:', secondAction);
-
       this.executeAction(secondAction, !firstIsPlayer, () => {
         // Check if battle is over
         if (this.checkBattleOver()) {
@@ -129,7 +102,7 @@ export class TurnManager {
           callback();
           return;
         }
-        console.log('Battle is not over after second action');
+        console.log('TurnManager : Battle is not over after second action');
 
         // Run onTurnEnd effects
         const state = Store.getState();
@@ -143,38 +116,12 @@ export class TurnManager {
           }
         });
 
-        if (!firstActorPokemon.isAlive) {
-          console.log('First Pokemon is KO');
-
-          if (firstActorPokemon === battleState.activePokemon.player) {
-            console.log('Player Pokemon is KO, player must select another Pokemon');
-
-            // Event to show Pokemon selection for the player to select another Pokemon
-            EventBus.emit('battle:show-pokemon-selection');
-
-            // Wait for player to select a Pokémon
-            this.waitForPlayerPokemonSelection(() => {
-              callback();
-            });
-          } else if (firstActorPokemon === battleState.activePokemon.cpu) {
-            console.log('CPU Pokemon is KO, CPU must select another Pokemon');
-
-            // Automatically switch to the next available Pokémon for the CPU
-            this.switchCpuPokemon();
-
-            callback();
-          } else {
-            console.error('Second Pokemon is not supported :', secondActorPokemon)
-            callback();
-          }
-          return;
-        }
+        this.checkIfPokemonIsAlive(secondActorPokemon, callback);
+        this.checkIfPokemonIsAlive(firstActorPokemon, callback);
         // Recall to indicate end of turn
         callback();
       });
-      console.log('Second action end:');
     });
-    console.log('First action end:');
   }
   
   private calculateActionPriority(action: BattleAction, pokemon: Pokemon): number {
@@ -190,9 +137,8 @@ export class TurnManager {
   }
   
   private executeAction(action: BattleAction, isPlayer: boolean, callback: () => void): void {
-    const state = Store.getState();
-    const battleState = state.battle;
-    console.log('executing action:', action);
+    let battleState = Store.getState().battle;
+    console.log('Turn Manager : Executing action:', action);
     
     if (!battleState) {
       console.error('Battle state not initialized');
@@ -207,17 +153,17 @@ export class TurnManager {
     // Execute action based on type
     switch (action.type) {
       case 'move':
-        console.log('Executing Move Action');
+        console.log('Turn Manager : Executing Move Action');
         this.executeMove(action, isPlayer, actor, target, callback);
         break;
 
       case 'switch':
-        console.log('Executing Switch Action');
+        console.log('Turn Manager : Executing Switch Action');
         this.executeSwitch(action, isPlayer, callback);
         break;
         
       case 'struggle':
-        console.log('Executing Struggle Action');
+        console.log('Turn Manager : Executing Struggle Action');
         this.executeStruggle(isPlayer, actor, target, callback);
         break;
 
@@ -228,19 +174,29 @@ export class TurnManager {
   }
   
   private executeMove(action: BattleAction, isPlayer: boolean, actor: Pokemon, target: Pokemon, callback: () => void): void {
-    // Register move effects
+    /*
+    ============================================================================
+    - REGISTER MOVE EFFECTS ===> JUST BEFORE PREMOVE EFFECTS
+    - MOVE EFFECTS WILL BE CLEARED AFTER POSTMOVE EFFECTS
+    ============================================================================
+    */
     EffectManager.registerMoveEffects(action.data.move.moveKey);
-    // Run onPreMove effects
-    const firstBattleState = Store.getState().battle;
-    firstBattleState.context = {
-      ...firstBattleState.context,
+
+    /*
+    ============================================================================
+    - HOOK : ON PRE MOVE ===> BEFORE A MOVE IS EXECUTED
+    ============================================================================
+    */
+    let battleState = Store.getState().battle;
+    battleState.context = {
+      ...battleState.context,
       attacker: actor,
       defender: target,
       move: action.data.move,
       moveType: action.data.move.type,
       pendingLogs: []
-    }
-    EffectManager.applyPreMoveEffects(firstBattleState.context);
+    };
+    EffectManager.applyPreMoveEffects(battleState.context);
     // Store.setState({
     //   battle: {
     //     ...firstBattleState,
@@ -248,17 +204,17 @@ export class TurnManager {
     //   }
     // });
 
-    const secondBattleState = Store.getState().battle;
-    const context = secondBattleState.context;
-    console.log('attacker can ACT : ', context.attacker.canAct);
-    actor = context.attacker;
-    console.log('actor can ACT : ', actor.canAct);
-    target = context.defender;
+    /*
+    ============================================================================
+    - BATTLE ENGINE : EXECUTE MOVE
+    - HOOK : ON DAMAGE MODIFIER ===> WHEN CALCULATING DAMAGE
+    ============================================================================
+    */
     const move = action.data.move;
     const moveResult = this.battleEngine.executeMove(move, actor, target);
-    console.log('Move result:', moveResult)
-    const battleState = Store.getState().battle;
-    
+    console.log('Turn Manager : Move result:', moveResult);
+
+    battleState = Store.getState().battle;
     // Update log
     Store.setState({
       battle: {
@@ -272,78 +228,74 @@ export class TurnManager {
     });
     
     setTimeout(() => {
-      // Display any stat changes
-      if (moveResult.statChanges && moveResult.statChanges.length > 0) {
-        for (const statChange of moveResult.statChanges) {
-          const changeDirection = statChange.change > 0 ? 'augmente' : 'diminue';
-          const magnitude = Math.abs(statChange.change) === 1 ? '' : (Math.abs(statChange.change) === 2 ? 'beaucoup ' : 'énormément ');
-          const targetName = statChange.target === 'player' ? battleState.activePokemon.player.name : battleState.activePokemon.cpu.name;
-          const statName = this.getStatName(statChange.stat);
-          
-          const statMessage = `${targetName} : ${statName} ${changeDirection} ${magnitude}!`;
-          console.log('Stat change message:', statMessage);
-          
-          // Update log with the latest state to avoid log overwriting
-          const lateState = Store.getState();
-          const lateBattleState = lateState.battle;
-          Store.setState({
-            battle: {
-              ...lateBattleState,
-              log: [...lateBattleState.log, statMessage]
-            }
-          });
-        }
-      }
-
-      console.log('Target : ', target);
+      console.log('TurnManager : Target : ', target);
       
       // Check if target is KO
       if (target.currentHp <= 0) {
-        console.log('Target is KO');
+        console.log('TurnManager : Target is KO');
         target.isAlive = false;
         
         const faintMessage = `${target.name} est K.O. !`;
         
         // Update log with the latest state to avoid log overwriting
-        const latestState = Store.getState();
-        const latestBattleState = latestState.battle;
+        battleState = Store.getState().battle;
         Store.setState({
           battle: {
-            ...latestBattleState,
-            log: [...latestBattleState.log, faintMessage]
+            ...battleState,
+            log: [...battleState.log, faintMessage]
           }
         });
 
-        console.log('latest battle state context : ', latestBattleState.context);
-        EffectManager.applyPostMoveEffects(latestBattleState.context);
+        /*
+        ========================================================================
+        - HOOK : ON POST MOVE ===> AFTER A MOVE IS EXECUTED
+        ========================================================================
+        */
+        EffectManager.applyPostMoveEffects(battleState.context);
 
         Store.setState({
           battle: {
-            ...latestBattleState,
-            log: [...latestBattleState.log, latestBattleState.context.pendingLogs.shift() as string]
+            ...battleState,
+            log: [...battleState.log, battleState.context.pendingLogs.shift() as string]
           }
         });
 
+        /*
+        ========================================================================
+        - UNREGISTER MOVE EFFECTS ===> RIGHT AFTER POSTMOVE EFFECTS
+        ========================================================================
+        */
         EffectManager.unregisterMoveEffects();
         
-        console.log('Continuing after target KO');
+        console.log('Turn Manager : Continuing after target KO');
         // Timer before continuing
         setTimeout(callback, 1000);
       } else {
         // Continue normally
-        const latestState = Store.getState();
-        const latestBattleState = latestState.battle;
-        console.log('latest battle state context : ', latestBattleState.context);
-        EffectManager.applyPostMoveEffects(latestBattleState.context);
+        battleState = Store.getState().battle;
+
+        /*
+        ========================================================================
+        - HOOK : ON POST MOVE ===> AFTER A MOVE IS EXECUTED
+        ========================================================================
+        */
+        EffectManager.applyPostMoveEffects(battleState.context);
 
         Store.setState({
           battle: {
-            ...latestBattleState,
-            log: [...latestBattleState.log, latestBattleState.context.pendingLogs.shift() as string]
+            ...battleState,
+            log: [...battleState.log, battleState.context.pendingLogs.shift() as string]
           }
         });
 
+        /*
+        ========================================================================
+        - UNREGISTER MOVE EFFECTS ===> RIGHT AFTER POSTMOVE EFFECTS
+        ========================================================================
+        */
         EffectManager.unregisterMoveEffects();
+
+        console.log('Turn Manager : Continuing, target alive');
         callback();
       }
     }, 1500);
@@ -586,4 +538,37 @@ export class TurnManager {
       console.error('No available Pokémon for CPU');
     }
   };
+
+  private checkIfPokemonIsAlive(pokemon: Pokemon, callback: () => void): boolean {
+    const battleState = Store.getState().battle;
+    if (pokemon.currentHp <= 0) {
+      pokemon.isAlive = false;
+      console.log(`${pokemon.name} is KO`);
+
+      if (pokemon === battleState.activePokemon.player) {
+        console.log('Player Pokemon is KO, player must select another Pokemon');
+
+        // Event to show Pokemon selection for the player to select another Pokemon
+        EventBus.emit('battle:show-pokemon-selection');
+
+        // Wait for player to select a Pokémon
+        this.waitForPlayerPokemonSelection(() => {
+          callback();
+        });
+      } else if (pokemon === battleState.activePokemon.cpu) {
+        console.log('CPU Pokemon is KO, CPU must select another Pokemon');
+
+        // Automatically switch to the next available Pokémon for the CPU
+        this.switchCpuPokemon();
+
+        callback();
+      } else {
+        console.error('Second Pokemon is not supported :', pokemon)
+        callback();
+      }
+      return false;
+    }
+    console.log(`${pokemon.name} is alive`);
+    return true;
+  }
 }
