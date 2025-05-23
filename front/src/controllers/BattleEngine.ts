@@ -320,6 +320,13 @@ export class BattleEngine {
   
   executeMove(move: PokemonMove, attacker: Pokemon, defender: Pokemon): MoveResult {
     const battleState = Store.getState().battle;
+    console.log('attacker canAct :', attacker.canAct);
+    if (!attacker.canAct) {
+      return {
+        success: false,
+        message: `${attacker.name} ne peut pas agir !`
+      };
+    }
     
     // Check if the move hits
     const hits = this.calculateHit(move, attacker, defender);
@@ -421,82 +428,4 @@ export class BattleEngine {
     
   //   return statChanges;
   // }
-  
-  // Apply status effects before action
-  applyStatusEffectsPreAction(pokemon: Pokemon): {canAct: boolean, message: string} {
-    let canAct = true;
-    let message = '';
-    
-    // If the Pokémon has a status
-    if (pokemon.status) {
-      switch (pokemon.status.name) {
-        case 'paralysis':
-          // 25% chance to be paralyzed
-          if (Math.random() < 0.25) {
-            canAct = false;
-            message = `${pokemon.name} est paralysé et ne peut pas bouger !`;
-          }
-          break;
-          
-        case 'sleep':
-          // WIP sleep mechanic
-          // 33% chance to wake up for now
-          if (Math.random() < 0.33) {
-            pokemon.status = null;
-            message = `${pokemon.name} se réveille !`;
-          } else {
-            canAct = false;
-            message = `${pokemon.name} dort profondément !`;
-          }
-          break;
-          
-        case 'freeze':
-          // 20% chance to thaw
-          if (Math.random() < 0.2) {
-            pokemon.status = null;
-            message = `${pokemon.name} n'est plus gelé !`;
-          } else {
-            canAct = false;
-            message = `${pokemon.name} est gelé !`;
-          }
-          break;
-      }
-    }
-    
-    return { canAct, message };
-  }
-  
-  // Apply status effects after action
-  applyStatusEffectsPostTurn(pokemon: Pokemon): string {
-    let message = '';
-    
-    // If the Pokémon has a status
-    if (pokemon.status) {
-      switch (pokemon.status.name) {
-        case 'burn':
-          // Burn damage is 1/16 of max HP and divide attack by 2
-          const burnDamage = Math.max(1, Math.floor(pokemon.baseStats.hp / 16));
-          pokemon.currentHp = Math.max(0, pokemon.currentHp - burnDamage);
-          message = `${pokemon.name} souffre de sa brûlure !`;
-          
-          if (pokemon.currentHp <= 0) {
-            pokemon.isAlive = false;
-          }
-          break;
-          
-        case 'poison':
-          // Poison damage is 1/8 of max HP (soft poison for now)
-          const poisonDamage = Math.max(1, Math.floor(pokemon.baseStats.hp / 8));
-          pokemon.currentHp = Math.max(0, pokemon.currentHp - poisonDamage);
-          message = `${pokemon.name} souffre du poison !`;
-          
-          if (pokemon.currentHp <= 0) {
-            pokemon.isAlive = false;
-          }
-          break;
-      }
-    }
-    
-    return message;
-  }
 }

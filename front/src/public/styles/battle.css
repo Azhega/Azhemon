@@ -151,10 +151,12 @@
 }
 
 .status-icon {
-  width: 20px;
+  width: 30px;
   height: 20px;
   margin-left: 5px;
-  display: inline-block;
+  display: inline-flex;
+  font-size: small;
+  justify-content: center;
 }
 
 .status-brn {
