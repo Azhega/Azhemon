@@ -204,23 +204,6 @@ export class TurnManager {
     const actor = isPlayer ? battleState.activePokemon.player : battleState.activePokemon.cpu;
     const target = isPlayer ? battleState.activePokemon.cpu : battleState.activePokemon.player;
     
-    // Check status effects before action
-    const statusEffect = this.battleEngine.applyStatusEffectsPreAction(actor);
-    
-    if (!statusEffect.canAct) {
-      // Update log with status effect message
-      Store.setState({
-        battle: {
-          ...battleState,
-          log: [...battleState.log, statusEffect.message]
-        }
-      });
-      console.log('Status effect message:', statusEffect.message)
-      // Timer before continuing
-      setTimeout(callback, 1000);
-      return;
-    }
-    
     // Execute action based on type
     switch (action.type) {
       case 'move':
@@ -249,6 +232,14 @@ export class TurnManager {
     EffectManager.registerMoveEffects(action.data.move.moveKey);
     // Run onPreMove effects
     const firstBattleState = Store.getState().battle;
+    firstBattleState.context = {
+      ...firstBattleState.context,
+      attacker: actor,
+      defender: target,
+      move: action.data.move,
+      moveType: action.data.move.type,
+      pendingLogs: []
+    }
     EffectManager.applyPreMoveEffects(firstBattleState.context);
     // Store.setState({
     //   battle: {
@@ -257,6 +248,12 @@ export class TurnManager {
     //   }
     // });
 
+    const secondBattleState = Store.getState().battle;
+    const context = secondBattleState.context;
+    console.log('attacker can ACT : ', context.attacker.canAct);
+    actor = context.attacker;
+    console.log('actor can ACT : ', actor.canAct);
+    target = context.defender;
     const move = action.data.move;
     const moveResult = this.battleEngine.executeMove(move, actor, target);
     console.log('Move result:', moveResult)
@@ -481,76 +478,6 @@ export class TurnManager {
       // Timer before continuing
       setTimeout(callback, 1000);
     }, 1500);
-  }
-  
-  private applyEndTurnEffects(): void {
-    const state = Store.getState();
-    const battleState = state.battle;
-    
-    if (!battleState) {
-      console.error('Battle state not initialized');
-      return;
-    }
-    
-    // Apply end turn effects for the player's Pokémon
-    if (battleState.activePokemon.player.isAlive) {
-      const playerStatusMessage = this.battleEngine.applyStatusEffectsPostTurn(battleState.activePokemon.player);
-      
-      if (playerStatusMessage) {
-        // Update log
-        Store.setState({
-          battle: {
-            ...battleState,
-            log: [...battleState.log, playerStatusMessage]
-          }
-        });
-      }
-      
-      // Check if the Pokémon is KO after status effect
-      if (battleState.activePokemon.player.currentHp <= 0) {
-        battleState.activePokemon.player.isAlive = false;
-        
-        const faintMessage = `${battleState.activePokemon.player.name} est K.O. !`;
-        
-        // Update log
-        Store.setState({
-          battle: {
-            ...battleState,
-            log: [...battleState.log, faintMessage]
-          }
-        });
-      }
-    }
-    
-    // Apply end turn effects for the CPU's Pokémon
-    if (battleState.activePokemon.cpu.isAlive) {
-      const cpuStatusMessage = this.battleEngine.applyStatusEffectsPostTurn(battleState.activePokemon.cpu);
-      
-      if (cpuStatusMessage) {
-        // Update log
-        Store.setState({
-          battle: {
-            ...battleState,
-            log: [...battleState.log, cpuStatusMessage]
-          }
-        });
-      }
-      
-      // Check if the Pokémon is KO after status effect
-      if (battleState.activePokemon.cpu.currentHp <= 0) {
-        battleState.activePokemon.cpu.isAlive = false;
-        
-        const faintMessage = `${battleState.activePokemon.cpu.name} est K.O. !`;
-        
-        // Update log
-        Store.setState({
-          battle: {
-            ...battleState,
-            log: [...battleState.log, faintMessage]
-          }
-        });
-      }
-    }
   }
   
   private checkBattleOver(): boolean {

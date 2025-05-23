@@ -1,3 +1,5 @@
+import EffectManager from '../controllers/EffectManager';
+
 export const status = {
   burn: {
     id: 1,
@@ -21,19 +23,29 @@ export const status = {
     name: 'Paralysie',
     description: 'Le Pokémon a 25% de chances de ne pas pouvoir agir chaque tour et sa vitesse est réduite de 50%.',
     onApply: (pokemon: any) => {
-      pokemon.speed = Math.floor(pokemon.speed * 0.5);
+      pokemon.currentStats.speed = Math.floor(pokemon.currentStats.speed * 0.5);
       console.log(`${pokemon.name} est paralysé !`);
+      pokemon.status = status['paralysis'];
+      EffectManager.registerStatusEffects(pokemon);
     },
     onRemove: (pokemon: any) => {
-      pokemon.speed = Math.floor(pokemon.speed * 2);
+      pokemon.currentStats.speed = Math.floor(pokemon.currentStats.speed * 2);
       console.log(`${pokemon.name} n'est plus paralysé !`);
+      pokemon.status = null;
+      // EffectManager.resetEffects(pokemon); IDK how to handle this, will check later
     },
     onPreMove: (context: any) => {
-      if (Math.random() < 0.25) {
-        context.pokemon.canAct = false;
-        console.log(`${context.pokemon.name} est paralysé et ne peut pas agir !`);
+      console.log('onPreMove paralysis', context);
+      const random = Math.random();
+      if (context.attacker.statusKey === 'paralysis' && random < 0.25) {
+        console.log('random act false', random);
+        context.attacker.canAct = false;
+        console.log('onPreMove: attack canAct', context.attacker.canAct);
+        console.log(`${context.attacker.name} est paralysé et ne peut pas agir !`);
+      } else {
+        console.log('random act true', random);
+        context.attacker.canAct = true;
       }
-      context.pokemon.canAct = true;
     }
   },
   poison: {

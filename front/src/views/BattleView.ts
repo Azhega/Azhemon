@@ -211,7 +211,8 @@ export class BattleView {
     // Status condition
     if (pokemon.status) {
       const statusIcon = document.createElement('span');
-      statusIcon.className = `status-icon status-${pokemon.status.name.substring(0, 3)}`;
+      statusIcon.className = `status-icon status-${pokemon.status.name.substring(0, 3).toLowerCase()}`;
+      statusIcon.innerHTML = `${pokemon.status.name.substring(0, 3).toUpperCase()}`;
       nameLevel.appendChild(statusIcon);
     }
     

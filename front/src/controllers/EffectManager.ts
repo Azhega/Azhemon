@@ -3,6 +3,7 @@ import { items } from '../data/items';
 import { moves } from '../data/moves';
 import { Pokemon } from '../models/PokemonModel';
 import State from '../utils/Store';
+import { status } from '../data/status';
 
 type EffectHook = 
   | 'onTurnStart'
@@ -21,6 +22,7 @@ export class EffectManager {
   private hooks: Map<EffectHook, EffectFunction[]> = new Map();
   private moveHooks: Map<EffectHook, EffectFunction[]> = new Map();
   private registeredItemFunctions: Map<EffectHook, Set<Function>> = new Map();
+  private registeredStatusFunctions: Map<EffectHook, Set<Function>> = new Map();
 
 
   private constructor() {}
@@ -93,10 +95,36 @@ export class EffectManager {
     }
   };
 
+  public registerStatusEffects(pokemon: Pokemon): void {
+    // Register status effects
+    const statusObj = status[pokemon.statusKey as keyof typeof status];
+    if (statusObj) {
+      for (const key of Object.keys(statusObj)) {
+        const value = statusObj[key as keyof typeof statusObj];
+        if (typeof value === 'function') {
+          const hook = key as EffectHook;
+          if (!this.hooks.has(hook)) {
+            console.log(`Registering status hook : ${hook}`);
+            this.hooks.set(hook, []);
+          }
+          if (!this.registeredStatusFunctions.has(hook)) {
+            this.registeredStatusFunctions.set(hook, new Set());
+          }
+          const registeredFns = this.registeredStatusFunctions.get(hook)!;
+          if (!registeredFns.has(value as Function)) {
+            registeredFns.add(value as Function);
+            console.log(`pushing status hook ${statusObj.name}: ${hook}`);
+            this.hooks.get(hook)!.push((value as Function).bind(statusObj));
+          }
+        }
+      }
+    }
+  }
+
   // To clear effects when a Pokemon leaves the battle
   public unregisterAllEffects() {
     console.log('hooks:', this.hooks);
-    console.log('Unregistering all items/abilities effects', this.hooks);
+    console.log('Unregistering all items/abilities/status effects', this.hooks);
     this.hooks.clear();
   }
 
@@ -112,13 +140,22 @@ export class EffectManager {
     this.registeredItemFunctions.clear();
   }
 
+  public unregisterStatusFunctions() {
+    console.log('registeredStatusFunctions:', this.registeredStatusFunctions);
+    console.log('Unregistering all status functions');
+    this.registeredStatusFunctions.clear();
+  }
+
   public resetEffects(firstPokemon: Pokemon, secondPokemon: Pokemon) {
     console.log('Resetting all effects');
     this.unregisterAllEffects();
     this.unregisterMoveEffects();
     this.unregisterItemFunctions();
+    this.unregisterStatusFunctions();
     this.registerPokemonEffects(firstPokemon);
     this.registerPokemonEffects(secondPokemon);
+    this.registerStatusEffects(firstPokemon);
+    this.registerStatusEffects(secondPokemon);
   }
 
   public runHook(hook: EffectHook, context: any): any[] {

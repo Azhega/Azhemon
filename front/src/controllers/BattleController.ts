@@ -388,8 +388,6 @@ export class BattleController {
     if (randomMove.currentPP === 0) {
       cpuPokemon.moves.splice(randomMoveIndex, 1);
     }
-
-    EffectManager.registerMoveEffects(randomMove.moveKey);
      
     console.log('CPU selected move:', randomMove);
     return {
@@ -454,6 +452,9 @@ export class BattleController {
     
     // Prepare for next turn
     EventBus.emit('battle:turn-start', battleState.turn + 1);
+
+    battleState.activePokemon.player.canAct = true;
+    battleState.activePokemon.cpu.canAct = true;
 
     // Clear all effects and register effects of (new) active Pokemon
     EffectManager.resetEffects(battleState.activePokemon.player, battleState.activePokemon.cpu); 
