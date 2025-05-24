@@ -125,6 +125,8 @@ export class BattleController {
     EffectManager.registerPokemonEffects(battleState.activePokemon.player);
     EffectManager.registerPokemonEffects(battleState.activePokemon.cpu);
 
+    console.log(`BattleController : ====== TURN START : ${battleState.turn + 1} ======`);
+
     /*
     ============================================================================
     - HOOK : ON TURN START ===> BEGINNING OF BATTLE
@@ -447,6 +449,8 @@ export class BattleController {
     ============================================================================
     */
     EffectManager.resetEffects(battleState.activePokemon.player, battleState.activePokemon.cpu); 
+
+    console.log(`BattleController : ====== TURN START : ${battleState.turn + 1} ======`);
 
     /*
     ============================================================================
