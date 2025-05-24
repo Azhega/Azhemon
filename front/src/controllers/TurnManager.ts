@@ -90,9 +90,10 @@ export class TurnManager {
       const firstActorPokemon = firstIsPlayer ? battleState.activePokemon.player : battleState.activePokemon.cpu;
       const secondActorPokemon = firstIsPlayer ? battleState.activePokemon.cpu : battleState.activePokemon.player;
 
-      this.checkIfPokemonIsAlive(firstActorPokemon, callback);
-      this.checkIfPokemonIsAlive(secondActorPokemon, callback);
-
+      if (!this.checkIfPokemonIsAlive(firstActorPokemon, callback) ||
+          !this.checkIfPokemonIsAlive(secondActorPokemon, callback)) {
+        return;
+      }
 
       // Execute second action
       this.executeAction(secondAction, !firstIsPlayer, () => {
@@ -543,10 +544,10 @@ export class TurnManager {
     const battleState = Store.getState().battle;
     if (pokemon.currentHp <= 0) {
       pokemon.isAlive = false;
-      console.log(`${pokemon.name} is KO`);
+      console.log(`TurnManager : ${pokemon.name} is KO`);
 
       if (pokemon === battleState.activePokemon.player) {
-        console.log('Player Pokemon is KO, player must select another Pokemon');
+        console.log(`TurnManager : Player Pokemon is KO, player must select another Pokemon`);
 
         // Event to show Pokemon selection for the player to select another Pokemon
         EventBus.emit('battle:show-pokemon-selection');
@@ -556,7 +557,7 @@ export class TurnManager {
           callback();
         });
       } else if (pokemon === battleState.activePokemon.cpu) {
-        console.log('CPU Pokemon is KO, CPU must select another Pokemon');
+        console.log(`TurnManager : CPU Pokemon is KO, CPU must select another Pokemon`);
 
         // Automatically switch to the next available Pokémon for the CPU
         this.switchCpuPokemon();

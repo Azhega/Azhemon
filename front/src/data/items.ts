@@ -29,7 +29,7 @@ export const items = {
     name: 'Casque Brut',
     description: 'Inflige des dégâts au Pokémon qui touche le porteur avec une attaque Physique',
     onPostMove: (context: any): void => {
-      if (context.defender.itemKey === 'rockyHelmet' && context.move.category === 'Physique' && context.damage > 0) {
+      if (context.defender.itemKey === 'rockyHelmet' && context.move.category === 'Physique' && context.attacker.canAct === true) {
         const itemMessage = `Casque Brut ! ${context.attacker.name} subit des dégâts !`;
         context.pendingLogs.push(itemMessage);
         const damage = Math.floor(context.defender.maxHp / 6);
