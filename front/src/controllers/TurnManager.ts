@@ -105,9 +105,13 @@ export class TurnManager {
         }
         console.log('TurnManager : Battle is not over after second action');
 
-        // Run onTurnEnd effects
-        const state = Store.getState();
-        const battleState = state.battle;
+        const battleState = Store.getState().battle;
+
+        /*
+        ========================================================================
+        - HOOK : ON TURN END ===> AFTER ALL ACTIONS ARE EXECUTED
+        ========================================================================
+        */
         EffectManager.applyTurnEndEffects(battleState.context);
 
         Store.setState({
@@ -117,8 +121,17 @@ export class TurnManager {
           }
         });
 
-        this.checkIfPokemonIsAlive(secondActorPokemon, callback);
-        this.checkIfPokemonIsAlive(firstActorPokemon, callback);
+        // Check again after turn end effects
+        if (this.checkBattleOver()) {
+          console.log('Battle is over');
+          callback();
+          return;
+        }
+
+        if (!this.checkIfPokemonIsAlive(firstActorPokemon, callback) ||
+            !this.checkIfPokemonIsAlive(secondActorPokemon, callback)) {
+          return;
+        }
         // Recall to indicate end of turn
         callback();
       });
@@ -191,6 +204,7 @@ export class TurnManager {
     let battleState = Store.getState().battle;
     battleState.context = {
       ...battleState.context,
+      damage: 0,
       attacker: actor,
       defender: target,
       move: action.data.move,
@@ -303,8 +317,7 @@ export class TurnManager {
   }
 
   private executeSwitch(action: BattleAction, isPlayer: boolean, callback: () => void): void {
-    const state = Store.getState();
-    const battleState = state.battle;
+    const battleState = Store.getState().battle;
     
     if (!battleState) {
       console.error('Battle state not initialized');
@@ -325,30 +338,34 @@ export class TurnManager {
     const oldPokemon = isPlayer ? battleState.activePokemon.player : battleState.activePokemon.cpu;
     
     // Update active Pokemon
-    const updatedBattleState = { ...battleState };
     if (isPlayer) {
-      updatedBattleState.activePokemon.player = newPokemon;
+      battleState.activePokemon.player = newPokemon;
     } else {
-      updatedBattleState.activePokemon.cpu = newPokemon;
+      battleState.activePokemon.cpu = newPokemon;
     }
     
     // Message for switch
     const switchMessage = `${oldPokemon.name}, reviens ! ${newPokemon.name}, go !`;
     
     // Update log
-    updatedBattleState.log = [...updatedBattleState.log, switchMessage];
+    battleState.log = [...battleState.log, switchMessage];
     
     // Update state
-    Store.setState({ battle: updatedBattleState });
+    Store.setState({ battle: battleState });
 
-    updatedBattleState.context.switchedPokemon = newPokemon;
+    battleState.context.switchedPokemon = newPokemon;
 
-    // Run onSwitch effects
-    EffectManager.applyOnSwitchEffects(updatedBattleState.context);
+    /*
+    ============================================================================
+    - HOOK : ON SWITCH ===> AFTER A POKEMON IS SWITCHED
+    ============================================================================
+    */
+    EffectManager.applyOnSwitchEffects(battleState.context);
+    
     Store.setState({
       battle: {
-        ...updatedBattleState,
-        log: [...updatedBattleState.log, updatedBattleState.context.pendingLogs.shift() as string]
+        ...battleState,
+        log: [...battleState.log, battleState.context.pendingLogs.shift() as string]
       }
     });
 
@@ -389,8 +406,7 @@ export class TurnManager {
       moveResult.message += ` ${actor.name} subit un contrecoup !`;
     }
     
-    const state = Store.getState();
-    const battleState = state.battle;
+    const battleState = Store.getState().battle;
     
     // Update log
     Store.setState({
@@ -434,9 +450,8 @@ export class TurnManager {
   }
   
   private checkBattleOver(): boolean {
-    const state = Store.getState();
-    const battleState = state.battle;
-    
+    const battleState = Store.getState().battle;
+
     if (!battleState) {
       console.error('Battle state not initialized');
       return true;
@@ -471,8 +486,7 @@ export class TurnManager {
       EventBus.off('battle:pokemon-selected', onPokemonSelected);
 
       // Update the active Pokémon for the player
-      const state = Store.getState();
-      const battleState = state.battle;
+      const battleState = Store.getState().battle;
       const selectedPokemon = battleState.playerTeam[selectedPokemonIndex];
 
       if (selectedPokemon && selectedPokemon.isAlive) {
@@ -515,8 +529,7 @@ export class TurnManager {
   };
 
   private switchCpuPokemon(): void {
-    const state = Store.getState();
-    const battleState = state.battle;
+    const battleState = Store.getState().battle;
 
     // Find the next available Pokémon in the CPU's team
     const nextPokemon = battleState.cpuTeam.find((pokemon: Pokemon) => pokemon.isAlive);
@@ -536,7 +549,7 @@ export class TurnManager {
         },
       });
     } else {
-      console.error('No available Pokémon for CPU');
+      console.log('No available Pokémon for CPU, player wins');
     }
   };
 

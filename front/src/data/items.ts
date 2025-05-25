@@ -7,8 +7,7 @@ export const items = {
     name: 'Restes',
     description: 'Restaure 1/16 des PV max du porteur à chaque tour',
     onTurnEnd: (context: any): void => {
-      const state = Store.getState();
-      const battleState = state.battle;
+      const battleState = Store.getState().battle;
       console.log('battleState : ', battleState);
       for (const pokemon of Object.values(battleState.activePokemon) as Pokemon[]) {
         if (pokemon.itemKey === 'leftovers' && pokemon.currentHp > 0 && pokemon.currentHp < pokemon.maxHp) {
@@ -29,7 +28,8 @@ export const items = {
     name: 'Casque Brut',
     description: 'Inflige des dégâts au Pokémon qui touche le porteur avec une attaque Physique',
     onPostMove: (context: any): void => {
-      if (context.defender.itemKey === 'rockyHelmet' && context.move.category === 'Physique' && context.attacker.canAct === true) {
+      if (context.defender.itemKey === 'rockyHelmet' && context.move.category === 'Physique' 
+        && context.attacker.canAct === true && context.damage > 0) {
         const itemMessage = `Casque Brut ! ${context.attacker.name} subit des dégâts !`;
         context.pendingLogs.push(itemMessage);
         const damage = Math.floor(context.defender.maxHp / 6);

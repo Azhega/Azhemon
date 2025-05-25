@@ -154,8 +154,7 @@ export class BattleView {
       return;
     }
 
-    const state = Store.getState();
-    const battleState = state.battle;
+    const battleState = Store.getState().battle;
     
     if (!battleState) {
       console.error('Battle state not initialized');
@@ -368,8 +367,7 @@ export class BattleView {
       return;
     }
     
-    const state = Store.getState();
-    const battleState = state.battle;
+    const battleState = Store.getState().battle;
     
     if (!battleState) {
       console.error('Battle state not initialized');
