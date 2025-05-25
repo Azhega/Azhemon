@@ -129,13 +129,6 @@ export class BattleController {
 
     /*
     ============================================================================
-    - HOOK : ON TURN START ===> BEGINNING OF BATTLE
-    ============================================================================
-    */
-    // EffectManager.applyTurnStartEffects(battleState); I don't implement one yet
-    
-    /*
-    ============================================================================
     - HOOK : ON SWITCH ===> BEGINNING OF BATTLE
     ============================================================================
     */
@@ -147,6 +140,13 @@ export class BattleController {
         log: [...battleState.log, battleState.context.pendingLogs.shift() as string]
       }
     });
+
+    /*
+    ============================================================================
+    - HOOK : ON TURN START ===> BEGINNING OF BATTLE
+    ============================================================================
+    */
+    // EffectManager.applyTurnStartEffects(battleState); I don't implement one yet
 
     this.battleView?.showActionSelection();
   }
@@ -192,8 +192,7 @@ export class BattleController {
   }
   
   private switchPokemon(pokemonIndex: number): void {
-    const state = Store.getState();
-    const battleState = state.battle;
+    const battleState = Store.getState().battle;
     const playerTeam = battleState.playerTeam;
     
     if (pokemonIndex < 0 || pokemonIndex >= playerTeam.length) {
@@ -345,8 +344,7 @@ export class BattleController {
   
   private generateCpuAction(): BattleAction {
     // WIP CPU action
-    const state = Store.getState();
-    const battleState = state.battle;
+    const battleState = Store.getState().battle;
     const cpuPokemon = battleState.activePokemon.cpu;
 
     if (cpuPokemon.moves.length === 0) {
