@@ -109,7 +109,6 @@ export const status = {
     onRemove: (pokemon: any) => {
       console.log(`${pokemon.name} n'est plus endormi !`);
       pokemon.status = null;
-      pokemon.status.sleepTurns = 0; // Reset sleep turns
       // EffectManager.resetEffects(pokemon); // IDK how to handle this, will check later
     },
     onPreMove: (context: any) => {
@@ -121,6 +120,8 @@ export const status = {
           context.attacker.statusKey = null;
           context.attacker.canAct = true;
           console.log(`${context.attacker.name} se réveille !`);
+          const statusMessage = `${context.attacker.name} se réveille !`;
+          context.pendingLogs.push(statusMessage);
         } else {
           context.attacker.canAct = false;
           context.attacker.status.sleepTurns += 1;
@@ -152,6 +153,8 @@ export const status = {
           context.attacker.statusKey = null;
           context.attacker.canAct = true;
           console.log(`${context.attacker.name} n'est plus gelé !`);
+          const statusMessage = `${context.attacker.name} n'est plus gelé !`;
+          context.pendingLogs.push(statusMessage);
         } else {
           context.attacker.canAct = false;
           context.attacker.status.sleepTurns += 1;

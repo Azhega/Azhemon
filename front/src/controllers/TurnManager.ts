@@ -203,12 +203,14 @@ export class TurnManager {
       pendingLogs: []
     };
     EffectManager.applyPreMoveEffects(battleState.context);
-    // Store.setState({
-    //   battle: {
-    //     ...firstBattleState,
-    //     log: [...firstBattleState.log, firstBattleState.context.pendingLogs.shift() as string]
-    //   }
-    // });
+    Store.setState({
+      battle: {
+        ...battleState,
+        log: [...battleState.log, ...(battleState.context.pendingLogs)]
+      }
+    });
+
+    battleState.context.pendingLogs.length = 0;
 
     /*
     ============================================================================
@@ -242,7 +244,6 @@ export class TurnManager {
       if (target.currentHp <= 0) {
         target.isAlive = false;
         console.log('TurnManager : Target is KO');
-        
         
         const faintMessage = `${target.name} est K.O. !`;
         
@@ -556,6 +557,14 @@ export class TurnManager {
     if (pokemon.currentHp <= 0) {
       pokemon.isAlive = false;
       console.log(`TurnManager : ${pokemon.name} is KO`);
+      const faintMessage = `${pokemon.name} est K.O. !`;
+
+      Store.setState({
+        battle: {
+          ...battleState,
+          log: [...battleState.log, faintMessage]
+        }
+      });
 
       if (pokemon === battleState.activePokemon.player) {
         console.log(`TurnManager : Player Pokemon is KO, player must select another Pokemon`);
@@ -632,6 +641,14 @@ export class TurnManager {
 
     if (battleState.activePokemon.cpu.currentHp <= 0) {
       battleState.activePokemon.cpu.isAlive = false;
+      const faintMessage = `${battleState.activePokemon.cpu.name} est K.O. !`;
+
+      Store.setState({
+        battle: {
+          ...battleState,
+          log: [...battleState.log, faintMessage]
+        }
+      });
       console.log('TurnManager : CPU Pokemon is KO after turn end effects, CPU must select another Pokemon');
 
       // Automatically switch to the next available Pokémon for the CPU
@@ -644,6 +661,14 @@ export class TurnManager {
 
     if (battleState.activePokemon.player.currentHp <= 0) {
       battleState.activePokemon.player.isAlive = false;
+      const faintMessage = `${battleState.activePokemon.player.name} est K.O. !`;
+
+      Store.setState({
+        battle: {
+          ...battleState,
+          log: [...battleState.log, faintMessage]
+        }
+      });
       console.log('TurnManager : Player Pokemon is KO after turn end effects, player must select another Pokemon');
 
       // Event to show Pokemon selection for the player to select another Pokemon
