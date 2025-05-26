@@ -322,11 +322,18 @@ export const moves = {
     priority: 0,
     description: 'Endort la cible',
     onPostMove: (context: any): void => {
-      if (!context.defender.statusKey) {
-        console.log('Hypnose !', context.defender.name, 'est endormi !');
-        context.defender.statusKey = 'sleep';
-      } else {
-        console.log('Hypnose !', context.defender.name, 'a déjà un statut !');
+      if (context.attacker.canAct === true) {
+        if (context.defender.statusKey === null || context.defender.statusKey === undefined) {
+          const moveMessage = `Hypnose ! ${context.defender.name} est endormi !`;
+          context.pendingLogs.push(moveMessage);
+          console.log(moveMessage);
+          context.defender.statusKey = 'sleep';
+          status['sleep'].onApply(context.defender);
+        } else {
+          const moveMessage = `Hypnose ! ${context.defender.name} a déjà un statut !`;
+          context.pendingLogs.push(moveMessage);
+          console.log(moveMessage);
+        }
       }
     }
   },

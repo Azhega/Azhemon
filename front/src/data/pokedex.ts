@@ -20,7 +20,10 @@ export const Pokedex = {
       'psychic',
       'flameThrower',
       'toxic',
-      'thunderWave'
+      'thunderWave',
+      'will_o_wisp',
+      'hypnosis',
+      'iceWave'
     ]
   },
   gastrodon: {
