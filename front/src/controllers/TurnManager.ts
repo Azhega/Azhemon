@@ -84,9 +84,8 @@ export class TurnManager {
         return;
       }
       
-      console.log('Battle is not over after first action');
+      console.log('TurnManager : Battle is not over after first action');
 
-      // If second Pokemon is KO, skip to end
       const firstActorPokemon = firstIsPlayer ? battleState.activePokemon.player : battleState.activePokemon.cpu;
       const secondActorPokemon = firstIsPlayer ? battleState.activePokemon.cpu : battleState.activePokemon.player;
 
@@ -117,11 +116,14 @@ export class TurnManager {
         /*
         ========================================================================
         - HOOK : ON TURN END ===> AT THE END OF THE TURN
+        - CHECK IF POKEMON ARE KO
         ========================================================================
         */
         this.applyTurnEndEffects(callback);
+        this.checkIfCpuPokemonIsAlive(); // Make it switch if KO
+        this.checkIfPlayerPokemonIsAlive(); // Make player switch if KO
 
-        // Recall to indicate end of turn
+        // this.checkBattleState();
         callback();
       });
     });
@@ -236,8 +238,9 @@ export class TurnManager {
       
       // Check if target is KO
       if (target.currentHp <= 0) {
-        console.log('TurnManager : Target is KO');
         target.isAlive = false;
+        console.log('TurnManager : Target is KO');
+        
         
         const faintMessage = `${target.name} est K.O. !`;
         
@@ -387,10 +390,6 @@ export class TurnManager {
       const recoilDamage = Math.max(1, Math.floor(moveResult.damage / 4));
       actor.currentHp = Math.max(0, actor.currentHp - recoilDamage);
       
-      if (actor.currentHp <= 0) {
-        actor.isAlive = false;
-      }
-      
       // Recoil message
       moveResult.message += ` ${actor.name} subit un contrecoup !`;
     }
@@ -409,6 +408,7 @@ export class TurnManager {
     setTimeout(() => {
       // Check if target is KO
       if (target.currentHp <= 0) {
+        target.isAlive = false;
         const faintMessage = `${target.name} est K.O. !`;
         
         // Update log
@@ -422,6 +422,7 @@ export class TurnManager {
       
       // Check if actor is KO after recoil
       if (actor.currentHp <= 0) {
+        actor.isAlive = false;
         const faintMessage = `${actor.name} est K.O. à cause du contrecoup !`;
         
         // Update log
@@ -551,7 +552,13 @@ export class TurnManager {
       if (pokemon === battleState.activePokemon.player) {
         console.log(`TurnManager : Player Pokemon is KO, player must select another Pokemon`);
 
+        /*
+        ========================================================================
+        - HOOK : ON TURN END ===> AT THE END OF THE TURN
+        ========================================================================
+        */
         this.applyTurnEndEffects(callback);
+        this.checkIfCpuPokemonIsAlive(); // Make it switch if KO
         
         // Event to show Pokemon selection for the player to select another Pokemon
         EventBus.emit('battle:show-pokemon-selection');
@@ -563,7 +570,13 @@ export class TurnManager {
       } else if (pokemon === battleState.activePokemon.cpu) {
         console.log(`TurnManager : CPU Pokemon is KO, CPU must select another Pokemon`);
 
+        /*
+        ========================================================================
+        - HOOK : ON TURN END ===> AT THE END OF THE TURN
+        ========================================================================
+        */
         this.applyTurnEndEffects(callback);
+        this.checkIfPlayerPokemonIsAlive(); // Make player switch if KO
 
         // Automatically switch to the next available Pokémon for the CPU
         this.switchCpuPokemon();
@@ -601,6 +614,33 @@ export class TurnManager {
       console.log('Battle is over');
       callback();
       return;
+    }
+  }
+
+  private checkIfCpuPokemonIsAlive(): void {
+    const battleState = Store.getState().battle;
+
+    if (battleState.activePokemon.cpu.currentHp <= 0) {
+      battleState.activePokemon.cpu.isAlive = false;
+      console.log('TurnManager : CPU Pokemon is KO after turn end effects, CPU must select another Pokemon');
+
+      // Automatically switch to the next available Pokémon for the CPU
+      this.switchCpuPokemon();
+    }
+  }
+
+  private checkIfPlayerPokemonIsAlive(): void {
+    const battleState = Store.getState().battle;
+
+    if (battleState.activePokemon.player.currentHp <= 0) {
+      battleState.activePokemon.player.isAlive = false;
+      console.log('TurnManager : Player Pokemon is KO after turn end effects, player must select another Pokemon');
+
+      // Event to show Pokemon selection for the player to select another Pokemon
+      EventBus.emit('battle:show-pokemon-selection');
+
+      // Wait for player to select a Pokémon
+      this.waitForPlayerPokemonSelection(() => {});
     }
   }
 }

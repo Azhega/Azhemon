@@ -69,9 +69,31 @@ export const status = {
     id: 3,
     name: 'Poison',
     description: 'Le Pokémon subit des dégâts chaque tour.',
-    onTurnEnd: (pokemon: any) => {
-      pokemon.currentHp -= Math.floor(pokemon.maxHp / 8);
-      console.log(`${pokemon.name} subit des dégâts de poison !`);
+    onApply: (pokemon: any) => {
+      console.log(`${pokemon.name} est empoisonné !`);
+      pokemon.status = status['poison'];
+      EffectManager.registerStatusEffects(pokemon);
+    },
+    onRemove: (pokemon: any) => {
+      console.log(`${pokemon.name} n'est plus empoisonné !`);
+      pokemon.status = null;
+      // EffectManager.resetEffects(pokemon); // IDK how to handle this, will check later
+    },
+    onTurnEnd: (context: any) => {
+      const battleState = Store.getState().battle;
+      console.log('battleState : ', battleState);
+      for (const pokemon of Object.values(battleState.activePokemon) as Pokemon[]) {
+        if (pokemon.statusKey === 'poison' && pokemon.currentHp > 0) {
+          const statusMessage = `Poison ! ${pokemon.name} subit des dégâts !`;
+          context.pendingLogs.push(statusMessage);
+          console.log('poison before : ', pokemon.name, pokemon.currentHp);
+          pokemon.currentHp = Math.max(
+            0,
+            pokemon.currentHp - Math.floor(pokemon.maxHp / 8)
+          );
+          console.log('poison after : ', pokemon.name, pokemon.currentHp);
+        }
+      }
     }
   },
   sleep: {
