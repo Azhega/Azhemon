@@ -100,17 +100,32 @@ export const status = {
     id: 4,
     name: 'Sommeil',
     description: 'Le Pokémon ne peut pas agir pendant 1 à 3 tours.',
+    onApply: (pokemon: any) => {
+      pokemon.status = status['sleep'];
+      pokemon.status.sleepTurns = 1; // Initial sleep turns
+      console.log(`${pokemon.name} est endormi !`);
+      EffectManager.registerStatusEffects(pokemon);
+    },
+    onRemove: (pokemon: any) => {
+      console.log(`${pokemon.name} n'est plus endormi !`);
+      pokemon.status = null;
+      pokemon.status.sleepTurns = 0; // Reset sleep turns
+      // EffectManager.resetEffects(pokemon); // IDK how to handle this, will check later
+    },
     onPreMove: (context: any) => {
-      context.pokemon.status.sleepTurns = context.pokemon.status.sleepTurns || 1;
-      if ((context.pokemon.status.sleepTurns > 1 && Math.random() < 0.5) || context.pokemon.status.sleepTurns > 3) {
-        context.pokemon.status = null;
-        context.pokemon.status.sleepTurns = 0;
-        context.pokemon.canAct = true;
-        console.log(`${context.pokemon.name} se réveille !`);
-      } else {
-        context.pokemon.canAct = false;
-        context.pokemon.status.sleepTurns += 1;
-        console.log(`${context.pokemon.name} est endormi et ne peut pas agir !`);
+      if (context.attacker.statusKey === 'sleep') {
+        context.attacker.status.sleepTurns = context.attacker.status.sleepTurns || 1;
+        console.log('Status : onPreMove sleepturns :', context.attacker.status.sleepTurns);
+        if (((context.attacker.status.sleepTurns > 1 && Math.random() < 0.5)) || context.attacker.status.sleepTurns > 3) {
+          context.attacker.status = null;
+          context.attacker.statusKey = null;
+          context.attacker.canAct = true;
+          console.log(`${context.attacker.name} se réveille !`);
+        } else {
+          context.attacker.canAct = false;
+          context.attacker.status.sleepTurns += 1;
+          console.log(`${context.attacker.name} est endormi et ne peut pas agir !`, context.attacker.status.sleepTurns);
+        }
       }
     }
   },
