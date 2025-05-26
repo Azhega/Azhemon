@@ -349,11 +349,18 @@ export const moves = {
     priority: 0,
     description: 'Gèle la cible',
     onPostMove: (context: any): void => {
-      if (!context.defender.statusKey) {
-        console.log('Vague Glace !', context.defender.name, 'est gelé !');
-        context.defender.statusKey = 'freeze';
-      } else {
-        console.log('Vague Glace !', context.defender.name, 'a déjà un statut !');
+      if (context.attacker.canAct === true) {
+        if (context.defender.statusKey === null || context.defender.statusKey === undefined) {
+          const moveMessage = `Vague Glace ! ${context.defender.name} est gelé !`;
+          context.pendingLogs.push(moveMessage);
+          console.log(moveMessage);
+          context.defender.statusKey = 'freeze';
+          status['freeze'].onApply(context.defender);
+        } else {
+          const moveMessage = `Vague Glace ! ${context.defender.name} a déjà un statut !`;
+          context.pendingLogs.push(moveMessage);
+          console.log(moveMessage);
+        }
       }
     }
   }
