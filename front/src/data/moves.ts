@@ -241,16 +241,18 @@ export const moves = {
     priority: 0,
     description: 'Brûle la cible',
     onPostMove: (context: any): void => {
-      if (!context.defender.statusKey || context.defender.statusKey === undefined) {
-        // const moveMessage = `Feu Follet ! ${context.defender.name} est brûlé !`;
-        // context.pendingLogs.push(moveMessage);
-        console.log('Feu Follet !', context.defender.name, 'est brûlé !');
-        context.defender.statusKey = 'burn';
-        status['burn'].onApply(context.defender);
-      } else {
-        // const moveMessage = `Feu Follet ! ${context.defender.name} a déjà un statut !`;
-        // context.pendingLogs.push(moveMessage);
-        console.log('Feu Follet !', context.defender.name, 'a déjà un statut !');
+      if (context.attacker.canAct === true) {
+        if (!context.defender.statusKey || context.defender.statusKey === undefined) {
+          const moveMessage = `Feu Follet ! ${context.defender.name} est brûlé !`;
+          context.pendingLogs.push(moveMessage);
+          console.log('Feu Follet !', context.defender.name, 'est brûlé !');
+          context.defender.statusKey = 'burn';
+          status['burn'].onApply(context.defender);
+        } else {
+          const moveMessage = `Feu Follet ! ${context.defender.name} a déjà un statut !`;
+          context.pendingLogs.push(moveMessage);
+          console.log('Feu Follet !', context.defender.name, 'a déjà un statut !');
+        }
       }
     }
   },
@@ -293,11 +295,18 @@ export const moves = {
     priority: 0,
     description: 'Empoisonne la cible',
     onPostMove: (context: any): void => {
-      if (!context.defender.statusKey) {
-        console.log('Toxik !', context.defender.name, 'est empoisonné !');
-        context.defender.statusKey = 'poison';
-      } else {
-        console.log('Toxik !', context.defender.name, 'a déjà un statut !');
+      if (context.attacker.canAct === true) {
+        if (context.defender.statusKey === null || context.defender.statusKey === undefined) {
+          const moveMessage = `Toxic ! ${context.defender.name} est empoisonné !`;
+          context.pendingLogs.push(moveMessage);
+          console.log(moveMessage);
+          context.defender.statusKey = 'poison';
+          status['poison'].onApply(context.defender);
+        } else {
+          const moveMessage = `Toxic ! ${context.defender.name} a déjà un statut !`;
+          context.pendingLogs.push(moveMessage);
+          console.log(moveMessage);
+        }
       }
     }
   },
