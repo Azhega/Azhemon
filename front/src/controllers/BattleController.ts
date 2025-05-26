@@ -125,7 +125,14 @@ export class BattleController {
     EffectManager.registerPokemonEffects(battleState.activePokemon.player);
     EffectManager.registerPokemonEffects(battleState.activePokemon.cpu);
 
-    console.log(`BattleController : ====== TURN START : ${battleState.turn + 1} ======`);
+    battleState = Store.getState().battle;
+    console.log(`BattleController : ====== TURN START : ${battleState.turn} ======`);
+    Store.setState({
+      battle: {
+        ...battleState,
+        log: [...battleState.log, `===== Début du Tour ${battleState.turn} ! =====`]
+      }
+    });
 
     /*
     ============================================================================
@@ -439,7 +446,7 @@ export class BattleController {
   }
 
   private startNextTurn(): void {
-    const battleState = Store.getState().battle;
+    let battleState = Store.getState().battle;
 
     // Battle continues
     Store.setState({
@@ -462,7 +469,14 @@ export class BattleController {
     */
     EffectManager.resetEffects(battleState.activePokemon.player, battleState.activePokemon.cpu); 
 
-    console.log(`BattleController : ====== TURN START : ${battleState.turn + 1} ======`);
+    battleState = Store.getState().battle;
+    console.log(`BattleController : ====== TURN START : ${battleState.turn} ======`);
+    Store.setState({
+      battle: {
+        ...battleState,
+        log: [...battleState.log, `===== Début du Tour ${battleState.turn} ! =====`]
+      }
+    });
 
     /*
     ============================================================================
