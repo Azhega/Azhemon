@@ -395,6 +395,14 @@ export class BattleController {
   }
   
   private checkBattleState(): void {
+    if (this.checkIfBattleOver()) {
+      return;
+    }
+
+    this.startNextTurn();
+  }
+
+  private checkIfBattleOver(): boolean {
     const battleState = Store.getState().battle;
     
     // Check if any team is defeated
@@ -411,7 +419,7 @@ export class BattleController {
       });
       
       this.battleView?.showBattleResult('lost');
-      return;
+      return true;
     }
     
     if (isCpuTeamDefeated) {
@@ -424,9 +432,15 @@ export class BattleController {
       });
       
       this.battleView?.showBattleResult('won');
-      return;
+      return true;
     }
-    
+
+    return false;
+  }
+
+  private startNextTurn(): void {
+    const battleState = Store.getState().battle;
+
     // Battle continues
     Store.setState({
       battle: {
