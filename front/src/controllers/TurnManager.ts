@@ -228,10 +228,12 @@ export class TurnManager {
         log: [
           ...battleState.log,
           moveResult.message,
-          battleState.context.pendingLogs.shift() as string
+          ...(battleState.context.pendingLogs)
         ]
       }
     });
+
+    battleState.context.pendingLogs.length = 0;
     
     setTimeout(() => {
       console.log('TurnManager : Target : ', target);
@@ -263,9 +265,11 @@ export class TurnManager {
         Store.setState({
           battle: {
             ...battleState,
-            log: [...battleState.log, battleState.context.pendingLogs.shift() as string]
+            log: [...battleState.log, ...(battleState.context.pendingLogs)]
           }
         });
+
+        battleState.context.pendingLogs.length = 0;
 
         /*
         ========================================================================
@@ -291,9 +295,11 @@ export class TurnManager {
         Store.setState({
           battle: {
             ...battleState,
-            log: [...battleState.log, battleState.context.pendingLogs.shift() as string]
+            log: [...battleState.log, ...(battleState.context.pendingLogs)]
           }
         });
+
+        battleState.context.pendingLogs.length = 0;
 
         /*
         ========================================================================
@@ -357,9 +363,11 @@ export class TurnManager {
     Store.setState({
       battle: {
         ...battleState,
-        log: [...battleState.log, battleState.context.pendingLogs.shift() as string]
+        log: [...battleState.log, ...(battleState.context.pendingLogs)]
       }
     });
+
+    battleState.context.pendingLogs.length = 0;
 
     // Timer before continuing
     setTimeout(callback, 1000);
@@ -605,9 +613,11 @@ export class TurnManager {
     Store.setState({
       battle: {
         ...battleState,
-        log: [...battleState.log, battleState.context.pendingLogs.shift() as string]
+        log: [...battleState.log, ...(battleState.context.pendingLogs)]
       }
     });
+
+    battleState.context.pendingLogs.length = 0;
 
     // Check again after turn end effects
     if (this.checkBattleOver()) {
