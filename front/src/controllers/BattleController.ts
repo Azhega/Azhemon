@@ -144,9 +144,11 @@ export class BattleController {
     Store.setState({
       battle: {
         ...battleState,
-        log: [...battleState.log, battleState.context.pendingLogs.shift() as string]
+        log: [...battleState.log, ...battleState.context.pendingLogs]
       }
     });
+
+    battleState.context.pendingLogs.length = 0;
 
     /*
     ============================================================================
