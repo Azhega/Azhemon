@@ -1,4 +1,6 @@
 import EffectManager from '../controllers/EffectManager';
+import Store from '../utils/Store';
+import { Pokemon } from '../models/PokemonModel';
 
 export const status = {
   burn: {
@@ -8,14 +10,30 @@ export const status = {
     onApply: (pokemon: any) => {
       pokemon.currentStats.attack = Math.floor(pokemon.currentStats.attack * 0.5);
       console.log(`${pokemon.name} est brûlé !`);
+      pokemon.status = status['burn'];
+      EffectManager.registerStatusEffects(pokemon);
     },
     onRemove: (pokemon: any) => {
       pokemon.currentStats.attack = Math.floor(pokemon.currentStats.attack * 2);
       console.log(`${pokemon.name} n'est plus brûlé !`);
+      pokemon.status = null;
+      // EffectManager.resetEffects(pokemon); // IDK how to handle this, will check later
     },
-    onTurnEnd: (pokemon: any) => {
-      pokemon.currentHp -= Math.floor(pokemon.maxHp / 8);
-      console.log(`${pokemon.name} subit des dégâts de brûlure !`);
+    onTurnEnd: (context: any) => {
+      const battleState = Store.getState().battle;
+      console.log('battleState : ', battleState);
+      for (const pokemon of Object.values(battleState.activePokemon) as Pokemon[]) {
+        if (pokemon.statusKey === 'burn' && pokemon.currentHp > 0) {
+          const statusMessage = `Brûlure ! ${pokemon.name} subit des dégâts !`;
+          context.pendingLogs.push(statusMessage);
+          console.log('burn before : ', pokemon.name, pokemon.currentHp);
+          pokemon.currentHp = Math.max(
+            0,
+            pokemon.currentHp - Math.floor(pokemon.maxHp / 16)
+          );
+          console.log('burn after : ', pokemon.name, pokemon.currentHp);
+        }
+      }
     }
   },
   paralysis: {

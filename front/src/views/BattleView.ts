@@ -208,8 +208,10 @@ export class BattleView {
     // Status condition
     if (pokemon.status) {
       const statusIcon = document.createElement('span');
-      statusIcon.className = `status-icon status-${pokemon.status.name.substring(0, 3).toLowerCase()}`;
-      statusIcon.innerHTML = `${pokemon.status.name.substring(0, 3).toUpperCase()}`;
+      statusIcon.className = `${pokemon.statusKey === 'paralysis' ? 'status-icon status-par' 
+      : `status-icon status-${pokemon.statusKey?.toLowerCase().replace(/[aeiou]/g, "")}`}`;
+      statusIcon.innerHTML = `${pokemon.statusKey === 'paralysis' ? 'PAR' 
+      : pokemon.statusKey?.toUpperCase().replace(/[AEIOU]/g, "")}`;
       nameLevel.appendChild(statusIcon);
     }
     

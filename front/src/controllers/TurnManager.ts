@@ -95,7 +95,11 @@ export class TurnManager {
         return;
       }
 
-      // Execute second action
+      /* 
+      ============================================================================
+      - EXECUTE SECOND ACTION
+      ============================================================================
+      */
       this.executeAction(secondAction, !firstIsPlayer, () => {
         // Check if battle is over
         if (this.checkBattleOver()) {
@@ -105,33 +109,18 @@ export class TurnManager {
         }
         console.log('TurnManager : Battle is not over after second action');
 
-        const battleState = Store.getState().battle;
-
-        /*
-        ========================================================================
-        - HOOK : ON TURN END ===> AFTER ALL ACTIONS ARE EXECUTED
-        ========================================================================
-        */
-        EffectManager.applyTurnEndEffects(battleState.context);
-
-        Store.setState({
-          battle: {
-            ...battleState,
-            log: [...battleState.log, battleState.context.pendingLogs.shift() as string]
-          }
-        });
-
-        // Check again after turn end effects
-        if (this.checkBattleOver()) {
-          console.log('Battle is over');
-          callback();
-          return;
-        }
-
         if (!this.checkIfPokemonIsAlive(firstActorPokemon, callback) ||
             !this.checkIfPokemonIsAlive(secondActorPokemon, callback)) {
           return;
         }
+
+        /*
+        ========================================================================
+        - HOOK : ON TURN END ===> AT THE END OF THE TURN
+        ========================================================================
+        */
+        this.applyTurnEndEffects(callback);
+
         // Recall to indicate end of turn
         callback();
       });
@@ -562,6 +551,8 @@ export class TurnManager {
       if (pokemon === battleState.activePokemon.player) {
         console.log(`TurnManager : Player Pokemon is KO, player must select another Pokemon`);
 
+        this.applyTurnEndEffects(callback);
+        
         // Event to show Pokemon selection for the player to select another Pokemon
         EventBus.emit('battle:show-pokemon-selection');
 
@@ -571,6 +562,8 @@ export class TurnManager {
         });
       } else if (pokemon === battleState.activePokemon.cpu) {
         console.log(`TurnManager : CPU Pokemon is KO, CPU must select another Pokemon`);
+
+        this.applyTurnEndEffects(callback);
 
         // Automatically switch to the next available Pokémon for the CPU
         this.switchCpuPokemon();
@@ -584,5 +577,30 @@ export class TurnManager {
     }
     console.log(`${pokemon.name} is alive`);
     return true;
+  }
+
+  private applyTurnEndEffects(callback: () => void): void {
+    const battleState = Store.getState().battle;
+
+    /*
+    ========================================================================
+    - HOOK : ON TURN END ===> AT THE END OF THE TURN
+    ========================================================================
+    */
+    EffectManager.applyTurnEndEffects(battleState.context);
+
+    Store.setState({
+      battle: {
+        ...battleState,
+        log: [...battleState.log, battleState.context.pendingLogs.shift() as string]
+      }
+    });
+
+    // Check again after turn end effects
+    if (this.checkBattleOver()) {
+      console.log('Battle is over');
+      callback();
+      return;
+    }
   }
 }
