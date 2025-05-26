@@ -597,6 +597,21 @@ export class TurnManager {
 
         // Automatically switch to the next available Pokémon for the CPU
         this.switchCpuPokemon();
+        /*
+        ============================================================================
+        - HOOK : ON SWITCH ===> AFTER A POKEMON IS SWITCHED
+        ============================================================================
+        */
+        EffectManager.applyOnSwitchEffects(battleState.context);
+        
+        Store.setState({
+          battle: {
+            ...battleState,
+            log: [...battleState.log, ...(battleState.context.pendingLogs)]
+          }
+        });
+
+        battleState.context.pendingLogs.length = 0;
 
         callback();
       } else {
@@ -653,6 +668,21 @@ export class TurnManager {
 
       // Automatically switch to the next available Pokémon for the CPU
       this.switchCpuPokemon();
+      /*
+      ============================================================================
+      - HOOK : ON SWITCH ===> AFTER A POKEMON IS SWITCHED
+      ============================================================================
+      */
+      EffectManager.applyOnSwitchEffects(battleState.context);
+      
+      Store.setState({
+        battle: {
+          ...battleState,
+          log: [...battleState.log, ...(battleState.context.pendingLogs)]
+        }
+      });
+
+      battleState.context.pendingLogs.length = 0;
     }
   }
 
