@@ -50,6 +50,11 @@ export const items = {
         damage = Math.floor(damage * 1.3);
         context.attacker.currentHp = Math.max(0, context.attacker.currentHp - Math.floor(context.attacker.maxHp / 10));
         console.log('lifeOrb after : damage , hp : ', context.attacker.name, damage, context.attacker.currentHp);
+        if (context.attacker.currentHp <= 0) {
+          const faintMessage = `${context.attacker.name} est K.O. à cause de l\'Orbe Vie !`;
+          context.pendingLogs.push(faintMessage);
+          context.attacker.isAlive = false;
+        }
       }
       return damage;
     },
