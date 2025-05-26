@@ -242,16 +242,22 @@ export const moves = {
     description: 'Brûle la cible',
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true) {
+        if (context.defender.types.includes('Feu')) {
+          const moveMessage = `Feu Follet ! ${context.defender.name} est immunisé !`;
+          context.pendingLogs.push(moveMessage);
+          console.log(moveMessage);
+          return;
+        }
         if (!context.defender.statusKey || context.defender.statusKey === undefined) {
           const moveMessage = `Feu Follet ! ${context.defender.name} est brûlé !`;
           context.pendingLogs.push(moveMessage);
-          console.log('Feu Follet !', context.defender.name, 'est brûlé !');
+          console.log(moveMessage);
           context.defender.statusKey = 'burn';
           status['burn'].onApply(context.defender);
         } else {
           const moveMessage = `Feu Follet ! ${context.defender.name} a déjà un statut !`;
           context.pendingLogs.push(moveMessage);
-          console.log('Feu Follet !', context.defender.name, 'a déjà un statut !');
+          console.log(moveMessage);
         }
       }
     }
@@ -269,6 +275,12 @@ export const moves = {
     description: 'Paralyse la cible',
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true) {
+        if (context.defender.types.includes('Électrik')) {
+          const moveMessage = `Cage-Éclair ! ${context.defender.name} est immunisé !`;
+          context.pendingLogs.push(moveMessage);
+          console.log(moveMessage);
+          return;
+        }
         if (context.defender.statusKey === null || context.defender.statusKey === undefined) {
           const moveMessage = `Cage-Éclair ! ${context.defender.name} est paralysé !`;
           context.pendingLogs.push(moveMessage);
@@ -296,6 +308,12 @@ export const moves = {
     description: 'Empoisonne la cible',
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true) {
+        if (context.defender.types.includes('Poison') || context.defender.types.includes('Acier')) {
+          const moveMessage = `Toxic ! ${context.defender.name} est immunisé !`;
+          context.pendingLogs.push(moveMessage);
+          console.log(moveMessage);
+          return;
+        }
         if (context.defender.statusKey === null || context.defender.statusKey === undefined) {
           const moveMessage = `Toxic ! ${context.defender.name} est empoisonné !`;
           context.pendingLogs.push(moveMessage);
@@ -350,6 +368,12 @@ export const moves = {
     description: 'Gèle la cible',
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true) {
+        if (context.defender.types.includes('Glace')) {
+          const moveMessage = `Vague Glace ! ${context.defender.name} est immunisé !`;
+          context.pendingLogs.push(moveMessage);
+          console.log(moveMessage);
+          return;
+        }
         if (context.defender.statusKey === null || context.defender.statusKey === undefined) {
           const moveMessage = `Vague Glace ! ${context.defender.name} est gelé !`;
           context.pendingLogs.push(moveMessage);

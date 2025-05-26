@@ -44,7 +44,8 @@ export const Pokedex = {
       'stoneEdge',
       'iceBeam',
       'earthquake',
-      'toxic'
+      'toxic',
+      'iceWave'
     ]
   },
   chandelure: {
