@@ -133,13 +133,30 @@ export const status = {
     id: 5,
     name: 'Gel',
     description: 'Le Pokémon ne peut pas agir tant qu\'il est gelé.',
+    onApply: (pokemon: any) => {
+      console.log(`${pokemon.name} est gelé !`);
+      pokemon.status = status['freeze'];
+      EffectManager.registerStatusEffects(pokemon);
+    },
+    onRemove: (pokemon: any) => {
+      console.log(`${pokemon.name} n'est plus gelé !`);
+      pokemon.status = null;
+      // EffectManager.resetEffects(pokemon); // IDK how to handle this, will check later
+    },
     onPreMove: (context: any) => {
-      if (Math.random() < 0.2) {
-        context.pokemon.canAct = true;
-        console.log(`${context.pokemon.name} est libéré du gel !`);
-      } else {
-        context.pokemon.canAct = false;
-        console.log(`${context.pokemon.name} est gelé et ne peut pas agir !`);
+      if (context.attacker.statusKey === 'freeze') {
+        const random = Math.random();
+        console.log('Status : onPreMove freeze', random);
+        if (random < 0.2) { // 20% chance to thaw
+          context.attacker.status = null;
+          context.attacker.statusKey = null;
+          context.attacker.canAct = true;
+          console.log(`${context.attacker.name} n'est plus gelé !`);
+        } else {
+          context.attacker.canAct = false;
+          context.attacker.status.sleepTurns += 1;
+          console.log(`${context.attacker.name} est gelé et ne peut pas agir !`);
+        }
       }
     }
   }
