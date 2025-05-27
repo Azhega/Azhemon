@@ -171,7 +171,7 @@ export const abilities = {
     description: 'Restaure un peu de PV si le Pokémon est retiré du combat',
     onSwitch: (context: any): void => {
       if (context.switchedPokemon) {
-        if (context.switchedPokemon.abilityKey === 'regenerator') {
+        if (context.switchedPokemon.abilityKey === 'regenerator' && context.switchedPokemon.currentHp < context.switchedPokemon.maxHp) {
           const abilityMessage = `Talent Régé-Force ! ${context.switchedPokemon.name} récupère des PV après un switch !`;
           context.pendingLogs.push(abilityMessage);
           context.switchedPokemon.currentHp = Math.min(context.switchedPokemon.maxHp, 

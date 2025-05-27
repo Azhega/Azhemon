@@ -47,7 +47,22 @@ export const moves = {
     accuracy: 100,
     pp: 15,
     priority: 0,
-    description: 'Peut brûler la cible'
+    description: 'Peut brûler la cible',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const random = Math.random();
+        console.log('Ébullition : random', random);
+        if (context.defender.statusKey === null || context.defender.statusKey === undefined) {
+          if (random < 0.3 && !context.defender.types.includes('Feu') && context.defender.isAlive) {
+            const moveMessage = `Ébullition ! ${context.defender.name} est brûlé !`;
+            context.pendingLogs.push(moveMessage);
+            console.log(moveMessage);
+            context.defender.statusKey = 'burn';
+            status['burn'].onApply(context.defender);
+          }
+        }
+      }
+    }
   },
   shadowBall: {
     moveKey: 'shadowBall',
@@ -59,7 +74,20 @@ export const moves = {
     accuracy: 100,
     pp: 15,
     priority: 0,
-    description: 'Peut baisser la Défense Spéciale de la cible'
+    description: 'Peut baisser la Défense Spéciale de la cible',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const random = Math.random();
+        console.log('Ball\'ombre : random', random);
+        if (random < 0.2 && context.defender.isAlive) {
+          const moveMessage = `Ball'ombre ! La Défense Spéciale de ${context.defender.name} baisse !`;
+          context.pendingLogs.push(moveMessage);
+          console.log(moveMessage);
+          context.defender.statModifiers.specialDefense -= 1;
+          context.defender.calculateModifiedStats();
+        }
+      }
+    }
   },
   x_scissor: {
     moveKey: 'x_scissor',
@@ -95,7 +123,22 @@ export const moves = {
     accuracy: 100,
     pp: 15,
     priority: 0,
-    description: 'Peut paralyser la cible'
+    description: 'Peut paralyser la cible',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const random = Math.random();
+        console.log('Tonnerre : random', random);
+        if (context.defender.statusKey === null || context.defender.statusKey === undefined) {
+          if (random < 0.1 && !context.defender.types.includes('Électrik') && context.defender.isAlive) {
+            const moveMessage = `Tonnerre ! ${context.defender.name} est paralysé !`;
+            context.pendingLogs.push(moveMessage);
+            console.log(moveMessage);
+            context.defender.statusKey = 'paralysis';
+            status['paralysis'].onApply(context.defender);
+          }
+        }
+      }
+    }
   },
   stoneEdge: {
     moveKey: 'stoneEdge',
@@ -119,7 +162,17 @@ export const moves = {
     accuracy: 100,
     pp: 5,
     priority: 0,
-    description: 'Baisse la Défense et la Défense Spéciale du lanceur'
+    description: 'Baisse la Défense et la Défense Spéciale du lanceur',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const moveMessage = `Close Combat ! La Défense et la Défense Spéciale de ${context.attacker.name} baissent !`;
+        context.pendingLogs.push(moveMessage);
+        console.log(moveMessage);
+        context.attacker.statModifiers.defense -= 1;
+        context.attacker.statModifiers.specialDefense -= 1;
+        context.attacker.calculateModifiedStats();
+      }
+    }
   },
   crossPoison: {
     moveKey: 'crossPoison',
@@ -131,7 +184,20 @@ export const moves = {
     accuracy: 100,
     pp: 15,
     priority: 0,
-    description: 'Taux de critiques élevé, peut empoisonner la cible'
+    description: 'Taux de critiques élevé, peut empoisonner la cible',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const random = Math.random();
+        console.log('Poison-Croix : random', random);
+        if (random < 0.1 && context.defender.statusKey === null && context.defender.isAlive) {
+          const moveMessage = `Poison-Croix ! ${context.defender.name} est empoisonné !`;
+          context.pendingLogs.push(moveMessage);
+          console.log(moveMessage);
+          context.defender.statusKey = 'poison';
+          status['poison'].onApply(context.defender);
+        }
+      }
+    }
   },
   iceBeam: {
     moveKey: 'iceBeam',
@@ -143,7 +209,22 @@ export const moves = {
     accuracy: 100,
     pp: 10,
     priority: 0,
-    description: 'Peut geler la cible'
+    description: 'Peut geler la cible',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const random = Math.random();
+        console.log('Laser Glace : random', random);
+        if (context.defender.statusKey === null || context.defender.statusKey === undefined) {
+          if (random < 0.1 && !context.defender.types.includes('Glace') && context.defender.isAlive) {
+            const moveMessage = `Laser Glace ! ${context.defender.name} est gelé !`;
+            context.pendingLogs.push(moveMessage);
+            console.log(moveMessage);
+            context.defender.statusKey = 'freeze';
+            status['freeze'].onApply(context.defender);
+          }
+        }
+      }
+    }
   },
   psychic: {
     moveKey: 'psychic',
@@ -155,7 +236,20 @@ export const moves = {
     accuracy: 100,
     pp: 10,
     priority: 0,
-    description: 'Peut baisser la Défense Spéciale de la cible'
+    description: 'Peut baisser la Défense Spéciale de la cible',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const random = Math.random();
+        console.log('Psyko : random', random);
+        if (random < 0.1 && context.defender.isAlive) {
+          const moveMessage = `Psyko ! La Défense Spéciale de ${context.defender.name} baisse !`;
+          context.pendingLogs.push(moveMessage);
+          console.log(moveMessage);
+          context.defender.statModifiers.specialDefense -= 1;
+          context.defender.calculateModifiedStats();
+        }
+      }
+    }
   },
   triAttack: {
     moveKey: 'triAttack',
@@ -167,7 +261,33 @@ export const moves = {
     accuracy: 100,
     pp: 10,
     priority: 0,
-    description: 'Peut paralyser, brûler ou geler la cible'
+    description: 'Peut paralyser, brûler ou geler la cible',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits 
+        && (context.defender.statusKey === null || context.defender.statusKey === undefined)) {
+        const random = Math.random();
+        console.log('Triplattaque : random', random);
+        if (random < 0.067 && !context.defender.types.includes('Glace') && context.defender.isAlive) {
+          const moveMessage = `Triplattaque ! ${context.defender.name} est gelé !`;
+          context.pendingLogs.push(moveMessage);
+          console.log(moveMessage);
+          context.defender.statusKey = 'freeze';
+          status['freeze'].onApply(context.defender);
+        } else if ((random > 0.067 && random < 0.133) && !context.defender.types.includes('Feu') && context.defender.isAlive) {
+          const moveMessage = `Triplattaque ! ${context.defender.name} est brûlé !`;
+          context.pendingLogs.push(moveMessage);
+          console.log(moveMessage);
+          context.defender.statusKey = 'burn';
+          status['burn'].onApply(context.defender);
+        } else if ((random > 0.133 && random < 0.2) && !context.defender.types.includes('Électrik') && context.defender.isAlive) {
+          const moveMessage = `Triplattaque ! ${context.defender.name} est paralysé !`;
+          context.pendingLogs.push(moveMessage);
+          console.log(moveMessage);
+          context.defender.statusKey = 'paralysis';
+          status['paralysis'].onApply(context.defender);
+        }
+      }
+    }
   },
   flameThrower: {
     moveKey: 'flameThrower',
@@ -179,7 +299,20 @@ export const moves = {
     accuracy: 100,
     pp: 15,
     priority: 0,
-    description: 'Peut brûler la cible'
+    description: 'Peut brûler la cible',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const random = Math.random();
+        console.log('Lance-Flammes : random', random);
+        if (random < 0.1 && !context.defender.types.includes('Feu') && context.defender.isAlive) {
+          const moveMessage = `Lance-Flammes ! ${context.defender.name} est brûlé !`;
+          context.pendingLogs.push(moveMessage);
+          console.log(moveMessage);
+          context.defender.statusKey = 'burn';
+          status['burn'].onApply(context.defender);
+        }
+      }
+    }
   },
   energyBall: {
     moveKey: 'energyBall',
@@ -191,7 +324,20 @@ export const moves = {
     accuracy: 100,
     pp: 10,
     priority: 0,
-    description: 'Peut baisser la Défense Spéciale de la cible'
+    description: 'Peut baisser la Défense Spéciale de la cible',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const random = Math.random();
+        console.log('Éco-Sphère : random', random);
+        if (random < 0.1 && context.defender.isAlive) {
+          const moveMessage = `Éco-Sphère ! La Défense Spéciale de ${context.defender.name} baisse !`;
+          context.pendingLogs.push(moveMessage);
+          console.log(moveMessage);
+          context.defender.statModifiers.specialDefense -= 1;
+          context.defender.calculateModifiedStats();
+        }
+      }
+    }
   },
   earthquake: {
     moveKey: 'earthquake',
@@ -241,7 +387,7 @@ export const moves = {
     priority: 0,
     description: 'Brûle la cible',
     onPostMove: (context: any): void => {
-      if (context.attacker.canAct === true) {
+      if (context.attacker.canAct === true && context.hits) {
         if (context.defender.types.includes('Feu')) {
           const moveMessage = `Feu Follet ! ${context.defender.name} est immunisé !`;
           context.pendingLogs.push(moveMessage);
@@ -274,7 +420,7 @@ export const moves = {
     priority: 0,
     description: 'Paralyse la cible',
     onPostMove: (context: any): void => {
-      if (context.attacker.canAct === true) {
+      if (context.attacker.canAct === true && context.hits) {
         if (context.defender.types.includes('Électrik')) {
           const moveMessage = `Cage-Éclair ! ${context.defender.name} est immunisé !`;
           context.pendingLogs.push(moveMessage);
@@ -307,7 +453,7 @@ export const moves = {
     priority: 0,
     description: 'Empoisonne la cible',
     onPostMove: (context: any): void => {
-      if (context.attacker.canAct === true) {
+      if (context.attacker.canAct === true && context.hits) {
         if (context.defender.types.includes('Poison') || context.defender.types.includes('Acier')) {
           const moveMessage = `Toxic ! ${context.defender.name} est immunisé !`;
           context.pendingLogs.push(moveMessage);
@@ -340,7 +486,7 @@ export const moves = {
     priority: 0,
     description: 'Endort la cible',
     onPostMove: (context: any): void => {
-      if (context.attacker.canAct === true) {
+      if (context.attacker.canAct === true && context.hits) {
         if (context.defender.statusKey === null || context.defender.statusKey === undefined) {
           const moveMessage = `Hypnose ! ${context.defender.name} est endormi !`;
           context.pendingLogs.push(moveMessage);
@@ -367,7 +513,7 @@ export const moves = {
     priority: 0,
     description: 'Gèle la cible',
     onPostMove: (context: any): void => {
-      if (context.attacker.canAct === true) {
+      if (context.attacker.canAct === true && context.hits) {
         if (context.defender.types.includes('Glace')) {
           const moveMessage = `Vague Glace ! ${context.defender.name} est immunisé !`;
           context.pendingLogs.push(moveMessage);
