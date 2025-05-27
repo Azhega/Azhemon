@@ -23,7 +23,12 @@ export const Pokedex = {
       'thunderWave',
       'will_o_wisp',
       'hypnosis',
-      'iceWave'
+      'iceWave',
+      'calmMind',
+      'charm',
+      'eerieImpulse',
+      'fakeTears',
+      'cottonSpore'
     ]
   },
   gastrodon: {
@@ -45,7 +50,8 @@ export const Pokedex = {
       'iceBeam',
       'earthquake',
       'toxic',
-      'iceWave'
+      'iceWave',
+      'amnesia'
     ]
   },
   chandelure: {
@@ -66,7 +72,9 @@ export const Pokedex = {
       'psychic',
       'flameThrower',
       'energyBall',
-      'will_o_wisp'
+      'will_o_wisp',
+      'nastyPlot',
+      'eerieImpulse'
     ]
   },
   escavalier: {
@@ -86,7 +94,11 @@ export const Pokedex = {
       'x_scissor',
       'closeCombat',
       'nightSlash',
-      'ironHead'
+      'ironHead',
+      'swordsDance',
+      'ironDefense',
+      'screech',
+      'metalSound'
     ]
   },
   haxorus: {
@@ -107,7 +119,8 @@ export const Pokedex = {
       'dragonClaw',
       'closeCombat',
       'earthquake',
-      'ironHead'
+      'ironHead',
+      'swordsDance'
     ]
   },
   eelektross: {
@@ -130,6 +143,9 @@ export const Pokedex = {
       'flameThrower',
       'earthquake',
       'thunderWave',
+      'screech',
+      'eerieImpulse',
+      'metalSound'
     ]
   },
   tyranitar: {
@@ -155,7 +171,8 @@ export const Pokedex = {
       'nightSlash',
       'ironHead',
       'closeCombat',
-      'thunderWave'
+      'thunderWave',
+      'ironDefense'
     ]
   },
   breloom: {
@@ -176,7 +193,10 @@ export const Pokedex = {
       'closeCombat',
       'energyBall',
       'ironHead',
-      'toxic'
+      'toxic',
+      'swordsDance',
+      'agility',
+      'cottonSpore'
     ]
   },
   drapion: {
@@ -198,7 +218,9 @@ export const Pokedex = {
       'crossPoison',
       'earthquake',
       'nightSlash',
-      'toxic'
+      'toxic',
+      'swordsDance',
+      'screech'
     ]
   },
   heracross: {
@@ -219,6 +241,9 @@ export const Pokedex = {
       'stoneEdge',
       'closeCombat',
       'earthquake',
+      'swordsDance',
+      'agility',
+      'screech'
     ]
   },
   lapras: {
@@ -240,7 +265,9 @@ export const Pokedex = {
       'iceBeam',
       'earthquake',
       'ironHead',
-      'iceWave'
+      'iceWave',
+      'charm',
+      'fakeTears'
     ]
   },
   reuniclus: {
@@ -264,7 +291,13 @@ export const Pokedex = {
       'flameThrower',
       'energyBall',
       'thunderWave',
-      'hypnosis'
+      'hypnosis',
+      'nastyPlot',
+      'amnesia',
+      'calmMind',
+      'charm',
+      'eerieImpulse',
+      'fakeTears'
     ]
   },
   porygon_z: {
@@ -286,7 +319,11 @@ export const Pokedex = {
       'iceBeam',
       'psychic',
       'triAttack',
-      'thunderWave'
+      'thunderWave',
+      'nastyPlot',
+      'amnesia',
+      'agility',
+      'eerieImpulse'
     ]
   },
   slowpoke: {
@@ -309,7 +346,12 @@ export const Pokedex = {
       'psychic',
       'flameThrower',
       'earthquake',
-      'thunderWave'
+      'thunderWave',
+      'nastyPlot',
+      'amnesia',
+      'calmMind',
+      'charm',
+      'fakeTears'
     ]
   },
   quagsire: {
@@ -331,7 +373,10 @@ export const Pokedex = {
       'iceBeam',
       'earthquake',
       'toxic',
-      'iceWave'
+      'iceWave',
+      'amnesia',
+      'charm',
+      'fakeTears'
     ]
   },
 }
