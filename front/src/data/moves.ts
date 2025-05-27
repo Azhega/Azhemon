@@ -569,5 +569,258 @@ export const moves = {
         }
       }
     }
+  },
+  swordsDance: {
+    moveKey: 'swordsDance',
+    id: 25,
+    name: 'Danse-Lames',
+    type: 'Normal',
+    category: 'Statut',
+    power: 0,
+    accuracy: 0,
+    pp: 20,
+    priority: 0,
+    description: 'Augmente l\'attaque de l\'utilisateur de 2 niveaux',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const moveMessage = `Danse-Lames ! L'attaque de ${context.attacker.name} augmente beaucoup !`;
+        context.pendingLogs.push(moveMessage);
+        console.log(moveMessage);
+        context.attacker.statModifiers.attack += 2;
+        context.attacker.calculateModifiedStats();
+      }
+    }
+  },
+  ironDefense: {
+    moveKey: 'ironDefense',
+    id: 26,
+    name: 'Mur de Fer',
+    type: 'Acier',
+    category: 'Statut',
+    power: 0,
+    accuracy: 0,
+    pp: 15,
+    priority: 0,
+    description: 'Augmente la défense de l\'utilisateur de 2 niveaux',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const moveMessage = `Mur de Fer ! La défense de ${context.attacker.name} augmente beaucoup !`;
+        context.pendingLogs.push(moveMessage);
+        console.log(moveMessage);
+        context.attacker.statModifiers.defense += 2;
+        context.attacker.calculateModifiedStats();
+      }
+    }
+  },
+  nastyPlot: {
+    moveKey: 'nastyPlot',
+    id: 27,
+    name: 'Machination',
+    type: 'Ténèbres',
+    category: 'Statut',
+    power: 0,
+    accuracy: 0,
+    pp: 20,
+    priority: 0,
+    description: 'Augmente l\'attaque spéciale de l\'utilisateur de 2 niveaux',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const moveMessage = `Machination ! L'attaque spéciale de ${context.attacker.name} augmente beaucoup !`;
+        context.pendingLogs.push(moveMessage);
+        console.log(moveMessage);
+        context.attacker.statModifiers.specialAttack += 2;
+        context.attacker.calculateModifiedStats();
+      }
+    }
+  },
+  amnesia: {
+    moveKey: 'amnesia',
+    id: 28,
+    name: 'Amnésie',
+    type: 'Psy',
+    category: 'Statut',
+    power: 0,
+    accuracy: 0,
+    pp: 20,
+    priority: 0,
+    description: 'Augmente la défense spéciale de l\'utilisateur de 2 niveaux',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const moveMessage = `Amnésie ! La défense spéciale de ${context.attacker.name} augmente beaucoup !`;
+        context.pendingLogs.push(moveMessage);
+        console.log(moveMessage);
+        context.attacker.statModifiers.specialDefense += 2;
+        context.attacker.calculateModifiedStats();
+      }
+    }
+  },
+  agility: {
+    moveKey: 'agility',
+    id: 29,
+    name: 'Hâte',
+    type: 'Psy',
+    category: 'Statut',
+    power: 0,
+    accuracy: 0,
+    pp: 30,
+    priority: 0,
+    description: 'Augmente la vitesse de l\'utilisateur de 2 niveaux',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const moveMessage = `Hâte ! La vitesse de ${context.attacker.name} augmente beaucoup !`;
+        context.pendingLogs.push(moveMessage);
+        console.log(moveMessage);
+        context.attacker.statModifiers.speed += 2;
+        context.attacker.calculateModifiedStats();
+      }
+    }
+  },
+  calmMind: {
+    moveKey: 'calmMind',
+    id: 30,
+    name: 'Calm Mind',
+    type: 'Psy',
+    category: 'Statut',
+    power: 0,
+    accuracy: 0,
+    pp: 20,
+    priority: 0,
+    description: 'Augmente l\'attaque spéciale et la défense spéciale de l\'utilisateur de 1 niveau',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const moveMessage = `Calm Mind ! L'attaque spéciale et la défense spéciale de ${context.attacker.name} augmentent !`;
+        context.pendingLogs.push(moveMessage);
+        console.log(moveMessage);
+        context.attacker.statModifiers.specialAttack += 1;
+        context.attacker.statModifiers.specialDefense += 1;
+        context.attacker.calculateModifiedStats();
+      }
+    }
+  },
+  charm: {
+    moveKey: 'charm',
+    id: 31,
+    name: 'Charme',
+    type: 'Fée',
+    category: 'Statut',
+    power: 0,
+    accuracy: 100,
+    pp: 20,
+    priority: 0,
+    description: 'Baisse l\'attaque de la cible de 2 niveaux',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const moveMessage = `Charme ! L'attaque de ${context.defender.name} baisse beaucoup !`;
+        context.pendingLogs.push(moveMessage);
+        console.log(moveMessage);
+        context.defender.statModifiers.attack -= 2;
+        context.defender.calculateModifiedStats();
+      }
+    }
+  },
+  screech: {
+    moveKey: 'screech',
+    id: 32,
+    name: 'Grincement',
+    type: 'Normal',
+    category: 'Statut',
+    power: 0,
+    accuracy: 85,
+    pp: 40,
+    priority: 0,
+    description: 'Baisse la défense de la cible de 2 niveaux',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const moveMessage = `Grincement ! La défense de ${context.defender.name} baisse beaucoup !`;
+        context.pendingLogs.push(moveMessage);
+        console.log(moveMessage);
+        context.defender.statModifiers.defense -= 2;
+        context.defender.calculateModifiedStats();
+      }
+    }
+  },
+  eerieImpulse: {
+    moveKey: 'eerieImpulse',
+    id: 33,
+    name: 'Impulsion Étrange',
+    type: 'Électrik',
+    category: 'Statut',
+    power: 0,
+    accuracy: 100,
+    pp: 15,
+    priority: 0,
+    description: 'Baisse l\'attaque spéciale de la cible de 2 niveaux',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const moveMessage = `Impulsion Étrange ! L'attaque spéciale de ${context.defender.name} baisse beaucoup !`;
+        context.pendingLogs.push(moveMessage);
+        console.log(moveMessage);
+        context.defender.statModifiers.specialAttack -= 2;
+        context.defender.calculateModifiedStats();
+      }
+    }
+  },
+  fakeTears: {
+    moveKey: 'fakeTears',
+    id: 34,
+    name: 'Croco Larme',
+    type: 'Ténèbres',
+    category: 'Statut',
+    power: 0,
+    accuracy: 100,
+    pp: 20,
+    priority: 0,
+    description: 'Baisse la défense spéciale de la cible de 2 niveaux',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const moveMessage = `Croco Larme ! La défense spéciale de ${context.defender.name} baisse beaucoup !`;
+        context.pendingLogs.push(moveMessage);
+        console.log(moveMessage);
+        context.defender.statModifiers.specialDefense -= 2;
+        context.defender.calculateModifiedStats();
+      }
+    }
+  },
+  metalSound: {
+    moveKey: 'metalSound',
+    id: 35,
+    name: 'Strido-Son',
+    type: 'Acier',
+    category: 'Statut',
+    power: 0,
+    accuracy: 85,
+    pp: 40,
+    priority: 0,
+    description: 'Baisse la défense spéciale de la cible de 2 niveaux',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const moveMessage = `Strido-Son ! La défense spéciale de ${context.defender.name} baisse beaucoup !`;
+        context.pendingLogs.push(moveMessage);
+        console.log(moveMessage);
+        context.defender.statModifiers.specialDefense -= 2;
+        context.defender.calculateModifiedStats();
+      }
+    }
+  },
+  cottonSpore: {
+    moveKey: 'cottonSpore',
+    id: 36,
+    name: 'Spore Coton',
+    type: 'Plante',
+    category: 'Statut',
+    power: 0,
+    accuracy: 100,
+    pp: 40,
+    priority: 0,
+    description: 'Baisse la vitesse de la cible de 2 niveaux',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const moveMessage = `Spore Coton ! La vitesse de ${context.defender.name} baisse beaucoup !`;
+        context.pendingLogs.push(moveMessage);
+        console.log(moveMessage);
+        context.defender.statModifiers.speed -= 2;
+        context.defender.calculateModifiedStats();
+      }
+    }
   }
 }
