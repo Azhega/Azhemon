@@ -247,7 +247,6 @@ export class TurnManager {
         
         const faintMessage = `${target.name} est K.O. !`;
         
-        // Update log with the latest state to avoid log overwriting
         battleState = Store.getState().battle;
         Store.setState({
           battle: {
@@ -263,6 +262,7 @@ export class TurnManager {
         */
         EffectManager.applyPostMoveEffects(battleState.context);
 
+        battleState = Store.getState().battle;
         Store.setState({
           battle: {
             ...battleState,
@@ -553,7 +553,7 @@ export class TurnManager {
   };
 
   private checkIfPokemonIsAlive(pokemon: Pokemon, callback: () => void): boolean {
-    const battleState = Store.getState().battle;
+    let battleState = Store.getState().battle;
     if (pokemon.currentHp <= 0) {
       pokemon.isAlive = false;
       console.log(`TurnManager : ${pokemon.name} is KO`);
@@ -604,6 +604,7 @@ export class TurnManager {
         */
         EffectManager.applyOnSwitchEffects(battleState.context);
         
+        battleState = Store.getState().battle;
         Store.setState({
           battle: {
             ...battleState,
