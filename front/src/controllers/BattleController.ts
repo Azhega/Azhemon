@@ -465,6 +465,8 @@ export class BattleController {
 
     battleState.activePokemon.player.canAct = true;
     battleState.activePokemon.cpu.canAct = true;
+    battleState.activePokemon.player.hasBeenDamaged = false;
+    battleState.activePokemon.cpu.hasBeenDamaged = false;
 
     /*
     ============================================================================
