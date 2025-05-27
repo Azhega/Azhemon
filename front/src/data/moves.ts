@@ -678,7 +678,7 @@ export const moves = {
   calmMind: {
     moveKey: 'calmMind',
     id: 30,
-    name: 'Calm Mind',
+    name: 'Plénitude',
     type: 'Psy',
     category: 'Statut',
     power: 0,
@@ -688,7 +688,7 @@ export const moves = {
     description: 'Augmente l\'attaque spéciale et la défense spéciale de l\'utilisateur de 1 niveau',
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
-        const moveMessage = `Calm Mind ! L'attaque spéciale et la défense spéciale de ${context.attacker.name} augmentent !`;
+        const moveMessage = `Plénitude ! L'attaque spéciale et la défense spéciale de ${context.attacker.name} augmentent !`;
         context.pendingLogs.push(moveMessage);
         console.log(moveMessage);
         context.attacker.statModifiers.specialAttack += 1;
@@ -820,6 +820,77 @@ export const moves = {
         console.log(moveMessage);
         context.defender.statModifiers.speed -= 2;
         context.defender.calculateModifiedStats();
+      }
+    }
+  },
+  recover: {
+    moveKey: 'recover',
+    id: 37,
+    name: 'Soin',
+    type: 'Normal',
+    category: 'Statut',
+    power: 0,
+    accuracy: 0,
+    pp: 10,
+    priority: 0,
+    description: 'Restaure la moitié des PV max de l\'utilisateur',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        if (context.attacker.currentHp < context.attacker.maxHp) {
+          const healAmount = Math.floor(context.attacker.maxHp / 2);
+          context.attacker.currentHp = Math.min(context.attacker.currentHp + healAmount, context.attacker.maxHp);
+          const moveMessage = `Soin ! ${context.attacker.name} récupère ${healAmount} PV !`;
+          context.pendingLogs.push(moveMessage);
+          console.log(moveMessage);
+        } else {
+          const moveMessage = `Soin ! Les PV de ${context.attacker.name} sont déjà au max !`;
+          context.pendingLogs.push(moveMessage);
+          console.log(moveMessage);
+        }
+      }
+    }
+  },
+  drainPunch: {
+    moveKey: 'drainPunch',
+    id: 38,
+    name: 'Vampi-poing',
+    type: 'Combat',
+    category: 'Physique',
+    power: 75,
+    accuracy: 100,
+    pp: 10,
+    priority: 0,
+    description: 'Restaure la moitié des dégâts infligés à la cible',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits
+        && context.attacker.currentHp < context.attacker.maxHp) {
+        const healAmount = Math.ceil(context.damage / 2);
+        context.attacker.currentHp = Math.min(context.attacker.currentHp + healAmount, context.attacker.maxHp);
+        const moveMessage = `Vampipoing ! ${context.attacker.name} récupère ${healAmount} PV !`;
+        context.pendingLogs.push(moveMessage);
+        console.log(moveMessage);
+      }
+    }
+  },
+  gigaDrain: {
+    moveKey: 'gigaDrain',
+    id: 39,
+    name: 'Giga-Sangsue',
+    type: 'Plante',
+    category: 'Spécial',
+    power: 75,
+    accuracy: 100,
+    pp: 10,
+    priority: 0,
+    description: 'Restaure la moitié des dégâts infligés à la cible',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits
+        && context.attacker.currentHp < context.attacker.maxHp) {
+        const healAmount = Math.ceil(context.damage / 2);
+        context.attacker.currentHp = Math.min(context.attacker.currentHp + healAmount, context.attacker.maxHp);
+        const moveMessage = `Giga-Sangsue ! ${context.attacker.name} récupère ${healAmount} PV !`;
+        context.pendingLogs.push(moveMessage);
+        console.log(moveMessage);
       }
     }
   }
