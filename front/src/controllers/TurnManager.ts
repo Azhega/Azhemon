@@ -316,7 +316,7 @@ export class TurnManager {
   }
 
   private executeSwitch(action: BattleAction, isPlayer: boolean, callback: () => void): void {
-    const battleState = Store.getState().battle;
+    let battleState = Store.getState().battle;
     
     if (!battleState) {
       console.error('Battle state not initialized');
@@ -339,8 +339,10 @@ export class TurnManager {
     // Update active Pokemon
     if (isPlayer) {
       battleState.activePokemon.player = newPokemon;
+      EffectManager.resetEffects(battleState.activePokemon.player, battleState.activePokemon.cpu);
     } else {
       battleState.activePokemon.cpu = newPokemon;
+      EffectManager.resetEffects(battleState.activePokemon.player, battleState.activePokemon.cpu);
     }
     
     // Message for switch
@@ -352,13 +354,14 @@ export class TurnManager {
     // Update state
     Store.setState({ battle: battleState });
 
-    battleState.context.switchedPokemon = newPokemon;
-
     /*
     ============================================================================
     - HOOK : ON SWITCH ===> AFTER A POKEMON IS SWITCHED
     ============================================================================
     */
+    battleState = Store.getState().battle;
+    battleState.context.switchedPokemon = newPokemon;
+    battleState.context.opponentPokemon = battleState.activePokemon.cpu;
     EffectManager.applyOnSwitchEffects(battleState.context);
     
     Store.setState({
@@ -485,11 +488,12 @@ export class TurnManager {
       EventBus.off('battle:pokemon-selected', onPokemonSelected);
 
       // Update the active Pokémon for the player
-      const battleState = Store.getState().battle;
+      let battleState = Store.getState().battle;
       const selectedPokemon = battleState.playerTeam[selectedPokemonIndex];
 
       if (selectedPokemon && selectedPokemon.isAlive) {
         battleState.activePokemon.player = selectedPokemon;
+        EffectManager.resetEffects(battleState.activePokemon.player, battleState.activePokemon.cpu);
 
         // Update the state
         Store.setState({ battle: battleState });
@@ -503,19 +507,25 @@ export class TurnManager {
           },
         });
 
-        // Run onSwitch effects
-        const updatedBattleState = Store.getState().battle;
-        updatedBattleState.context.switchedPokemon = selectedPokemon;
-        EffectManager.applyOnSwitchEffects(updatedBattleState.context);
+        /*
+        ========================================================================
+        - HOOK : ON SWITCH ===> AFTER A POKEMON IS SWITCHED
+        ========================================================================
+        */
+        battleState = Store.getState().battle;
+        battleState.context.switchedPokemon = selectedPokemon;
+        battleState.context.opponentPokemon = battleState.activePokemon.cpu;
+        EffectManager.applyOnSwitchEffects(battleState.context);
 
-        const latestState = Store.getState();
-        const latestBattleState = latestState.battle;
+        battleState = Store.getState().battle;
         Store.setState({
           battle: {
-            ...latestBattleState,
-            log: [...latestBattleState.log, latestBattleState.context.pendingLogs.shift() as string],
+            ...battleState,
+            log: [...battleState.log, ...battleState.context.pendingLogs]
           },
         });
+
+        battleState.context.pendingLogs.length = 0;
 
         // Continue execution
         callback();
@@ -528,18 +538,17 @@ export class TurnManager {
   };
 
   private switchCpuPokemon(): void {
-    const battleState = Store.getState().battle;
+    let battleState = Store.getState().battle;
 
     // Find the next available Pokémon in the CPU's team
     const nextPokemon = battleState.cpuTeam.find((pokemon: Pokemon) => pokemon.isAlive);
 
     if (nextPokemon) {
       battleState.activePokemon.cpu = nextPokemon;
+      EffectManager.resetEffects(battleState.activePokemon.player, battleState.activePokemon.cpu);
 
-      // Update the state
       Store.setState({ battle: battleState });
 
-      // Log the switch
       const switchMessage = `L'adversaire envoie ${nextPokemon.name} !`;
       Store.setState({
         battle: {
@@ -547,6 +556,26 @@ export class TurnManager {
           log: [...battleState.log, switchMessage],
         },
       });
+
+      /*
+      ============================================================================
+      - HOOK : ON SWITCH ===> AFTER CPU POKEMON IS SWITCHED
+      ============================================================================
+      */
+      battleState = Store.getState().battle;
+      battleState.context.switchedPokemon = nextPokemon;
+      battleState.context.opponentPokemon = battleState.activePokemon.player;
+      EffectManager.applyOnSwitchEffects(battleState.context);
+      
+      battleState = Store.getState().battle;
+      Store.setState({
+        battle: {
+          ...battleState,
+          log: [...battleState.log, ...(battleState.context.pendingLogs)]
+        }
+      });
+
+      battleState.context.pendingLogs.length = 0;
     } else {
       console.log('No available Pokémon for CPU, player wins');
     }
@@ -597,22 +626,6 @@ export class TurnManager {
 
         // Automatically switch to the next available Pokémon for the CPU
         this.switchCpuPokemon();
-        /*
-        ============================================================================
-        - HOOK : ON SWITCH ===> AFTER A POKEMON IS SWITCHED
-        ============================================================================
-        */
-        EffectManager.applyOnSwitchEffects(battleState.context);
-        
-        battleState = Store.getState().battle;
-        Store.setState({
-          battle: {
-            ...battleState,
-            log: [...battleState.log, ...(battleState.context.pendingLogs)]
-          }
-        });
-
-        battleState.context.pendingLogs.length = 0;
 
         callback();
       } else {
@@ -667,21 +680,12 @@ export class TurnManager {
       });
       console.log('TurnManager : CPU Pokemon is KO after turn end effects, CPU must select another Pokemon');
 
-      // Automatically switch to the next available Pokémon for the CPU
-      this.switchCpuPokemon();
       /*
-      ============================================================================
-      - HOOK : ON SWITCH ===> AFTER A POKEMON IS SWITCHED
-      ============================================================================
+      ==========================================================================
+      - HOOK : ON SWITCH ===> AFTER CPU POKEMON IS SWITCHED
+      ==========================================================================
       */
-      EffectManager.applyOnSwitchEffects(battleState.context);
-      
-      Store.setState({
-        battle: {
-          ...battleState,
-          log: [...battleState.log, ...(battleState.context.pendingLogs)]
-        }
-      });
+      this.switchCpuPokemon();
 
       battleState.context.pendingLogs.length = 0;
     }

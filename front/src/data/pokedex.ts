@@ -11,7 +11,7 @@ export const Pokedex = {
       specialDefense: 115,
       speed: 80
     },
-    possibleAbilities: ['sereneGrace', 'superLuck'],
+    possibleAbilities: ['magicGuard'],
     possibleMoves: [
       'auraSphere',
       'airSlash',
@@ -101,7 +101,7 @@ export const Pokedex = {
       specialDefense: 70,
       speed: 97
     },
-    possibleAbilities: ['moldBreaker'],
+    possibleAbilities: ['intimidate'],
     possibleMoves: [
       'x_scissor',
       'dragonClaw',
@@ -144,7 +144,7 @@ export const Pokedex = {
       specialDefense: 100,
       speed: 61
     },
-    possibleAbilities: ['sandStream'],
+    possibleAbilities: ['intimidate', 'moxie', 'roughSkin'],
     possibleMoves: [
       'dragonClaw',
       'thunderbolt',

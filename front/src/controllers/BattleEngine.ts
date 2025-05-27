@@ -246,10 +246,10 @@ export class BattleEngine {
     const randomMod = 0.85 + (Math.random() * 0.15);
     
     // Basic formula for damage calculation
-    const baseDamage = ((((2 * attacker.level) / 5 + 2) * move.power * (attackStat / defenseStat)) / 50) + 2;
-    
+    const baseDamage = Math.max((((((2 * attacker.level) / 5 + 2) * move.power * (attackStat / defenseStat)) / 50) + 2), 1);
+
     // Final Damage
-    let finalDamage = Math.floor(baseDamage * stab * effectiveness * critMod * randomMod);
+    let finalDamage = Math.ceil(baseDamage * stab * effectiveness * critMod * randomMod);
     console.log('BattleEngine : Base Damage:', baseDamage, 'Final Damage:', finalDamage, 'CriticalMod:', critMod, 'Effectiveness:', effectiveness, 'STAB:', stab, 'RandomMod:', randomMod);
 
     const context = {

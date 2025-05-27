@@ -17,6 +17,7 @@ export const status = {
       pokemon.currentStats.attack = Math.floor(pokemon.currentStats.attack * 2);
       console.log(`${pokemon.name} n'est plus brûlé !`);
       pokemon.status = null;
+      pokemon.statusKey = null;
       // EffectManager.resetEffects(pokemon); // IDK how to handle this, will check later
     },
     onTurnEnd: (context: any) => {
@@ -50,6 +51,7 @@ export const status = {
       pokemon.currentStats.speed = Math.floor(pokemon.currentStats.speed * 2);
       console.log(`${pokemon.name} n'est plus paralysé !`);
       pokemon.status = null;
+      pokemon.statusKey = null;
       // EffectManager.resetEffects(pokemon); IDK how to handle this, will check later
     },
     onPreMove: (context: any) => {
@@ -77,13 +79,14 @@ export const status = {
     onRemove: (pokemon: any) => {
       console.log(`${pokemon.name} n'est plus empoisonné !`);
       pokemon.status = null;
+      pokemon.statusKey = null;
       // EffectManager.resetEffects(pokemon); // IDK how to handle this, will check later
     },
     onTurnEnd: (context: any) => {
       const battleState = Store.getState().battle;
       console.log('battleState : ', battleState);
       for (const pokemon of Object.values(battleState.activePokemon) as Pokemon[]) {
-        if (pokemon.statusKey === 'poison' && pokemon.currentHp > 0) {
+        if (pokemon.statusKey === 'poison' && pokemon.currentHp > 0 && pokemon.abilityKey !== 'poisonHeal') {
           const statusMessage = `Poison ! ${pokemon.name} subit des dégâts !`;
           context.pendingLogs.push(statusMessage);
           console.log('poison before : ', pokemon.name, pokemon.currentHp);
@@ -109,6 +112,7 @@ export const status = {
     onRemove: (pokemon: any) => {
       console.log(`${pokemon.name} n'est plus endormi !`);
       pokemon.status = null;
+      pokemon.statusKey = null;
       // EffectManager.resetEffects(pokemon); // IDK how to handle this, will check later
     },
     onPreMove: (context: any) => {
@@ -142,6 +146,7 @@ export const status = {
     onRemove: (pokemon: any) => {
       console.log(`${pokemon.name} n'est plus gelé !`);
       pokemon.status = null;
+      pokemon.statusKey = null;
       // EffectManager.resetEffects(pokemon); // IDK how to handle this, will check later
     },
     onPreMove: (context: any) => {

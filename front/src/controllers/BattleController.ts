@@ -140,6 +140,8 @@ export class BattleController {
     ============================================================================
     */
     battleState = Store.getState().battle;
+    battleState.context.switchedPokemon = battleState.activePokemon.player;
+    battleState.context.opponentPokemon = battleState.activePokemon.cpu;
     EffectManager.applyOnSwitchEffects(battleState.context);
     Store.setState({
       battle: {

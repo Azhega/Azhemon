@@ -1,11 +1,23 @@
 import { Pokemon } from "../models/PokemonModel";
 import Store from "../utils/Store";
+import { status } from "./status";
 
 export const abilities = {
-  sereneGrace: {
+  magicGuard: {
     id: 1,
-    name: 'Sérénité',
-    description: 'Double les chances d\'activation des effets secondaires'
+    name: 'Garde Magik',
+    description: 'Soigne le Pokémon des statuts à chaque fin de tour',
+    onTurnEnd: (context: any): void => {
+      const battleState = Store.getState().battle;
+      console.log('battleState : ', battleState);
+      for (const pokemon of Object.values(battleState.activePokemon) as Pokemon[]) {
+        if (pokemon.abilityKey === 'magicGuard' && pokemon.statusKey) {
+          const abilityMessage = `Talent Garde Magik ! ${pokemon.name} se soigne de son statut !`;
+          context.pendingLogs.push(abilityMessage);
+          status[pokemon.statusKey as keyof typeof status].onRemove(pokemon);
+        }
+      }
+    }
   },
   stormDrain: {
     id: 2,
@@ -47,13 +59,19 @@ export const abilities = {
       return context.damage;
     }
   },
-  moldBreaker: {
+  intimidate: {
     id: 5,
-    name: 'Brise Moule',
-    description: 'Le Pokémon ignore les talents adverses qui auraient un effet sur ses capacités',
-    onDamageModifier: (damage:number, context: any): number => {
-      // Logic to ignore target's ability effects
-      return context.damage;
+    name: 'Intimidation',
+    description: 'Le Pokémon baisse l\'attaque de l\'adversaire lorsqu\'il entre au combat',
+    onSwitch: (context: any): void => {
+      if (context.switchedPokemon) {
+        if (context.switchedPokemon.abilityKey === 'intimidate') {
+          const abilityMessage = `Talent Intimidation ! ${context.switchedPokemon.name} baisse l'attaque de son adversaire !`;
+          context.pendingLogs.push(abilityMessage);
+          context.opponentPokemon.statModifiers.attack -= 1;
+          context.opponentPokemon.calculateModifiedStats();
+        }
+      }
     }
   },
   levitate: {
@@ -69,23 +87,41 @@ export const abilities = {
       return context.damage;
     }
   },
-  sandStream: {
+  roughSkin: {
     id: 7,
-    name: 'Sable Volant',
-    description: 'Le Pokémon invoque une tempête de sable quand il entre au combat',
-    onTurnStart: (context: any): string => {
-      return 'Sandstorm';
+    name: 'Peau Dure',
+    description: 'Blesse l\'attaquant lorsque le Pokémon subit une attaque directe.',
+    onPostMove: (context: any): void => {
+      if (context.defender.abilityKey === 'roughSkin' && context.move.category === 'Physique' 
+        && context.attacker.canAct === true && context.damage > 0) {
+        const abilityMessage = `Talent Peau Dure de ${context.defender.name} ! ${context.attacker.name} subit des dégâts !`;
+        context.pendingLogs.push(abilityMessage);
+        const damage = Math.floor(context.defender.maxHp / 8);
+        context.attacker.currentHp = Math.max(0, context.attacker.currentHp - damage);
+        console.log(`${context.attacker.name} subit ${damage} points de dégâts à cause du talent Peau Dure !`);
+      }
     }
   },
   poisonHeal: {
     id: 8,
     name: 'Soin-Poison',
     description: 'Quand le Pokémon est empoisonné, il regagne des PV au lieu d\'en perdre',
-    onTurnEnd: (context: any): number => {
-      if (context.status === 'Poisoned') {
-        return context.hp + 1;
+    onTurnEnd: (context: any): void => {
+      const battleState = Store.getState().battle;
+      console.log('battleState : ', battleState);
+      for (const pokemon of Object.values(battleState.activePokemon) as Pokemon[]) {
+        if (pokemon.abilityKey === 'poisonHeal' && pokemon.statusKey === 'poison' 
+          && pokemon.currentHp > 0 && pokemon.currentHp < pokemon.maxHp) {
+          const abilityMessage = `Soin-Poison ! ${pokemon.name} récupère des PV au lieu d'en perdre !`;
+          context.pendingLogs.push(abilityMessage);
+          console.log('PoisonHeal before : ', pokemon.name, pokemon.currentHp);
+          pokemon.currentHp = Math.min(
+            pokemon.maxHp,
+            pokemon.currentHp + Math.floor(pokemon.maxHp / 8)
+          );
+          console.log('PoisonHeal after : ', pokemon.name, pokemon.currentHp);
+        }
       }
-      return context.hp;
     }
   },
   sniper: {
