@@ -182,7 +182,10 @@ export class EffectManager {
 
   public chainHook<T>(hook: EffectHook, initialValue: T, context: any): T {
     let value = initialValue;
-    const functions = this.hooks.get(hook) || [];
+    const functions = [
+    ...(this.hooks.get(hook) || []),
+    ...(this.moveHooks.get(hook) || [])
+    ];
     console.log(`Effect Manager : Running chainHook for ${hook} with initial value:`, initialValue);
     console.log(`Effect Manager : Functions for ${hook}:`, functions);
     for (const fn of functions) {

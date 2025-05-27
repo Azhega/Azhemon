@@ -279,7 +279,7 @@ export class BattleEngine {
     return {
       damage: finalDamage,
       effectiveness: effectiveness,
-      critical: critical
+      critical: context.critical
     };
   }
   

@@ -150,7 +150,19 @@ export const moves = {
     accuracy: 80,
     pp: 5,
     priority: 0,
-    description: 'Taux de critiques élevé'
+    description: 'Taux de critiques élevé',
+    onDamageModifier: (damage: number, context: any): number => {
+      if (!context.critical) {
+        const random = Math.random();
+        console.log('Lame de Roc : random', random);
+        if (random < 0.125) {
+          context.critical = true;
+          console.log('Lame de Roc : coup critique !');
+          return Math.floor(damage * 1.5);
+        }
+      }
+      return damage;
+    }
   },
   closeCombat: {
     moveKey: 'closeCombat',
@@ -185,6 +197,18 @@ export const moves = {
     pp: 15,
     priority: 0,
     description: 'Taux de critiques élevé, peut empoisonner la cible',
+    onDamageModifier: (damage: number, context: any): number => {
+      if (!context.critical) {
+        const random = Math.random();
+        console.log('Poison-Croix : random', random);
+        if (random < 0.125) {
+          context.critical = true;
+          console.log('Poison-Croix : coup critique !');
+          return Math.floor(damage * 1.5);
+        }
+      }
+      return damage;
+    },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         const random = Math.random();
@@ -361,7 +385,19 @@ export const moves = {
     accuracy: 100,
     pp: 15,
     priority: 0,
-    description: 'Taux de critiques élevé'
+    description: 'Taux de critiques élevé',
+    onDamageModifier: (damage: number, context: any): number => {
+      if (!context.critical) {
+        const random = Math.random();
+        console.log('Tranche-Nuit : random', random);
+        if (random < 0.125) {
+          context.critical = true;
+          console.log('Tranche-Nuit : coup critique !');
+          return Math.floor(damage * 1.5);
+        }
+      }
+      return damage;
+    }
   },
   ironHead: {
     moveKey: 'ironHead',
