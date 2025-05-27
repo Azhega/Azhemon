@@ -211,6 +211,7 @@ export class BattleEngine {
         moveType: move.type,
         attacker: attacker,
         defender: defender,
+        hits: true
       }
       battleState.context = context;
 
@@ -222,11 +223,11 @@ export class BattleEngine {
     let defenseStat: number;
     
     if (move.category === 'Physique') {
-      attackStat = attacker.currentStats.attack * (1 + attacker.statModifiers.attack / 3);
-      defenseStat = defender.currentStats.defense * (1 + defender.statModifiers.defense / 3);
+      attackStat = attacker.currentStats.attack
+      defenseStat = defender.currentStats.defense
     } else if (move.category === 'Spécial') {
-      attackStat = attacker.currentStats.specialAttack * (1 + attacker.statModifiers.specialAttack / 3);
-      defenseStat = defender.currentStats.specialDefense * (1 + defender.statModifiers.specialDefense / 3);
+      attackStat = attacker.currentStats.specialAttack
+      defenseStat = defender.currentStats.specialDefense
     } else {
       // Status moves or other categories
       return { damage: 0, effectiveness: 1, critical: false };
@@ -259,6 +260,7 @@ export class BattleEngine {
       moveType: move.type,
       attacker: attacker,
       defender: defender,
+      hits: true,
       effectiveness: effectiveness,
       critical: critical,
       pendingLogs: []
@@ -322,7 +324,10 @@ export class BattleEngine {
   }
   
   executeMove(move: PokemonMove, attacker: Pokemon, defender: Pokemon): MoveResult {
+    let battleState = Store.getState().battle;
     if (!attacker.canAct) {
+      battleState.context.hits = false;
+
       return {
         success: false,
         message: `${attacker.name} ne peut pas agir !`
@@ -334,13 +339,15 @@ export class BattleEngine {
     console.log('BattleEngine : Hits :', hits);
     
     if (!hits) {
+      battleState.context.hits = false;
+
       return {
         success: false,
         message: `${attacker.name} utilise ${move.name}, mais l'adversaire évite l'attaque !`
       };
     }
     
-    let battleState = Store.getState().battle;
+    battleState = Store.getState().battle;
     // Calculate damage
     const damageResult = this.calculateDamage(move, attacker, defender, battleState);
     

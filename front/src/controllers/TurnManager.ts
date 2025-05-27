@@ -243,17 +243,17 @@ export class TurnManager {
       // Check if target is KO
       if (target.currentHp <= 0) {
         target.isAlive = false;
-        console.log('TurnManager : Target is KO');
+        // console.log('TurnManager : Target is KO');
         
-        const faintMessage = `${target.name} est K.O. !`;
+        // const faintMessage = `${target.name} est K.O. !`;
         
-        battleState = Store.getState().battle;
-        Store.setState({
-          battle: {
-            ...battleState,
-            log: [...battleState.log, faintMessage]
-          }
-        });
+        // battleState = Store.getState().battle;
+        // Store.setState({
+        //   battle: {
+        //     ...battleState,
+        //     log: [...battleState.log, faintMessage]
+        //   }
+        // });
 
         /*
         ========================================================================

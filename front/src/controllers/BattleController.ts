@@ -45,6 +45,7 @@ export class BattleController {
       moveType: null,
       attacker: null,
       defender: null,
+      hits: false,
       effectiveness: null,
       critical: null,
       pendingLogs: [],
