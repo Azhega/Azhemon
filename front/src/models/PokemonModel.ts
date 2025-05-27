@@ -1,3 +1,4 @@
+import Store from '../utils/Store.ts';
 import { Effect } from './EffectModel.ts';
 
 export interface PokemonStats {
@@ -136,29 +137,37 @@ export class Pokemon {
   }
 
   public calculateModifiedStats(): void {
-    console.log('current stats before modifiers:', this.currentStats.attack);
+    let battleState = Store.getState().battle;
+    const clamp = (value: number, min: number, max: number) => {
+      if (value > max) {
+        console.log(`Modificateur ${value} est supérieur à la limite ${max}, ajusté à ${max}.`);
+        const statMessage = `Limite de +6, la stat ne peut pas plus augmenter !`;
+        battleState.context.pendingLogs.push(statMessage);
+      } else if (value < min) {
+        console.log(`Modificateur ${value} est inférieur à la limite ${min}, ajusté à ${min}.`);
+        const statMessage = `Limite de -6, la stat ne peut pas plus diminuer !`;
+        battleState.context.pendingLogs.push(statMessage);
+      }
+      return Math.max(min, Math.min(max, value));
+    }
 
-    this.currentStats.attack = this.statModifiers.attack >= 0 ? 
-      Math.floor(this.initialCurrentStats.attack * (1 + (this.statModifiers.attack * 0.5))) :
-      Math.floor(this.initialCurrentStats.attack / (1 + (this.statModifiers.attack * 0.5)));
+    const statKeys: (keyof PokemonStats)[] = [
+      'attack', 'defense', 'specialAttack', 'specialDefense', 'speed', 'accuracy', 'evasion'
+    ];
 
-    this.currentStats.defense = this.statModifiers.defense >= 0 ?
-      Math.floor(this.initialCurrentStats.defense * (1 + (this.statModifiers.defense * 0.5))) :
-      Math.floor(this.initialCurrentStats.defense / (1 + (this.statModifiers.defense * 0.5)));
+    statKeys.forEach(stat => {
+      this.statModifiers[stat] = clamp(this.statModifiers[stat], -6, 6);
 
-    this.currentStats.specialAttack = this.statModifiers.specialAttack >= 0 ?
-      Math.floor(this.initialCurrentStats.specialAttack * (1 + (this.statModifiers.specialAttack * 0.5))) :
-      Math.floor(this.initialCurrentStats.specialAttack / (1 + (this.statModifiers.specialAttack * 0.5)));
+      // Calculate the stat based on the modifier
+      const mod = this.statModifiers[stat];
+      if (mod >= 0) {
+        this.currentStats[stat] = Math.floor(this.initialCurrentStats[stat] * (1 + (mod * 0.5)));
+      } else {
+        this.currentStats[stat] = Math.floor(this.initialCurrentStats[stat] / (1 + (Math.abs(mod) * 0.5)));
+      }
+    });
 
-    this.currentStats.specialDefense = this.statModifiers.specialDefense >= 0 ?
-      Math.floor(this.initialCurrentStats.specialDefense * (1 + (this.statModifiers.specialDefense * 0.5))) :
-      Math.floor(this.initialCurrentStats.specialDefense / (1 + (this.statModifiers.specialDefense * 0.5)));
-
-    this.currentStats.speed = this.statModifiers.speed >= 0 ?
-      Math.floor(this.initialCurrentStats.speed * (1 + (this.statModifiers.speed * 0.5))) :
-      Math.floor(this.initialCurrentStats.speed / (1 + (this.statModifiers.speed * 0.5)));
-
-    console.log('current stats after modifiers:', this.currentStats.attack);
+    // If you want to handle accuracy/evasion differently, do it here
   }
 }
 
