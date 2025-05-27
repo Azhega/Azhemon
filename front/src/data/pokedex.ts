@@ -29,7 +29,9 @@ export const Pokedex = {
       'eerieImpulse',
       'fakeTears',
       'cottonSpore',
-      'recover'
+      'recover',
+      'braveBird',
+      'extremeSpeed'
     ]
   },
   gastrodon: {
@@ -53,7 +55,9 @@ export const Pokedex = {
       'toxic',
       'iceWave',
       'amnesia',
-      'recover'
+      'recover',
+      'aquaJet',
+      'avalanche'
     ]
   },
   chandelure: {
@@ -76,7 +80,9 @@ export const Pokedex = {
       'energyBall',
       'will_o_wisp',
       'nastyPlot',
-      'eerieImpulse'
+      'eerieImpulse',
+      'flareBlitz',
+      'shadowSneak'
     ]
   },
   escavalier: {
@@ -100,7 +106,8 @@ export const Pokedex = {
       'swordsDance',
       'ironDefense',
       'screech',
-      'metalSound'
+      'metalSound',
+      'revenge'
     ]
   },
   haxorus: {
@@ -122,7 +129,8 @@ export const Pokedex = {
       'closeCombat',
       'earthquake',
       'ironHead',
-      'swordsDance'
+      'swordsDance',
+      'extremeSpeed'
     ]
   },
   eelektross: {
@@ -148,7 +156,8 @@ export const Pokedex = {
       'screech',
       'eerieImpulse',
       'metalSound',
-      'drainPunch'
+      'drainPunch',
+      'wildCharge'
     ]
   },
   tyranitar: {
@@ -175,7 +184,9 @@ export const Pokedex = {
       'ironHead',
       'closeCombat',
       'thunderWave',
-      'ironDefense'
+      'ironDefense',
+      'headSmash',
+      'revenge'
     ]
   },
   breloom: {
@@ -201,7 +212,9 @@ export const Pokedex = {
       'agility',
       'cottonSpore',
       'drainPunch',
-      'gigaDrain'
+      'gigaDrain',
+      'machPunch',
+      'revenge'
     ]
   },
   drapion: {
@@ -248,7 +261,9 @@ export const Pokedex = {
       'earthquake',
       'swordsDance',
       'agility',
-      'screech'
+      'screech',
+      'machPunch',
+      'revenge'
     ]
   },
   lapras: {
@@ -273,7 +288,9 @@ export const Pokedex = {
       'iceWave',
       'charm',
       'fakeTears',
-      'recover'
+      'recover',
+      'iceShard',
+      'avalanche'
     ]
   },
   reuniclus: {
@@ -359,7 +376,9 @@ export const Pokedex = {
       'amnesia',
       'calmMind',
       'charm',
-      'fakeTears'
+      'fakeTears',
+      'aquaJet',
+      'avalanche'
     ]
   },
   quagsire: {
@@ -386,7 +405,9 @@ export const Pokedex = {
       'charm',
       'fakeTears',
       'recover',
-      'drainPunch'
+      'drainPunch',
+      'aquaJet',
+      'avalanche'
     ]
   },
 }

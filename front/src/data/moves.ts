@@ -893,5 +893,212 @@ export const moves = {
         console.log(moveMessage);
       }
     }
+  },
+  headSmash: {
+    moveKey: 'headSmash',
+    id: 40,
+    name: 'Fracass\'Tête',
+    type: 'Roche',
+    category: 'Physique',
+    power: 150,
+    accuracy: 80,
+    pp: 5,
+    priority: 0,
+    description: 'Inflige des dégâts au lanceur égaux à la moitié des dégâts infligés à la cible',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const recoilDamage = Math.floor(context.damage / 2);
+        context.attacker.currentHp = Math.max(context.attacker.currentHp - recoilDamage, 0);
+        const moveMessage = `Fracass\'Tête ! ${context.attacker.name} subit ${recoilDamage} points de dégâts de recul !`;
+        context.pendingLogs.push(moveMessage);
+        console.log(moveMessage);
+      }
+    }
+  },
+  wildCharge: {
+    moveKey: 'wildCharge',
+    id: 41,
+    name: 'Éclair Fou',
+    type: 'Électrik',
+    category: 'Physique',
+    power: 90,
+    accuracy: 100,
+    pp: 15,
+    priority: 0,
+    description: 'Inflige des dégâts au lanceur égaux à un quart des dégâts infligés à la cible',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const recoilDamage = Math.floor(context.damage / 4);
+        context.attacker.currentHp = Math.max(context.attacker.currentHp - recoilDamage, 0);
+        const moveMessage = `Éclair Fou ! ${context.attacker.name} subit ${recoilDamage} points de dégâts de recul !`;
+        context.pendingLogs.push(moveMessage);
+        console.log(moveMessage);
+      }
+    }
+  },
+  flareBlitz: {
+    moveKey: 'flareBlitz',
+    id: 42,
+    name: 'Boutefeu',
+    type: 'Feu',
+    category: 'Physique',
+    power: 120,
+    accuracy: 100,
+    pp: 15,
+    priority: 0,
+    description: 'Inflige des dégâts au lanceur égaux à un tiers des dégâts infligés à la cible, peut brûler la cible',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const recoilDamage = Math.floor(context.damage / 3);
+        context.attacker.currentHp = Math.max(context.attacker.currentHp - recoilDamage, 0);
+        const moveMessage = `Boutefeu ! ${context.attacker.name} subit ${recoilDamage} points de dégâts de recul !`;
+        context.pendingLogs.push(moveMessage);
+        console.log(moveMessage);
+
+        const random = Math.random();
+        console.log('Boutefeu : random', random);
+        if (random < 0.1 && !context.defender.types.includes('Feu') 
+          && context.defender.isAlive && context.defender.statusKey === null) {
+          const burnMessage = `Boutefeu ! ${context.defender.name} est brûlé !`;
+          context.pendingLogs.push(burnMessage);
+          console.log(burnMessage);
+          context.defender.statusKey = 'burn';
+          status['burn'].onApply(context.defender);
+        }
+      }
+    }
+  },
+  braveBird: {
+    moveKey: 'braveBird',
+    id: 43,
+    name: 'Rapace',
+    type: 'Vol',
+    category: 'Physique',
+    power: 120,
+    accuracy: 100,
+    pp: 15,
+    priority: 0,
+    description: 'Inflige des dégâts au lanceur égaux à un tiers des dégâts infligés à la cible',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const recoilDamage = Math.floor(context.damage / 3);
+        context.attacker.currentHp = Math.max(context.attacker.currentHp - recoilDamage, 0);
+        const moveMessage = `Rapace ! ${context.attacker.name} subit ${recoilDamage} points de dégâts de recul !`;
+        context.pendingLogs.push(moveMessage);
+        console.log(moveMessage);
+      }
+    }
+  },
+  aquaJet: {
+    moveKey: 'aquaJet',
+    id: 44,
+    name: 'Aqua-Jet',
+    type: 'Eau',
+    category: 'Physique',
+    power: 40,
+    accuracy: 100,
+    pp: 20,
+    priority: 1,
+    description: 'Priorité +1'
+  },
+  bulletPunch: {
+    moveKey: 'bulletPunch',
+    id: 45,
+    name: 'Pisto-Poing',
+    type: 'Acier',
+    category: 'Physique',
+    power: 40,
+    accuracy: 100,
+    pp: 30,
+    priority: 1,
+    description: 'Priorité +1'
+  },
+  machPunch: {
+    moveKey: 'machPunch',
+    id: 46,
+    name: 'Mach Punch',
+    type: 'Combat',
+    category: 'Physique',
+    power: 40,
+    accuracy: 100,
+    pp: 30,
+    priority: 1,
+    description: 'Priorité +1',
+  },
+  shadowSneak: {
+    moveKey: 'shadowSneak',
+    id: 47,
+    name: 'Ombre Portée',
+    type: 'Spectre',
+    category: 'Physique',
+    power: 40,
+    accuracy: 100,
+    pp: 30,
+    priority: 1,
+    description: 'Priorité +1'
+  },
+  iceShard: {
+    moveKey: 'iceShard',
+    id: 48,
+    name: 'Éclats Glace',
+    type: 'Glace',
+    category: 'Physique',
+    power: 40,
+    accuracy: 100,
+    pp: 30,
+    priority: 1,
+    description: 'Priorité +1'
+  },
+  extremeSpeed: {
+    moveKey: 'extremeSpeed',
+    id: 49,
+    name: 'Vitesse Extrême',
+    type: 'Normal',
+    category: 'Physique',
+    power: 80,
+    accuracy: 100,
+    pp: 5,
+    priority: 2,
+    description: 'Priorité +2'
+  },
+  avalanche: {
+    moveKey: 'avalanche',
+    id: 50,
+    name: 'Avalanche',
+    type: 'Glace',
+    category: 'Physique',
+    power: 60,
+    accuracy: 100,
+    pp: 10,
+    priority: -4,
+    description: 'Double les dégâts si l\'utilisateur a été touché par une attaque lors du tour précédent',
+    onDamageModifier: (damage: number, context: any): number => {
+      if (context.attacker.hasBeenDamaged) {
+        console.log('Avalanche : coup double !');
+        return damage * 2;
+      }
+      
+      return damage;
+    }
+  },
+  revenge: {
+    moveKey: 'revenge',
+    id: 51,
+    name: 'Vendetta',
+    type: 'Combat',
+    category: 'Physique',
+    power: 60,
+    accuracy: 100,
+    pp: 10,
+    priority: -4,
+    description: 'Double les dégâts si l\'utilisateur a été touché par une attaque lors du tour précédent',
+    onDamageModifier: (damage: number, context: any): number => {
+      if (context.attacker.hasBeenDamaged) {
+        console.log('Vendetta : coup double !');
+        return damage * 2;
+      }
+      
+      return damage;
+    }
   }
 }

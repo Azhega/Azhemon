@@ -84,6 +84,7 @@ export class Pokemon {
   trainer: number | null = null; // Trainer ID, to implement later
   terrain: /*Terrain |*/ any = null; // Terrain, to implement later
   canAct: boolean = true;
+  hasBeenDamaged: boolean = false;
   
   constructor(data: any) {
     this.key = data.key;

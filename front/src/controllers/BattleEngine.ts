@@ -356,7 +356,8 @@ export class BattleEngine {
       // HP cannot go below 0
       console.log('BattleEngine : Defender hp before:', defender.currentHp);
       defender.currentHp = Math.max(0, defender.currentHp - damageResult.damage);
-      console.log('BattleEngine : Defender hp after:', defender.currentHp);
+      console.log('BattleEngine : Defender hp after:', defender.currentHp); 
+      defender.hasBeenDamaged = true;
       // Check if the defender is knocked out
       if (defender.currentHp <= 0) {
         defender.isAlive = false;
