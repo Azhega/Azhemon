@@ -28,7 +28,8 @@ export const Pokedex = {
       'charm',
       'eerieImpulse',
       'fakeTears',
-      'cottonSpore'
+      'cottonSpore',
+      'recover'
     ]
   },
   gastrodon: {
@@ -51,7 +52,8 @@ export const Pokedex = {
       'earthquake',
       'toxic',
       'iceWave',
-      'amnesia'
+      'amnesia',
+      'recover'
     ]
   },
   chandelure: {
@@ -145,7 +147,8 @@ export const Pokedex = {
       'thunderWave',
       'screech',
       'eerieImpulse',
-      'metalSound'
+      'metalSound',
+      'drainPunch'
     ]
   },
   tyranitar: {
@@ -196,7 +199,9 @@ export const Pokedex = {
       'toxic',
       'swordsDance',
       'agility',
-      'cottonSpore'
+      'cottonSpore',
+      'drainPunch',
+      'gigaDrain'
     ]
   },
   drapion: {
@@ -267,7 +272,8 @@ export const Pokedex = {
       'ironHead',
       'iceWave',
       'charm',
-      'fakeTears'
+      'fakeTears',
+      'recover'
     ]
   },
   reuniclus: {
@@ -297,7 +303,9 @@ export const Pokedex = {
       'calmMind',
       'charm',
       'eerieImpulse',
-      'fakeTears'
+      'fakeTears',
+      'recover',
+      'drainPunch'
     ]
   },
   porygon_z: {
@@ -376,7 +384,9 @@ export const Pokedex = {
       'iceWave',
       'amnesia',
       'charm',
-      'fakeTears'
+      'fakeTears',
+      'recover',
+      'drainPunch'
     ]
   },
 }
