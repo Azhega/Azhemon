@@ -711,6 +711,7 @@ export class TurnManager {
 
       // Wait for player to select a Pokémon
       this.waitForPlayerPokemonSelection(() => {});
+      return;
     }
   }
 }

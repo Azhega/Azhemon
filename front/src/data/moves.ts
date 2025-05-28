@@ -863,7 +863,8 @@ export const moves = {
     description: 'Restaure la moitié des dégâts infligés à la cible',
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits
-        && context.attacker.currentHp < context.attacker.maxHp) {
+        && context.attacker.currentHp < context.attacker.maxHp 
+        && context.attacker.isAlive) {
         const healAmount = Math.ceil(context.damage / 2);
         context.attacker.currentHp = Math.min(context.attacker.currentHp + healAmount, context.attacker.maxHp);
         const moveMessage = `Vampipoing ! ${context.attacker.name} récupère ${healAmount} PV !`;
@@ -885,7 +886,8 @@ export const moves = {
     description: 'Restaure la moitié des dégâts infligés à la cible',
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits
-        && context.attacker.currentHp < context.attacker.maxHp) {
+        && context.attacker.currentHp < context.attacker.maxHp 
+        && context.attacker.isAlive) {
         const healAmount = Math.ceil(context.damage / 2);
         context.attacker.currentHp = Math.min(context.attacker.currentHp + healAmount, context.attacker.maxHp);
         const moveMessage = `Giga-Sangsue ! ${context.attacker.name} récupère ${healAmount} PV !`;
