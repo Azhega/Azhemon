@@ -193,4 +193,40 @@ export const abilities = {
       return context.damage;
     }
   },
+  static: {
+    id: 14,
+    name: 'Statik',
+    description: 'Si le Pokémon est touché par une capacité de contact, il a 30% de chances d\'être paralysé',
+    onPostMove: (context: any): void => {
+      if (context.defender.abilityKey === 'static' && context.move.category === 'Physique' 
+        && context.attacker.canAct === true && context.damage > 0) {
+        const random = Math.random();
+        if (random < 0.3 && context.attacker.statusKey === null 
+          && !context.attacker.types.includes('Électrik') && context.attacker.isAlive) {
+          const abilityMessage = `Talent Statik ! ${context.attacker.name} est paralysé !`;
+          context.pendingLogs.push(abilityMessage);
+          context.attacker.statusKey = 'paralysis';
+          status['paralysis'].onApply(context.attacker);
+        }
+      }
+    }
+  },
+  flameBody: {
+    id: 15,
+    name: 'Corps Ardent',
+    description: 'Si le Pokémon est touché par une capacité de contact, il a 30% de chances d\'être brûlé',
+    onPostMove: (context: any): void => {
+      if (context.defender.abilityKey === 'flameBody' && context.move.category === 'Physique' 
+        && context.attacker.canAct === true && context.damage > 0) {
+        const random = Math.random();
+        if (random < 0.3 && context.attacker.statusKey === null 
+          && !context.attacker.types.includes('Feu') && context.attacker.isAlive) {
+          const abilityMessage = `Talent Corps Ardent ! ${context.attacker.name} est brûlé !`;
+          context.pendingLogs.push(abilityMessage);
+          context.attacker.statusKey = 'burn';
+          status['burn'].onApply(context.attacker);
+        }
+      }
+    }
+  }
 }
