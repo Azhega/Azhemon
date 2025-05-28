@@ -146,7 +146,7 @@ export const Pokedex = {
       specialDefense: 80,
       speed: 50
     },
-    possibleAbilities: ['levitate'],
+    possibleAbilities: ['levitate', 'static'],
     possibleMoves: [
       'dragonClaw',
       'thunderbolt',

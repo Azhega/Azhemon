@@ -355,7 +355,7 @@ export class TurnManager {
             return;
           }
         } else {
-          console.error('NO U-TURN : NO POKEMON SWITCH');
+          console.log('NO U-TURN : NO POKEMON SWITCH');
         }
 
         /*
