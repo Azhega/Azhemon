@@ -48,6 +48,7 @@ export class BattleController {
       hits: false,
       effectiveness: null,
       critical: null,
+      requestSwitch: false,
       pendingLogs: [],
     };
 
@@ -467,6 +468,7 @@ export class BattleController {
     battleState.activePokemon.cpu.canAct = true;
     battleState.activePokemon.player.hasBeenDamaged = false;
     battleState.activePokemon.cpu.hasBeenDamaged = false;
+    battleState.context.requestSwitch = false;
 
     /*
     ============================================================================

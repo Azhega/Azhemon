@@ -1,4 +1,8 @@
 import { status } from './status';
+import { TurnManager } from '../controllers/TurnManager';
+import Store from '../utils/Store';
+import EventBus from '../utils/EventBus'; 
+import { Pokemon } from '../models/PokemonModel';
 
 export const moves = {
   auraSphere: {
@@ -1101,6 +1105,38 @@ export const moves = {
       }
       
       return damage;
+    }
+  },
+  u_turn: {
+    moveKey: 'u_turn',
+    id: 52,
+    name: 'Demi-Tour',
+    type: 'Insecte',
+    category: 'Physique',
+    power: 70,
+    accuracy: 100,
+    pp: 20,
+    priority: 0,
+    description: 'Permet de changer de Pokémon après l\'attaque',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits && context.attacker.isAlive) {
+        const battleState = Store.getState().battle;
+        let team: any[] = [];
+        if (battleState.playerTeam.some((p: Pokemon) => p === context.attacker)) {
+          team = battleState.playerTeam;
+        } else if (battleState.cpuTeam.some((p: Pokemon) => p === context.attacker)) {
+          team = battleState.cpuTeam;
+        }
+
+        const aliveCount = team.filter((p: Pokemon) => p.isAlive && p !== context.attacker).length;
+
+        if (aliveCount > 0) {
+          const moveMessage = `Demi-Tour ! ${context.attacker.name} change de Pokémon !`;
+          context.pendingLogs.push(moveMessage);
+          console.log(moveMessage);
+          context.requestSwitch = true;
+        }
+      }
     }
   }
 }
