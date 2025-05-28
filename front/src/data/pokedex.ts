@@ -107,7 +107,8 @@ export const Pokedex = {
       'ironDefense',
       'screech',
       'metalSound',
-      'revenge'
+      'revenge',
+      'u_turn'
     ]
   },
   haxorus: {
@@ -238,7 +239,8 @@ export const Pokedex = {
       'nightSlash',
       'toxic',
       'swordsDance',
-      'screech'
+      'screech',
+      'u_turn'
     ]
   },
   heracross: {
@@ -263,7 +265,8 @@ export const Pokedex = {
       'agility',
       'screech',
       'machPunch',
-      'revenge'
+      'revenge',
+      'u_turn'
     ]
   },
   lapras: {

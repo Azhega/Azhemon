@@ -60,6 +60,7 @@ export class BattleView {
   
   private registerEventListeners(): void {
     EventBus.on('battle:show-pokemon-selection', () => this.showTeamSelection(true));
+    EventBus.on('battle:hide-pokemon-selection', () => this.hideTeamSelection());
 
     // Store changes
     const unsubscribe = Store.subscribe(() => {
@@ -449,10 +450,24 @@ export class BattleView {
     }
   }
 
+  private hideTeamSelection(): void {
+    if (this.teamMenu) {
+      this.teamMenu.style.display = 'none';
+    }
+  }
+
   showBattleResult(result: 'won' | 'lost'): void {
     if (!this.actionMenu || !this.moveMenu || !this.teamMenu) {
       console.error('Action, move or team menu not found');
       return;
+    }
+
+    // Remove any existing result container
+    if (this.battleContainer) {
+      const existingResult = this.battleContainer.querySelector('.battle-result');
+      if (existingResult) {
+        existingResult.remove();
+      }
     }
     
     // Hide all menus

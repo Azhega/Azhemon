@@ -272,6 +272,34 @@ export class TurnManager {
 
         battleState.context.pendingLogs.length = 0;
 
+        battleState = Store.getState().battle;
+        if (battleState.context.requestSwitch) {
+          if (battleState.context.attacker === battleState.activePokemon.player) {
+            battleState.context.requestSwitch = false;
+            console.log('U-TURN : PLAYER POKEMON SWITCH')
+            EventBus.emit('battle:show-pokemon-selection');
+            this.waitForPlayerPokemonSelection(() => {
+              EffectManager.unregisterMoveEffects();
+              console.log('Turn Manager : Continuing, target alive');
+              callback();
+            });
+            return;
+          } else if (battleState.context.attacker === battleState.activePokemon.cpu) {
+            battleState.context.requestSwitch = false;
+            console.log('U-TURN : CPU POKEMON SWITCH')
+            this.switchCpuPokemon();
+            EffectManager.unregisterMoveEffects();
+            console.log('Turn Manager : Continuing, target alive');
+            callback();
+            return;
+          } else {
+            console.error('U-TURN : Unknown attacker type');
+            return;
+          }
+        } else {
+          console.log('NO U-TURN : NO POKEMON SWITCH');
+        }
+
         /*
         ========================================================================
         - UNREGISTER MOVE EFFECTS ===> RIGHT AFTER POSTMOVE EFFECTS
@@ -301,6 +329,34 @@ export class TurnManager {
         });
 
         battleState.context.pendingLogs.length = 0;
+
+        battleState = Store.getState().battle;
+        if (battleState.context.requestSwitch) {
+          if (battleState.context.attacker === battleState.activePokemon.player) {
+            battleState.context.requestSwitch = false;
+            console.log('U-TURN : PLAYER POKEMON SWITCH')
+            EventBus.emit('battle:show-pokemon-selection');
+            this.waitForPlayerPokemonSelection(() => {
+              EffectManager.unregisterMoveEffects();
+              console.log('Turn Manager : Continuing, target alive');
+              callback();
+            });
+            return;
+          } else if (battleState.context.attacker === battleState.activePokemon.cpu) {
+            battleState.context.requestSwitch = false;
+            console.log('U-TURN : CPU POKEMON SWITCH')
+            this.switchCpuPokemon();
+            EffectManager.unregisterMoveEffects();
+            console.log('Turn Manager : Continuing, target alive');
+            callback();
+            return;
+          } else {
+            console.error('U-TURN : Unknown attacker type');
+            return;
+          }
+        } else {
+          console.error('NO U-TURN : NO POKEMON SWITCH');
+        }
 
         /*
         ========================================================================
@@ -486,6 +542,7 @@ export class TurnManager {
     const onPokemonSelected = (selectedPokemonIndex: number) => {
       // Remove the event listener after selection
       EventBus.off('battle:pokemon-selected', onPokemonSelected);
+      EventBus.emit('battle:hide-pokemon-selection');
 
       // Update the active Pokémon for the player
       let battleState = Store.getState().battle;
@@ -541,7 +598,9 @@ export class TurnManager {
     let battleState = Store.getState().battle;
 
     // Find the next available Pokémon in the CPU's team
-    const nextPokemon = battleState.cpuTeam.find((pokemon: Pokemon) => pokemon.isAlive);
+    const nextPokemon = battleState.cpuTeam.find((pokemon: Pokemon) => {
+      return pokemon.isAlive && pokemon !== battleState.activePokemon.cpu
+    });
 
     if (nextPokemon) {
       battleState.activePokemon.cpu = nextPokemon;
