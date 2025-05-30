@@ -7,14 +7,17 @@ import { BattleAction, BattleState, BattleTurn } from '../models/BattleModel.ts'
 import { Pokedex } from '../data/pokedex.ts';
 import { createBattlePokemon } from '../utils/PokemonFactory.ts';
 import EffectManager from './EffectManager.ts';
+import { PokemonAI } from './PokemonAI.ts';
 
 export class BattleController {
   private battleView: BattleView | null;
   private turnManager: TurnManager | null;
+  private ai: PokemonAI;
 
   constructor() {
     this.battleView = new BattleView();
     this.turnManager = new TurnManager();
+    this.ai = new PokemonAI();
 
     this.registerEventListeners();
   }
@@ -190,16 +193,19 @@ export class BattleController {
         }
       };
 
-    const cpuAction = this.generateCpuAction();
-      
+    const cpuAction = this.ai.makeDecision(battleState.activePokemon.cpu, 
+      battleState.activePokemon.player, battleState.cpuTeam);
+
     // Create turn
     const currentTurn: BattleTurn = {
       turnNumber: battleState.turn,
       actions: {
         player: playerAction,
-        cpu: cpuAction
+        cpu: cpuAction.action
       }
     };
+
+    console.log('BattleController : CPU Action Reasoning:', cpuAction.reasoning);
     
     this.executeTurn(currentTurn);
   }
@@ -237,14 +243,15 @@ export class BattleController {
     };
     
     // Generate CPU action
-    const cpuAction = this.generateCpuAction();
+    const cpuAction = this.ai.makeDecision(battleState.activePokemon.cpu, 
+      battleState.activePokemon.player, battleState.cpuTeam);
     
     // Create turn
     const currentTurn: BattleTurn = {
       turnNumber: battleState.turn,
       actions: {
         player: playerAction,
-        cpu: cpuAction
+        cpu: cpuAction.action
       }
     };
     
@@ -398,6 +405,25 @@ export class BattleController {
         move: randomMove
       }
     };
+  }
+
+  public generateAiAction(): BattleAction {
+    const battleState = Store.getState().battle;
+    
+    if (!battleState) {
+      throw new Error('Battle state not initialized');
+    }
+    
+    const cpuPokemon = battleState.activePokemon.cpu;
+    const playerPokemon = battleState.activePokemon.player;
+    const cpuTeam = battleState.cpuTeam;
+    
+    const decision = this.ai.makeDecision(cpuPokemon, playerPokemon, cpuTeam);
+    
+    // Debug
+    console.log(`BattleController : IA Decision Reasoning : ${decision.reasoning}`);
+    
+    return decision.action;
   }
   
   private executeTurn(turn: BattleTurn): void {
