@@ -5,6 +5,11 @@ import { Pokemon, PokemonMove } from '../models/PokemonModel';
 import { TurnManager } from './TurnManager.ts';
 import { BattleAction, BattleState, BattleTurn } from '../models/BattleModel.ts';
 import { Pokedex } from '../data/pokedex.ts';
+import { items } from '../data/items.ts';
+import { abilities } from '../data/abilities.ts';
+import { moves } from '../data/moves.ts';
+import { natures } from '../data/natures.ts';
+import { cpuPokedex } from '../data/cpuPokedex.ts';
 import { createBattlePokemon } from '../utils/PokemonFactory.ts';
 import EffectManager from './EffectManager.ts';
 import { PokemonAI } from './PokemonAI.ts';
@@ -308,103 +313,52 @@ export class BattleController {
     });
 
     EventBus.emit('screen:changed', 'menu');
-}
-  
+  }
+
   private generateCpuTeam(size: number): Pokemon[] {
     // WIP CPU team
-    const pokemonSpecies = Pokedex;
     const cpuTeam: Pokemon[] = [];
     
     // Same team size as player
     for (let i = 0; i < size; i++) {
-      const randomIndex = Math.floor(Math.random() * Object.keys(pokemonSpecies).length);
-      const randomKey = Object.keys(pokemonSpecies)[randomIndex];
-      
+      const randomIndex = Math.floor(Math.random() * Object.keys(cpuPokedex).length);
+      const cpuPokemonKey = Object.keys(cpuPokedex)[randomIndex];
+      const abilityKey = cpuPokedex[cpuPokemonKey as keyof typeof cpuPokedex].ability;
+      const itemKey = cpuPokedex[cpuPokemonKey as keyof typeof cpuPokedex].item;
+      const natureKey = cpuPokedex[cpuPokemonKey as keyof typeof cpuPokedex].nature;
+
       // Create Pokemon object
       const cpuPokemon = createBattlePokemon(
-        randomKey as keyof typeof Pokedex, 
+        cpuPokemonKey as keyof typeof cpuPokedex, 
         {
-          nature: { 
-            id: 2, name: 'Bizarre', description: 'Nature neutre',
-            atk: 1.0, def: 1.0, spa: 1.0, spd: 1.0, spe: 1.0
-          },
-          moves: this.generateRandomMoves(),
-          ability: { id: 0, name: 'Aucun', description: ''},
-          item: null
+          nature: natures[natureKey as keyof typeof natures],
+          moves: this.generateCpuMoves(cpuPokemonKey),
+          ability: abilities[abilityKey as keyof typeof abilities],
+          item: items[itemKey as keyof typeof items]
         });
-      cpuPokemon.key = randomKey;
-      cpuPokemon.abilityKey = "sereneGrace"; // default abilitykey
-      cpuPokemon.itemKey = "leftovers"; // default itemkey
-      
+      cpuPokemon.key = cpuPokemonKey;
+      cpuPokemon.abilityKey = abilityKey;
+      cpuPokemon.itemKey = itemKey;
+      cpuPokemon.natureKey = natureKey;
+
       cpuTeam.push(cpuPokemon);
     }
     
     return cpuTeam;
   }
   
-  private generateRandomMoves(): PokemonMove[] {
-    // WIP Random moves
-    const state = Store.getState();
-    const cpuMoves = state.currentTeam[0].moves.map((move: PokemonMove) => ({
-      ...move,
-      currentPP: move.pp
-    }));
-    return cpuMoves;
-  }
-  
-  private generateRandomAbility(species: any): any {
-    // WIP Random ability
-    return {
-      id: 1,
-      name: 'Talent par défaut',
-      description: 'Un talent par défaut',
-      effects: []
-    };
-  }
-  
-  private generateCpuAction(): BattleAction {
-    // WIP CPU action
-    const battleState = Store.getState().battle;
-    const cpuPokemon = battleState.activePokemon.cpu;
-
-    if (cpuPokemon.moves.length === 0) {
-      console.error('CPU Pokemon has no moves available');
+  private generateCpuMoves(cpuPokemonKey: string): PokemonMove[] {
+    const cpuPokemonMoves = cpuPokedex[cpuPokemonKey as keyof typeof cpuPokedex].moves.map((moveKey: string) => {
+      const baseMove = moves[moveKey as keyof typeof moves];
       return {
-        type: 'struggle',
-        user: 'cpu',
-        target: 'player',
-        data: {}
-      };
-    }
-
-    if (cpuPokemon.moves.every((move: PokemonMove) => move.currentPP <= 0)) {
-      console.log('BattleController : CPU Pokemon has no moves left');
-      // Struggle if no moves available
-      return {
-        type: 'struggle',
-        user: 'cpu',
-        target: 'player',
-        data: {}
-      };
-    }
-
-    const randomMoveIndex = Math.floor(Math.random() * cpuPokemon.moves.length);
-    const randomMove = cpuPokemon.moves[randomMoveIndex];
-    cpuPokemon.moves[randomMoveIndex].currentPP -= 1;
-    if (randomMove.currentPP === 0) {
-      cpuPokemon.moves.splice(randomMoveIndex, 1);
-    }
-     
-    console.log('BattleController : CPU selected move:', randomMove);
-    return {
-      type: 'move',
-      user: 'cpu',
-      target: 'player',
-      data: {
-        moveIndex: randomMoveIndex,
-        move: randomMove
+        ...baseMove,
+        moveKey: baseMove.moveKey,
+        currentPP: baseMove.pp,
+        target: null
       }
-    };
+    });
+
+    return cpuPokemonMoves;
   }
 
   public generateAiAction(): BattleAction {

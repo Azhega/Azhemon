@@ -57,7 +57,8 @@ export const Pokedex = {
       'amnesia',
       'recover',
       'aquaJet',
-      'avalanche'
+      'avalanche',
+      'earthPower'
     ]
   },
   chandelure: {
@@ -123,7 +124,7 @@ export const Pokedex = {
       specialDefense: 70,
       speed: 97
     },
-    possibleAbilities: ['intimidate'],
+    possibleAbilities: ['intimidate', 'moxie'],
     possibleMoves: [
       'x_scissor',
       'dragonClaw',

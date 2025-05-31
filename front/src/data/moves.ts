@@ -1138,5 +1138,30 @@ export const moves = {
         }
       }
     }
+  },
+  earthPower: {
+    moveKey: 'earthPower',
+    id: 53,
+    name: 'Telluriforce',
+    type: 'Sol',
+    category: 'Spécial',
+    power: 90,
+    accuracy: 100,
+    pp: 10,
+    priority: 0,
+    description: 'Peut baisser la Défense Spéciale de la cible',
+    onPostMove: (context: any): void => {
+      if (context.attacker.canAct === true && context.hits) {
+        const random = Math.random();
+        console.log('Telluriforce : random', random);
+        if (random < 0.1 && context.defender.isAlive) {
+          const moveMessage = `Telluriforce ! La Défense Spéciale de ${context.defender.name} baisse !`;
+          context.pendingLogs.push(moveMessage);
+          console.log(moveMessage);
+          context.defender.statModifiers.specialDefense -= 1;
+          context.defender.calculateModifiedStats();
+        }
+      }
+    }
   }
 }
