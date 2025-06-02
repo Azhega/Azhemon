@@ -11,9 +11,10 @@ export interface BattleState {
   playerTeam: Pokemon[];
   cpuTeam: Pokemon[];
   activePokemon: {
-    player: Pokemon;
+    player: Pokemon | null;
     cpu: Pokemon;
   };
+  leadSelected: boolean;
   weather: WeatherType | null; // to implement later
   terrain: TerrainType | null; // to implement later
   status: BattleStatus;
