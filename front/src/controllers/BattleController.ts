@@ -53,6 +53,7 @@ export class BattleController {
       moveType: null,
       attacker: null,
       defender: null,
+      defenderInitialHp: null,
       hits: false,
       effectiveness: null,
       critical: null,
@@ -448,7 +449,20 @@ export class BattleController {
     battleState.activePokemon.cpu.canAct = true;
     battleState.activePokemon.player.hasBeenDamaged = false;
     battleState.activePokemon.cpu.hasBeenDamaged = false;
-    battleState.context.requestSwitch = false;
+
+    battleState.context = {
+      damage: null,
+      move: null,
+      moveType: null,
+      attacker: null,
+      defender: null,
+      defenderInitialHp: null,
+      hits: false,
+      effectiveness: null,
+      critical: null,
+      requestSwitch: false,
+      pendingLogs: [],
+    };
 
     /*
     ============================================================================

@@ -931,7 +931,8 @@ export const moves = {
     description: 'Inflige des dégâts au lanceur égaux à la moitié des dégâts infligés à la cible',
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
-        const recoilDamage = Math.floor(context.damage / 2);
+        const actualDamage = Math.max(0, context.defenderInitialHp - context.defender.currentHp);
+        const recoilDamage = Math.floor(actualDamage / 2);
         context.attacker.currentHp = Math.max(context.attacker.currentHp - recoilDamage, 0);
         const moveMessage = `Fracass\'Tête ! ${context.attacker.name} subit ${recoilDamage} points de dégâts de recul !`;
         context.pendingLogs.push(moveMessage);
@@ -952,7 +953,8 @@ export const moves = {
     description: 'Inflige des dégâts au lanceur égaux à un quart des dégâts infligés à la cible',
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
-        const recoilDamage = Math.floor(context.damage / 4);
+        const actualDamage = Math.max(0, context.defenderInitialHp - context.defender.currentHp);
+        const recoilDamage = Math.floor(actualDamage / 2);
         context.attacker.currentHp = Math.max(context.attacker.currentHp - recoilDamage, 0);
         const moveMessage = `Éclair Fou ! ${context.attacker.name} subit ${recoilDamage} points de dégâts de recul !`;
         context.pendingLogs.push(moveMessage);
@@ -973,7 +975,8 @@ export const moves = {
     description: 'Inflige des dégâts au lanceur égaux à un tiers des dégâts infligés à la cible, peut brûler la cible',
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
-        const recoilDamage = Math.floor(context.damage / 3);
+        const actualDamage = Math.max(0, context.defenderInitialHp - context.defender.currentHp);
+        const recoilDamage = Math.floor(actualDamage / 2);
         context.attacker.currentHp = Math.max(context.attacker.currentHp - recoilDamage, 0);
         const moveMessage = `Boutefeu ! ${context.attacker.name} subit ${recoilDamage} points de dégâts de recul !`;
         context.pendingLogs.push(moveMessage);
@@ -1005,7 +1008,8 @@ export const moves = {
     description: 'Inflige des dégâts au lanceur égaux à un tiers des dégâts infligés à la cible',
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
-        const recoilDamage = Math.floor(context.damage / 3);
+        const actualDamage = Math.max(0, context.defenderInitialHp - context.defender.currentHp);
+        const recoilDamage = Math.floor(actualDamage / 2);
         context.attacker.currentHp = Math.max(context.attacker.currentHp - recoilDamage, 0);
         const moveMessage = `Rapace ! ${context.attacker.name} subit ${recoilDamage} points de dégâts de recul !`;
         context.pendingLogs.push(moveMessage);
