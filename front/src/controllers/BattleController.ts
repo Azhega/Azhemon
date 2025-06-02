@@ -67,9 +67,10 @@ export class BattleController {
       playerTeam: validPlayerTeam,
       cpuTeam: cpuTeam,
       activePokemon: {
-        player: validPlayerTeam[0],
+        player: null,
         cpu: cpuTeam[0]
       },
+      leadSelected: false,
       weather: null, // to implement later
       terrain: null, // to implement later
       status: 'initializing',
@@ -81,7 +82,8 @@ export class BattleController {
     
     this.battleView?.initialize();
     
-    this.startBattle();
+    // Show lead selection
+    EventBus.emit('battle:show-pokemon-selection', { leadSelection: true });
   }
 
   destroy(): void {
@@ -106,6 +108,20 @@ export class BattleController {
     EventBus.on('battle:select-move', (data) => this.selectMove(data.moveIndex));
     EventBus.on('battle:switch-pokemon', (data) => this.switchPokemon(data.pokemonIndex));
     EventBus.on('battle:back-to-menu', () => this.exitBattle());
+    EventBus.on('battle:lead-selected', (data) => this.setLeadPokemon(data.pokemonIndex));
+  }
+
+  private setLeadPokemon(pokemonIndex: number): void {
+    const battleState = Store.getState().battle;
+    const selectedPokemon: Pokemon = battleState.playerTeam[pokemonIndex];
+    if (!selectedPokemon || !selectedPokemon.isAlive) {
+      EventBus.emit('battle:error', 'Sélection invalide.');
+      return;
+    }
+    battleState.activePokemon.player = selectedPokemon;
+    battleState.leadSelected = true;
+    Store.setState({ battle: battleState });
+    this.startBattle();
   }
   
   private startBattle(): void {

@@ -59,7 +59,7 @@ export class BattleView {
   }
   
   private registerEventListeners(): void {
-    EventBus.on('battle:show-pokemon-selection', () => this.showTeamSelection(true));
+    EventBus.on('battle:show-pokemon-selection', (data?: any) => this.showTeamSelection(true, data?.leadSelection));
     EventBus.on('battle:hide-pokemon-selection', () => this.hideTeamSelection());
 
     // Store changes
@@ -175,12 +175,16 @@ export class BattleView {
     // Clear existing content
     this.playerField.innerHTML = '';
     this.cpuField.innerHTML = '';
+
+    if (!battleState.leadSelected) {
+      return;
+    }
     
     // Get active Pokemon
     const playerPokemon = battleState.activePokemon.player;
     const cpuPokemon = battleState.activePokemon.cpu;
     
-    this.renderPokemonSprite(this.playerField, playerPokemon, 'player');
+    this.renderPokemonSprite(this.playerField, playerPokemon!, 'player');
     this.renderPokemonSprite(this.cpuField, cpuPokemon, 'cpu');
   }
 
@@ -249,6 +253,11 @@ export class BattleView {
 
     // Clear existing content
     this.battleLog.innerHTML = '';
+
+    if (!battleState.leadSelected) {
+      this.battleLog.innerHTML = '<h2>Choisissez un Pokémon !</h2>';
+      return;
+    }
     
     // Add all log entries
     battleState.log.forEach(entry => {
@@ -364,7 +373,7 @@ export class BattleView {
     this.moveMenu.appendChild(backButton);
   }
   
-  private showTeamSelection(activePokemonFainted: boolean): void {
+  private showTeamSelection(activePokemonFainted: boolean, leadSelection: boolean = false): void {
     if (!this.actionMenu || !this.teamMenu) {
       console.error('Action or team menu not found');
       return;
@@ -415,13 +424,18 @@ export class BattleView {
         ${!isAlive ? '<br><small>(K.O.)</small>' : ''}
       `;
       
-      if (!activePokemonFainted) {
+      if (leadSelection) {
+        teamButton.onclick = () => {
+          EventBus.emit('battle:lead-selected', { pokemonIndex: index });
+          this.teamMenu!.style.display = 'none';
+        };
+      } else if (!activePokemonFainted) {
         teamButton.onclick = () => {
           EventBus.emit('battle:switch-pokemon', { pokemonIndex: index });
           if (this.teamMenu) {
             this.teamMenu.style.display = 'none';
           }
-        }
+        };
       } else {
         teamButton.onclick = () => this.onPokemonSelected(index);
       }
