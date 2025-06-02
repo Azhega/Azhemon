@@ -5,14 +5,17 @@ import EventBus from '../utils/EventBus';
 import Store from '../utils/Store';
 import EffectManager from './EffectManager';
 import { Effect } from '../models/EffectModel';
+import { PokemonAI } from './PokemonAI';
 
 export class TurnManager {
   private battleEngine: BattleEngine;
-  
+  private ai: PokemonAI;
+
   constructor() {
     this.battleEngine = new BattleEngine();
+    this.ai = new PokemonAI();
   }
-  
+
   executeTurn(turn: BattleTurn, callback: () => void): void {
     console.log(`Turn Manager : Executing turn ${turn.turnNumber} : `, turn);
     
@@ -597,10 +600,8 @@ export class TurnManager {
   private switchCpuPokemon(): void {
     let battleState = Store.getState().battle;
 
-    // Find the next available Pokémon in the CPU's team
-    const nextPokemon = battleState.cpuTeam.find((pokemon: Pokemon) => {
-      return pokemon.isAlive && pokemon !== battleState.activePokemon.cpu
-    });
+    // CPU AI calculates the best switch
+    const nextPokemon = this.ai.switchAfterKo(battleState.activePokemon.player, battleState.cpuTeam).newCpuPokemon;
 
     if (nextPokemon) {
       battleState.activePokemon.cpu = nextPokemon;
