@@ -426,6 +426,7 @@ export const moves = {
     pp: 15,
     priority: 0,
     description: 'Brûle la cible',
+    flags: { statusEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         if (context.defender.types.includes('Feu')) {
@@ -459,6 +460,7 @@ export const moves = {
     pp: 15,
     priority: 0,
     description: 'Paralyse la cible',
+    flags: { statusEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         if (context.defender.types.includes('Électrik')) {
@@ -492,6 +494,7 @@ export const moves = {
     pp: 15,
     priority: 0,
     description: 'Empoisonne la cible',
+    flags: { statusEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         if (context.defender.types.includes('Poison') || context.defender.types.includes('Acier')) {
@@ -525,6 +528,7 @@ export const moves = {
     pp: 15,
     priority: 0,
     description: 'Endort la cible',
+    flags: { statusEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         if (context.defender.statusKey === null || context.defender.statusKey === undefined) {
@@ -552,6 +556,7 @@ export const moves = {
     pp: 10,
     priority: 0,
     description: 'Gèle la cible',
+    flags: { statusEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         if (context.defender.types.includes('Glace')) {
@@ -585,6 +590,7 @@ export const moves = {
     pp: 20,
     priority: 0,
     description: 'Augmente l\'attaque de l\'utilisateur de 2 niveaux',
+    flags: { statEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         const moveMessage = `Danse-Lames ! L'attaque de ${context.attacker.name} augmente beaucoup !`;
@@ -606,6 +612,7 @@ export const moves = {
     pp: 15,
     priority: 0,
     description: 'Augmente la défense de l\'utilisateur de 2 niveaux',
+    flags: { statEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         const moveMessage = `Mur de Fer ! La défense de ${context.attacker.name} augmente beaucoup !`;
@@ -627,6 +634,7 @@ export const moves = {
     pp: 20,
     priority: 0,
     description: 'Augmente l\'attaque spéciale de l\'utilisateur de 2 niveaux',
+    flags: { statEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         const moveMessage = `Machination ! L'attaque spéciale de ${context.attacker.name} augmente beaucoup !`;
@@ -648,6 +656,7 @@ export const moves = {
     pp: 20,
     priority: 0,
     description: 'Augmente la défense spéciale de l\'utilisateur de 2 niveaux',
+    flags: { statEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         const moveMessage = `Amnésie ! La défense spéciale de ${context.attacker.name} augmente beaucoup !`;
@@ -669,6 +678,7 @@ export const moves = {
     pp: 30,
     priority: 0,
     description: 'Augmente la vitesse de l\'utilisateur de 2 niveaux',
+    flags: { statEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         const moveMessage = `Hâte ! La vitesse de ${context.attacker.name} augmente beaucoup !`;
@@ -690,6 +700,7 @@ export const moves = {
     pp: 20,
     priority: 0,
     description: 'Augmente l\'attaque spéciale et la défense spéciale de l\'utilisateur de 1 niveau',
+    flags: { statEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         const moveMessage = `Plénitude ! L'attaque spéciale et la défense spéciale de ${context.attacker.name} augmentent !`;
@@ -712,6 +723,7 @@ export const moves = {
     pp: 20,
     priority: 0,
     description: 'Baisse l\'attaque de la cible de 2 niveaux',
+    flags: { statEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         const moveMessage = `Charme ! L'attaque de ${context.defender.name} baisse beaucoup !`;
@@ -733,6 +745,7 @@ export const moves = {
     pp: 40,
     priority: 0,
     description: 'Baisse la défense de la cible de 2 niveaux',
+    flags: { statEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         const moveMessage = `Grincement ! La défense de ${context.defender.name} baisse beaucoup !`;
@@ -754,6 +767,7 @@ export const moves = {
     pp: 15,
     priority: 0,
     description: 'Baisse l\'attaque spéciale de la cible de 2 niveaux',
+    flags: { statEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         const moveMessage = `Impulsion Étrange ! L'attaque spéciale de ${context.defender.name} baisse beaucoup !`;
@@ -775,6 +789,7 @@ export const moves = {
     pp: 20,
     priority: 0,
     description: 'Baisse la défense spéciale de la cible de 2 niveaux',
+    flags: { statEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         const moveMessage = `Croco Larme ! La défense spéciale de ${context.defender.name} baisse beaucoup !`;
@@ -796,6 +811,7 @@ export const moves = {
     pp: 40,
     priority: 0,
     description: 'Baisse la défense spéciale de la cible de 2 niveaux',
+    flags: { statEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         const moveMessage = `Strido-Son ! La défense spéciale de ${context.defender.name} baisse beaucoup !`;
@@ -817,6 +833,7 @@ export const moves = {
     pp: 40,
     priority: 0,
     description: 'Baisse la vitesse de la cible de 2 niveaux',
+    flags: { statEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         const moveMessage = `Spore Coton ! La vitesse de ${context.defender.name} baisse beaucoup !`;
@@ -838,6 +855,7 @@ export const moves = {
     pp: 10,
     priority: 0,
     description: 'Restaure la moitié des PV max de l\'utilisateur',
+    flags: { healEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         if (context.attacker.currentHp < context.attacker.maxHp) {

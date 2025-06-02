@@ -25,6 +25,13 @@ export interface PokemonMove {
   description: string;
   priority: number;
   target: Pokemon | null;
+  flags?: MoveFlags;
+}
+
+export interface MoveFlags {
+  statusEffect?: boolean;
+  statEffect?: boolean;
+  healEffect?: boolean;
 }
 
 export interface PokemonAbility {
