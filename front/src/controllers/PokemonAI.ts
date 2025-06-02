@@ -287,4 +287,33 @@ export class PokemonAI {
       description: 'Utilisé quand aucune autre attaque n\'est disponible, infligeant des dégâts de recul à l\'utilisateur.',
     };
   }
+
+  public switchAfterKo(playerPokemon: Pokemon, cpuTeam: Pokemon[]): {
+    newCpuPokemon: Pokemon;
+    bestScore?: number;
+  } {
+    let bestScore = 0;
+    let newCpuPokemon: Pokemon = cpuTeam[0]; // Default to first Pokémon
+
+    cpuTeam.forEach((cpuPokemon) => {
+      if (!cpuPokemon.isAlive) return;
+
+      this.reasoning.push(`CPU Decision: Calculating MUScore for ${cpuPokemon.name} against ${playerPokemon.name}`);
+      const score = this.calculateMatchupScore(cpuPokemon, playerPokemon);
+      if (score > bestScore) {
+        bestScore = score;
+        newCpuPokemon = cpuPokemon;
+        this.reasoning.push(`CPU Decision: New best score for ${cpuPokemon.name} : ${bestScore}`);
+      }
+    });
+
+    this.reasoning.push(`CPU Decision: Switch to ${newCpuPokemon.name} (bestScore: ${bestScore})`);
+
+    console.log(this.reasoning.join('\n')); // Debug output
+
+    return {
+      newCpuPokemon: newCpuPokemon,
+      bestScore: bestScore
+    };
+  }
 }
