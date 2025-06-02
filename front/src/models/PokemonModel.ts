@@ -174,8 +174,22 @@ export class Pokemon {
         this.currentStats[stat] = Math.floor(this.initialCurrentStats[stat] / (1 + (Math.abs(mod) * 0.5)));
       }
     });
+  }
 
-    // If you want to handle accuracy/evasion differently, do it here
+  public resetStats(): void {
+    this.currentStats = { ...this.initialCurrentStats };
+    this.statModifiers = {
+      hp: 0,
+      attack: 0,
+      defense: 0,
+      specialAttack: 0,
+      specialDefense: 0,
+      speed: 0,
+      accuracy: 0,
+      evasion: 0
+    };
+    this.canAct = true;
+    this.hasBeenDamaged = false;
   }
 }
 
