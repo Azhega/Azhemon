@@ -394,8 +394,9 @@ export class TurnManager {
       return;
     }
     
-    const newPokemon = team[pokemonIndex];
-    const oldPokemon = isPlayer ? battleState.activePokemon.player : battleState.activePokemon.cpu;
+    const newPokemon: Pokemon = team[pokemonIndex];
+    const oldPokemon: Pokemon = isPlayer ? battleState.activePokemon.player : battleState.activePokemon.cpu;
+    oldPokemon.resetStats();
     
     // Update active Pokemon
     if (isPlayer) {
@@ -551,7 +552,10 @@ export class TurnManager {
 
       // Update the active Pokémon for the player
       let battleState = Store.getState().battle;
-      const selectedPokemon = battleState.playerTeam[selectedPokemonIndex];
+      const oldPokemon: Pokemon = battleState.activePokemon.player;
+      oldPokemon.resetStats();
+
+      const selectedPokemon: Pokemon = battleState.playerTeam[selectedPokemonIndex];
 
       if (selectedPokemon && selectedPokemon.isAlive) {
         battleState.activePokemon.player = selectedPokemon;
@@ -601,6 +605,8 @@ export class TurnManager {
 
   private switchCpuPokemon(): void {
     let battleState = Store.getState().battle;
+    const oldPokemon: Pokemon = battleState.activePokemon.cpu;
+    oldPokemon.resetStats();
 
     // CPU AI calculates the best switch
     const nextPokemon = this.ai.switchAfterKo(battleState.activePokemon.player, battleState.cpuTeam).newCpuPokemon;
