@@ -29,7 +29,7 @@ export const abilities = {
         context.pendingLogs.push(abilityMessage);
         return 0;
       }
-      return context.damage;
+      return damage;
     }
   },
   flashFire: {
@@ -42,7 +42,7 @@ export const abilities = {
         context.pendingLogs.push(abilityMessage);
         return 0;
       }
-      return context.damage;
+      return damage;
     }
   },
   swarm: {
@@ -56,7 +56,7 @@ export const abilities = {
         context.pendingLogs.push(abilityMessage);
         return Math.floor(context.damage * 1.5);
       }
-      return context.damage;
+      return damage;
     }
   },
   intimidate: {
@@ -84,7 +84,7 @@ export const abilities = {
         context.pendingLogs.push(abilityMessage);
         return 0;
       }
-      return context.damage;
+      return damage;
     }
   },
   roughSkin: {
@@ -134,7 +134,7 @@ export const abilities = {
         context.pendingLogs.push(abilityMessage);
         return context.damage * 1.5;
       }
-      return context.damage;
+      return damage;
     }
   },
   moxie: {
@@ -162,7 +162,7 @@ export const abilities = {
           context.defender.currentHp + Math.floor(context.defender.maxHp / 5));
         return 0;
       }
-      return context.damage;
+      return damage;
     }
   },
   regenerator: {
@@ -190,7 +190,7 @@ export const abilities = {
         context.pendingLogs.push(abilityMessage);
         return Math.floor((context.damage / 1.5) * 2);
       }
-      return context.damage;
+      return damage;
     }
   },
   static: {
