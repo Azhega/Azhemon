@@ -685,6 +685,7 @@ export class TurnManager {
         */
         this.applyTurnEndEffects(callback);
         if (!this.checkIfPlayerPokemonIsAlive(callback)) { // Make player switch if KO
+          this.switchCpuPokemon();
           return false;
         }
 

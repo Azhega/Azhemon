@@ -260,6 +260,7 @@ export class BattleEngine {
       moveType: move.type,
       attacker: attacker,
       defender: defender,
+      defenderInitialHp: defender.currentHp,
       hits: true,
       effectiveness: effectiveness,
       critical: critical,
