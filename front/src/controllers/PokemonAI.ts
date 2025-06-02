@@ -97,6 +97,11 @@ export class PokemonAI {
       defenseScore *= effectiveness;
     }
 
+    if (defenseScore === 0) {
+      this.reasoning.push(`CPU Decision: Defense score is 0, setting to 0.1 to avoid division by zero`);
+      defenseScore = 0.1;
+    }
+
     this.reasoning.push(`CPU Decision: Type effectiveness : ${playerPokemon.name} against ${cpuPokemon.name} : ${defenseScore}`);
     this.reasoning.push(`CPU Decision: Final defScore : ${1 / defenseScore}`);
 
@@ -115,11 +120,11 @@ export class PokemonAI {
 
     // Outspeed bonus
     if (cpuPokemon.currentStats.speed > playerPokemon.currentStats.speed) {
-      ratio *= 1.5;
+      ratio *= 1.25;
       this.reasoning.push(`CPU Decision: Outspeed bonus, new ratio: ${ratio}`);
     }
 
-    return ratio;
+    return Math.min(2, ratio);
   }
   
   private shouldSwitch(cpuCurrentPokemon: Pokemon, playerPokemon: Pokemon, cpuTeam: Pokemon[]): {
@@ -128,7 +133,10 @@ export class PokemonAI {
     bestScore?: number;
   } {
     this.reasoning.push(`CPU Decision: Calculating CURRENT MUScore for ${cpuCurrentPokemon.name} against ${playerPokemon.name}`);
-    const currentScore = this.calculateMatchupScore(cpuCurrentPokemon, playerPokemon);
+    let currentScore = this.calculateMatchupScore(cpuCurrentPokemon, playerPokemon);
+    if (Object.values(cpuCurrentPokemon.statModifiers).some(boost => boost >= 2)) {
+      currentScore *= 2;
+    }
 
     let bestScore = 0;
     let bestPokemonIndex = -1;
@@ -191,7 +199,7 @@ export class PokemonAI {
   
   private calculateMoveScore(move: PokemonMove, cpuPokemon: Pokemon, playerPokemon: Pokemon): number {
     this.reasoning.push(`CPU Decision: Calculating score for move ${move.name} (${move.moveKey}) of ${cpuPokemon.name} against ${playerPokemon.name}`);
-    if (!move.power || move.power === 0) {
+    if (!move.power || move.power === 0 || move.category === 'Statut') {
       // Status move
       return this.calculateStatusMoveScore(move, cpuPokemon, playerPokemon);
     }
@@ -204,6 +212,8 @@ export class PokemonAI {
     this.reasoning.push(`CPU Decision: Calculating attack move score for ${move.name} (${move.moveKey}) of ${cpuPokemon.name} against ${playerPokemon.name}`);
     const typeEffectiveness = this.BattleEngine.calculateTypeEffectiveness(move.type, playerPokemon.types);
     let typeMult = typeEffectiveness >= 2 ? 2 : -2;
+
+    const immunityMult = playerPokemon.abilityKey === 'levitate' && move.type === 'Sol' ? 0 : 1;
     
     // Multiplier based on move category aligned with stats
     const isPhysical = move.category === 'Physique';
@@ -228,7 +238,7 @@ export class PokemonAI {
 
     this.reasoning.push(`CPU Decision: Move Score for ${move.name} (${move.moveKey}) : ${finalScore}`);
 
-    finalScore *= typeEffectiveness;
+    finalScore *= typeEffectiveness * immunityMult;
 
     this.reasoning.push(`CPU Decision: Final Move Score after applying typeEffectiveness for ${move.name} (${move.moveKey}) : ${finalScore}`);
     
@@ -239,7 +249,50 @@ export class PokemonAI {
     // WIP Status Move Score, don't know how to handle it yet
     // For now, return a fixed score
     this.reasoning.push(`CPU Decision: Status Move : ${move.name} (${move.moveKey}) of ${cpuPokemon.name} against ${playerPokemon.name}`);
-    return 6;
+
+
+
+    let moveScore = 5;
+
+    const outspeedMult = cpuPokemon.currentStats.speed > playerPokemon.currentStats.speed ? 1.5 : 1;
+
+    if (move.flags?.statusEffect) {
+      let hpMult = cpuPokemon.currentHp > cpuPokemon.maxHp / 1.6 ? 2 : 0.5;
+      let effectivenessMult = this.BattleEngine.calculateTypeEffectiveness(move.type, playerPokemon.types);
+      let immunityMult = playerPokemon.types.includes(move.type) ? 0 : 1;
+      let abilityMult = playerPokemon.abilityKey === 'magicGuard' ? 0 : 1;  
+      let statusMult = !playerPokemon.statusKey ? 4 : 0;
+      moveScore *= hpMult * effectivenessMult * immunityMult * statusMult * abilityMult * outspeedMult;
+      this.reasoning.push(
+        `CPU Decision: Status Move Score for ${move.name} (${move.moveKey}) : 
+        ${moveScore} (hpMult: ${hpMult}, effectivenessMult: ${effectivenessMult}, 
+        immunityMult: ${immunityMult}, statusMult: ${statusMult}, abilityMult: ${abilityMult}, 
+        outspeedMult: ${outspeedMult})`
+      );
+    } else if (move.flags?.statEffect) {
+      let statMult = 1.2;
+      if (Object.values(cpuPokemon.statModifiers).some(boost => boost >= 2)) {
+        statMult = 0.5;
+      }
+
+      let hpMult = cpuPokemon.currentHp > cpuPokemon.maxHp / 1.2 ? 2 : 0.5;
+      let matchupMult = this.calculateMatchupScore(cpuPokemon, playerPokemon) > 4 ? 2 : 1;
+      moveScore *= statMult * hpMult * matchupMult * outspeedMult;
+      this.reasoning.push(
+        `CPU Decision: Stat Effect Move Score for ${move.name} (${move.moveKey}) : 
+        ${moveScore} (hpMult: ${hpMult}, matchupMult: ${matchupMult}, 
+        statMult: ${statMult}, outspeedMult: ${outspeedMult})`
+      );
+    } else if (move.flags?.healEffect) {
+      let healMult = cpuPokemon.currentHp < cpuPokemon.maxHp / 2 ? 2 : 1;
+      moveScore *= healMult * outspeedMult;
+      this.reasoning.push(
+        `CPU Decision: Heal Effect Move Score for ${move.name} (${move.moveKey}) : 
+        ${moveScore} (healMult: ${healMult}, outspeedMult: ${outspeedMult})`
+      );
+    }
+
+    return moveScore;
   }
   
   private selectMove(moveScores: Array<{move: PokemonMove | null, score: number}>): {

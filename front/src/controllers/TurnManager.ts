@@ -124,7 +124,9 @@ export class TurnManager {
         */
         this.applyTurnEndEffects(callback);
         this.checkIfCpuPokemonIsAlive(); // Make it switch if KO
-        this.checkIfPlayerPokemonIsAlive(); // Make player switch if KO
+        if (!this.checkIfPlayerPokemonIsAlive(callback)) { // Make player switch if KO
+          return;
+        }
 
         // this.checkBattleState();
         callback();
@@ -682,7 +684,9 @@ export class TurnManager {
         ========================================================================
         */
         this.applyTurnEndEffects(callback);
-        this.checkIfPlayerPokemonIsAlive(); // Make player switch if KO
+        if (!this.checkIfPlayerPokemonIsAlive(callback)) { // Make player switch if KO
+          return false;
+        }
 
         // Automatically switch to the next available Pokémon for the CPU
         this.switchCpuPokemon();
@@ -751,7 +755,7 @@ export class TurnManager {
     }
   }
 
-  private checkIfPlayerPokemonIsAlive(): void {
+  private checkIfPlayerPokemonIsAlive(callback: () => void): boolean {
     const battleState = Store.getState().battle;
 
     if (battleState.activePokemon.player.currentHp <= 0) {
@@ -770,8 +774,9 @@ export class TurnManager {
       EventBus.emit('battle:show-pokemon-selection');
 
       // Wait for player to select a Pokémon
-      this.waitForPlayerPokemonSelection(() => {});
-      return;
+      this.waitForPlayerPokemonSelection(callback);
+      return false;
     }
+    return true;
   }
 }
