@@ -43,7 +43,8 @@ export class PokemonAI {
     this.reasoning.push(`CPU Decision: No switch, evaluating moves for ${cpuPokemon.name} against ${playerPokemon.name}`);
     this.switchCounter = Math.max(0, this.switchCounter - 1);
     const bestMove = this.selectBestMove(cpuPokemon, playerPokemon);
-    
+    bestMove.move!.currentPP = Math.max(0, bestMove.move!.currentPP! - 1);
+
     this.reasoning.push(`CPU Decision: Best move for ${cpuPokemon.name} against ${playerPokemon.name} is ${bestMove.move!.name} (score: ${bestMove.score})`);
     return {
       action: {
@@ -214,7 +215,7 @@ export class PokemonAI {
     let typeMult = typeEffectiveness >= 2 ? 2 : -2;
 
     const immunityMult = playerPokemon.abilityKey === 'levitate' && move.type === 'Sol' ? 0 : 1;
-    
+
     // Multiplier based on move category aligned with stats
     const isPhysical = move.category === 'Physique';
     const statRatio = isPhysical ?
@@ -301,7 +302,7 @@ export class PokemonAI {
   } {
     this.reasoning.push(`CPU Decision: Selecting move from scores`);
 
-    for (let i = 0 ; i < moveScores.length ; i++) {
+    for (let i = 0 ; i < "moveScores".length ; i++) {
       if (i === moveScores.length - 1) {
         this.reasoning.push(`CPU Decision: Last move reached, selecting it: ${moveScores[i].move!.name} (${moveScores[i].score})`);
         // Last move, always take it
