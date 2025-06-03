@@ -20,9 +20,14 @@ export class EventBus {
     this.listeners.get(event)!.push(callback);
   }
   
-  off(event: string, callback: Listener): void {
+  off(event: string, callback?: Listener): void {
     if (!this.listeners.has(event)) return;
-    
+
+    if (!callback) {
+      this.listeners.delete(event);
+      return;
+    }
+
     const filterIndex = this.listeners.get(event)!.findIndex(
       listener => listener === callback
     );

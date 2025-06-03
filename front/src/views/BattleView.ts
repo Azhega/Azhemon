@@ -35,7 +35,8 @@ export class BattleView {
 
   destroy(): void {
     // Remove event listeners
-    EventBus.off('battle:show-pokemon-selection', this.showTeamSelection);
+    EventBus.off('battle:show-pokemon-selection');
+    EventBus.off('battle:hide-pokemon-selection');
 
     // Unsubscribe from the store
     if (this.unsubscribe) {
@@ -56,6 +57,7 @@ export class BattleView {
     this.actionMenu = null;
     this.moveMenu = null;
     this.teamMenu = null;
+    this.isInitialized = false;
   }
   
   private registerEventListeners(): void {
@@ -374,8 +376,12 @@ export class BattleView {
   }
   
   private showTeamSelection(activePokemonFainted: boolean, leadSelection: boolean = false): void {
+    if (!this.isInitialized) {
+      return;
+    }
+
     if (!this.actionMenu || !this.teamMenu) {
-      console.error('Action or team menu not found');
+      console.error('Action or team menu not found', this.actionMenu, this.teamMenu);
       return;
     }
     
