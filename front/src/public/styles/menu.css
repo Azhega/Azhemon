@@ -1,0 +1,198 @@
+.menu-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  min-height: 90vh;
+  justify-content: center;
+}
+
+.team-selection-section {
+  width: 100%;
+  max-width: 800px;
+  margin: 1rem 0;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.team-selector-container h3 {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #333;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.battle-teams-dropdown {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: white;
+  color: #333;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.battle-teams-dropdown:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.battle-teams-dropdown:hover {
+  border-color: #999;
+}
+
+/* Team Preview */
+.selected-team-preview {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.selected-team-preview h4 {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #555;
+  font-size: 1.1rem;
+}
+
+.team-preview-slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.preview-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 8px;
+  min-height: 117.58px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.preview-slot.empty-slot {
+  background: #f8f9fa;
+  border: 2px dashed #ddd;
+  color: #999;
+  font-weight: 500;
+}
+
+.preview-slot.filled-slot {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 2px solid #dee2e6;
+  cursor: pointer;
+}
+
+.preview-slot.filled-slot:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.preview-sprite {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  margin-bottom: 0.25rem;
+}
+
+.preview-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.preview-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+}
+
+.preview-types {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.preview-types .type {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  color: white;
+  font-weight: 500;
+}
+
+/* Menu Buttons */
+.menu-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.menu-button {
+  padding: 0.75rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 150px;
+}
+
+.menu-button:not(:disabled) {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.menu-button:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+}
+
+.menu-button:disabled {
+  background: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.menu-button.ready-to-battle {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.menu-button.ready-to-battle:hover {
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+/* Type Colors */
+.type.normal { background-color: #A8A878; }
+.type.fighting { background-color: #C03028; }
+.type.flying { background-color: #A890F0; }
+.type.poison { background-color: #A040A0; }
+.type.ground { background-color: #E0C068; }
+.type.rock { background-color: #B8A038; }
+.type.bug { background-color: #A8B820; }
+.type.ghost { background-color: #705898; }
+.type.steel { background-color: #B8B8D0; }
+.type.fire { background-color: #F08030; }
+.type.water { background-color: #6890F0; }
+.type.grass { background-color: #78C850; }
+.type.electric { background-color: #F8D030; }
+.type.psychic { background-color: #F85888; }
+.type.ice { background-color: #98D8D8; }
+.type.dragon { background-color: #7038F8; }
+.type.dark { background-color: #705848; }
+.type.fairy { background-color: #EE99AC; }
