@@ -27,6 +27,7 @@ export const abilities = {
       if (context.defender.abilityKey === 'stormDrain' && context.moveType === 'Eau') {
         const abilityMessage = `Talent Lavabo ! ${context.defender.name} absorbe les dégâts Eau !`;
         context.pendingLogs.push(abilityMessage);
+        context.hits = false;
         return 0;
       }
       return damage;
@@ -40,6 +41,7 @@ export const abilities = {
       if (context.defender.abilityKey === 'flashFire' && context.moveType === 'Feu') {
         const abilityMessage = `Talent Torche ! ${context.defender.name} absorbe les dégâts Feu !`;
         context.pendingLogs.push(abilityMessage);
+        context.hits = false;
         return 0;
       }
       return damage;
@@ -82,6 +84,7 @@ export const abilities = {
       if (context.defender.abilityKey === 'levitate' && context.moveType === 'Sol') {
         const abilityMessage = `Talent Lévitation ! ${context.defender.name} est immunisé contre les attaques de type Sol !`;
         context.pendingLogs.push(abilityMessage);
+        context.hits = false;
         return 0;
       }
       return damage;
@@ -158,6 +161,7 @@ export const abilities = {
       if (context.defender.abilityKey === 'waterAbsorb' && context.moveType === 'Eau') {
         const abilityMessage = `Talent Absorbe-Eau ! ${context.defender.name} absorbe les dégâts Eau et récupère des PV !`;
         context.pendingLogs.push(abilityMessage);
+        context.hits = false;
         context.defender.currentHp = Math.min(context.defender.maxHp, 
           context.defender.currentHp + Math.floor(context.defender.maxHp / 5));
         return 0;
