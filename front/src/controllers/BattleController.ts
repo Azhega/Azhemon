@@ -30,7 +30,7 @@ export class BattleController {
   initialize(): void {
     const state = Store.getState();
     
-    const playerTeam = state.currentTeam || [];
+    const playerTeam = state.currentBattleTeam || [];
     if (!playerTeam.some((pokemon: Pokemon | null) => pokemon !== null)) {
       console.error('No Pokémon in player team');
       EventBus.emit('battle:error', 'Tu dois avoir au moins un Pokémon dans ton équipe !');
@@ -88,10 +88,10 @@ export class BattleController {
 
   destroy(): void {
     // Remove event listeners
-    EventBus.off('battle:start', this.startBattle);
-    EventBus.off('battle:select-move', this.selectMove);
-    EventBus.off('battle:switch-pokemon', this.switchPokemon);
-    EventBus.off('battle:back-to-menu', this.exitBattle);
+    EventBus.off('battle:select-move');
+    EventBus.off('battle:switch-pokemon');
+    EventBus.off('battle:back-to-menu');
+    EventBus.off('battle:lead-selected');
 
     // Clean up views
     if (this.battleView) {
@@ -104,7 +104,6 @@ export class BattleController {
   
   private registerEventListeners(): void {
     // Battle events
-    EventBus.on('battle:start', () => this.startBattle());
     EventBus.on('battle:select-move', (data) => this.selectMove(data.moveIndex));
     EventBus.on('battle:switch-pokemon', (data) => this.switchPokemon(data.pokemonIndex));
     EventBus.on('battle:back-to-menu', () => this.exitBattle());
@@ -283,12 +282,12 @@ export class BattleController {
   private exitBattle(): void {
     const state = Store.getState();
     console.log('Exiting battle...', state);
-    console.log('Current Team : ', state.currentTeam);
+    console.log('Current Team : ', state.currentBattleTeam);
 
-    const currentTeam = state.currentTeam;
+    const currentBattleTeam = state.currentBattleTeam;
 
     // Reset Current Team
-    const resetTeam = currentTeam.map((pokemon: Pokemon | null) => {
+    const resetTeam = currentBattleTeam.map((pokemon: Pokemon | null) => {
         if (pokemon) {
             // Create a new instance of the Pokemon class
             const resetPokemon = new Pokemon({
@@ -325,8 +324,12 @@ export class BattleController {
 
     // Update the state with the reset team
     Store.setState({
-        currentTeam: resetTeam,
+        currentBattleTeam: resetTeam,
         battle: null,
+        game: {
+          screen: 'menu',
+          isLoading: false
+        },
     });
 
     EventBus.emit('screen:changed', 'menu');

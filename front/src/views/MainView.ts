@@ -19,7 +19,6 @@ export class MainView {
         this.showLoading();
       } else {
         this.hideLoading();
-        this.updateScreen(state.game.currentScreen);
       }
     });
   }
