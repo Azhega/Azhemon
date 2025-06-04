@@ -143,50 +143,108 @@ export class TeamBuilderView {
     const pokemon = this.currentTeam[this.selectedPokemonIndex];
     detailsPanel.innerHTML = `
       <div class="pokemon-detail-card">
-        <div class="pokemon-header">
-          <img src="src/public/images/sprites/${pokemon?.name.toLowerCase()}/${pokemon?.name.toLowerCase()}_face.png" 
-              alt="${pokemon?.name.toLowerCase()}" class="pokemon-avatar">
-          <div class="pokemon-title">
-            <h2 class="pokemon-name editable" data-attribute="pokemon">${pokemon?.name}</h2>
-            <div class="pokemon-types">
-              ${pokemon?.types.map(type => `<span class="type ${type.toLowerCase()}">${type}</span>`).join('')}
+        <!-- Top row: Pokemon info + attributes in columns -->
+        <div class="pokemon-info-row">
+          <div class="pokemon-header">
+            <img src="src/public/images/sprites/${pokemon?.name.toLowerCase()}/${pokemon?.name.toLowerCase()}_face.png" 
+                alt="${pokemon?.name.toLowerCase()}" class="pokemon-avatar">
+            <div class="pokemon-title">
+              <h2 class="pokemon-name editable" data-attribute="pokemon">${pokemon?.name}</h2>
+              <div class="pokemon-types">
+                ${pokemon?.types.map(type => `<span class="type ${type.toLowerCase()}">${type}</span>`).join('')}
+              </div>
+            </div>
+          </div>
+          
+          <div class="pokemon-attributes">
+            <div class="attribute-row">
+              <span class="attribute-label">Objet</span>
+              <span class="attribute-value editable" data-attribute="item">${pokemon?.item?.name || 'Aucun'}</span>
+            </div>
+            <div class="attribute-row">
+              <span class="attribute-label">Talent</span>
+              <span class="attribute-value editable" data-attribute="ability">${pokemon?.ability.name || 'Aucun'}</span>
+            </div>
+            <div class="attribute-row">
+              <span class="attribute-label">Nature</span>
+              <span class="attribute-value editable" data-attribute="nature">${pokemon?.nature.name || 'Aucun'}</span>
+            </div>
+          </div>
+          
+          <div class="pokemon-actions">
+            <button id="remove-pokemon" class="remove-button" data-slot="${this.selectedPokemonIndex}">
+              Retirer
+            </button>
+          </div>
+        </div>
+        
+        <!-- Bottom row: Stats + Moves in columns -->
+        <div class="pokemon-details-row">
+          <div class="pokemon-stats">
+            <h3>Statistiques</h3>
+            <div class="stats-grid">
+              <div class="stat-row">
+                <span class="stat-label">PV</span>
+                <span class="stat-value">${pokemon?.baseStats.hp || 0}</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Attaque</span>
+                <span class="stat-value">${pokemon?.baseStats.attack || 0}</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Défense</span>
+                <span class="stat-value">${pokemon?.baseStats.defense || 0}</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Att. Spé</span>
+                <span class="stat-value">${pokemon?.baseStats.specialAttack || 0}</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Déf. Spé</span>
+                <span class="stat-value">${pokemon?.baseStats.specialDefense || 0}</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Vitesse</span>
+                <span class="stat-value">${pokemon?.baseStats.speed || 0}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="pokemon-moves">
+            <div class="moves-header-row">
+              <h3>Attaques</h3>
+              <span class="move-col-header type-col">Type</span>
+              <span class="move-col-header category-col">Catégorie</span>
+              <span class="move-col-header power-col">Puissance</span>
+              <span class="move-col-header accuracy-col">Précision</span>
+              <span class="move-col-header pp-col">PP</span>
+              <span class="move-col-header action-col"></span>
+            </div>
+            <div class="moves-list">
+              ${Array(4).fill(0).map((_, i) => {
+                const move = pokemon?.moves && pokemon?.moves[i] ? pokemon?.moves[i] : null;
+                return `
+                  <div class="move-slot ${!move ? 'empty' : ''}" data-move-slot="${i}">
+                    <div class="move-content">
+                      <div class="move-data-row">
+                        <span class="editable move-name" data-attribute="move" data-move-index="${i}">${move?.name || 'Attaque ' + (i + 1)}</span>
+                        <span class="move-type type ${move?.type?.toLowerCase() || ''}">${move?.type || '-'}</span>
+                        <span class="move-category">${move?.category || '-'}</span>
+                        <span class="move-power">${move?.power || '-'}</span>
+                        <span class="move-accuracy">${move?.accuracy ? move.accuracy + '%' : '-'}</span>
+                        <span class="move-pp">${move?.pp || '-'}</span>
+                        <span class="move-action">
+                          ${move ? `<button class="remove-move-btn" data-move-index="${i}" title="Supprimer cette attaque">×</button>` : ''}
+                        </span>
+                      </div>
+                      ${move && move.description ? `<div class="move-description">${move.description}</div>` : `<div class="move-description">Pas d'effet secondaire</div>`}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
             </div>
           </div>
         </div>
-        
-        <div class="pokemon-attributes">
-          <div class="attribute-row">
-            <span class="attribute-label">Objet</span>
-            <span class="attribute-value editable" data-attribute="item">${pokemon?.item?.name || 'Aucun'}</span>
-          </div>
-          <div class="attribute-row">
-            <span class="attribute-label">Talent</span>
-            <span class="attribute-value editable" data-attribute="ability">${pokemon?.ability.name || 'Aucun'}</span>
-          </div>
-          <div class="attribute-row">
-            <span class="attribute-label">Nature</span>
-            <span class="attribute-value editable" data-attribute="nature">${pokemon?.nature.name || 'Aucun'}</span>
-          </div>
-        </div>
-        
-        <div class="pokemon-moves">
-          <h3>Attaques</h3>
-          <div class="moves-list">
-            ${Array(4).fill(0).map((_, i) => {
-              const move = pokemon?.moves && pokemon?.moves[i] ? pokemon?.moves[i] : null;
-              return `
-                <div class="move-slot ${!move ? 'empty' : ''}" data-move-slot="${i}">
-                  <span class="editable" data-attribute="move" data-move-index="${i}">${move?.name || 'Attaque ' + (i + 1)}</span>
-                  <span class="type ${move?.type.toLowerCase()}">${move?.type}</span>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        </div>
-        
-        <button id="remove-pokemon" class="remove-button" data-slot="${this.selectedPokemonIndex}">
-          Retirer ce Pokémon
-        </button>
       </div>
     `;
 
@@ -730,6 +788,13 @@ export class TeamBuilderView {
       detailsPanel.addEventListener('click', (e) => {
         const target = e.target as HTMLElement;
         const editable = target.closest('.editable');
+
+        if (target.classList.contains('remove-move-btn')) {
+          e.stopPropagation(); // Prevent triggering the editable click
+          const moveIndex = parseInt(target.getAttribute('data-move-index') || '0');
+          this.removeMove(moveIndex);
+          return;
+        }
         
         if (editable) {
           const attribute = editable.getAttribute('data-attribute');
@@ -767,5 +832,15 @@ export class TeamBuilderView {
     this.currentTeam[slotIndex] = pokemon;
     Store.setState({ currentTeam: [...this.currentTeam] });
     this.updateTeamDisplay();
+  }
+
+  private removeMove(moveIndex: number): void {
+    if (this.selectedPokemonIndex !== null) {
+      const selectedPokemon = this.currentTeam[this.selectedPokemonIndex];
+      if (selectedPokemon && selectedPokemon.moves) {
+        selectedPokemon.moves[moveIndex] = null;
+        this.updatePokemonInSlot(this.selectedPokemonIndex, selectedPokemon);
+      }
+    }
   }
 }
