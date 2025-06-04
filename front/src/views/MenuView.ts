@@ -18,6 +18,28 @@ export class MenuView {
     this.attachEvents();
     this.loadTeams();
     this.displayTeamPreview(Array(6).fill(null));
+
+    EventBus.on('teambuilder:team-saved', () => {
+      this.loadTeams();
+    });
+    
+    EventBus.on('teambuilder:team-deleted', () => {
+      this.loadTeams();
+
+      // Always clear the current battle team when any team is deleted
+      Store.setState({ 
+        currentBattleTeam: Array(6).fill(null)
+      });
+      
+      // Reset the dropdown
+      const dropdown = document.getElementById('battle-teams-dropdown') as HTMLSelectElement;
+      if (dropdown) {
+        dropdown.value = '';
+      }
+      
+      this.displayTeamPreview(Array(6).fill(null));
+      this.updateBattleButtonState();
+    });
     
     Store.subscribe((state) => {
       if (state.game.screen === 'menu') {

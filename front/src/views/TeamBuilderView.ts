@@ -592,6 +592,10 @@ export class TeamBuilderView {
         ApiService.delete('team/' + teamIndex)
           .then(() => {
             alert('Équipe supprimée avec succès !');
+
+            // For MenuView team selector
+            EventBus.emit('teambuilder:team-deleted');
+            
             this.loadTeams();
             this.currentTeam = [null, null, null, null, null, null];
             Store.setState({ currentTeam: this.currentTeam , currentTeamIndex: null });
@@ -662,6 +666,10 @@ export class TeamBuilderView {
           const response = await ApiService.patch('update_team/' + Store.getState().currentTeamIndex, payload);
           console.log('Team updated:', response);
           alert('Équipe mise à jour avec succès !');
+
+          // For MenuView team selector
+          EventBus.emit('teambuilder:team-saved');
+
           teamNameInput.value = ''; // Clear the input after saving
           this.loadTeams();
           this.currentTeam = [null, null, null, null, null, null];
@@ -672,6 +680,9 @@ export class TeamBuilderView {
         const response = await ApiService.post('create_team', payload);
         console.log('Team saved:', response);
         alert('Équipe sauvegardée avec succès !');
+
+        // For MenuView team selector
+        EventBus.emit('teambuilder:team-saved');
       } catch (error) {
         console.error('Erreur lors du saveTeam:', error);
         alert("Une erreur est survenue lors de la sauvegarde de l'équipe.");
