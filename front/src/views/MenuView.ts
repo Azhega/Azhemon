@@ -1,6 +1,7 @@
 import EventBus from '../utils/EventBus';
 import Store from '../utils/Store';
 import ApiService from '../services/ApiService';
+import AuthService from '../services/AuthService';
 import { Pokemon } from '../models/PokemonModel';
 import { Pokedex } from '../data/pokedex';
 import { items } from '../data/items';
@@ -51,6 +52,14 @@ export class MenuView {
   private render(): void {
     this.element.innerHTML = `
       <div class="menu-container">
+        <!-- User info and logout button -->
+        <div class="menu-header">
+          <div class="user-info">
+            <span>Bienvenue, ${Store.getState().user.username || 'Joueur'}</span>
+            <button id="logout-button" class="logout-button">Déconnexion</button>
+          </div>
+        </div>
+
         <img src="src/public/images/logos/pokemon-logo.png" alt="Pokémon Showdown" class="logo" />
         <h1 style="color:black">Azhemon</h1>
         
@@ -251,6 +260,10 @@ export class MenuView {
       }
       
       await this.loadTeamPreview(selectedTeamId);
+    });
+
+    document.getElementById('logout-button')?.addEventListener('click', async () => {
+      await AuthService.logout();
     });
   }
 }

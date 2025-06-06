@@ -1,15 +1,21 @@
-import { Pokemon, PokemonAbility, PokemonItem, PokemonNature, PokemonMove } from '../models/PokemonModel';
+import { PokemonMove } from '../models/PokemonModel';
+import AuthService from './AuthService';
 
 export class ApiService {
-  private baseUrl = 'http://azhemon.azh:8099/back';
+  private baseUrl = 'http://localhost:8099';
 
+  private getAuthHeaders(): HeadersInit {
+    const token = localStorage.getItem('access_token');
+    return {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+  }
+
+  // Use AuthService for all authenticated requests
   async getAll(endpoint: string): Promise<any[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/${endpoint}`);
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
-      return await response.json();
+      return await AuthService.makeAuthenticatedRequest(endpoint);
     } catch (error) {
       console.error(`Error fetching ${endpoint}:`, error);
       return [];
@@ -18,11 +24,7 @@ export class ApiService {
 
   async getById(endpoint: string, id: number): Promise<any> {
     try {
-      const response = await fetch(`${this.baseUrl}/${endpoint}/${id}`);
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
-      return await response.json();
+      return await AuthService.makeAuthenticatedRequest(`${endpoint}/${id}`);
     } catch (error) {
       console.error(`Error fetching ${endpoint} by ID ${id}:`, error);
       throw error;
@@ -39,7 +41,9 @@ export class ApiService {
 
   async getTeamPokemonByTeamIdAndSlot(teamId: number, slot: number): Promise<any> {
     try {
-      const response = await fetch(`${this.baseUrl}/team_pokemon/team/${teamId}/slot/${slot}`);
+      const response = await fetch(`${this.baseUrl}/team_pokemon/team/${teamId}/slot/${slot}`, {
+        headers: this.getAuthHeaders(),
+      });
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
@@ -56,7 +60,9 @@ export class ApiService {
 
   async getTeamPokemonByPlayerIdAndTeamName(playerId: number, teamName: string): Promise<any[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/team_pokemon/player_id/${playerId}/team/${teamName}`);
+      const response = await fetch(`${this.baseUrl}/team_pokemon/player_id/${playerId}/team/${teamName}`, {
+        headers: this.getAuthHeaders(),
+      });
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
@@ -69,7 +75,9 @@ export class ApiService {
 
   async getTeamPokemonByPlayerIdTeamNameAndSlot(playerId: number, teamName: string, slot: number): Promise<any> {
     try {
-      const response = await fetch(`${this.baseUrl}/team_pokemon/player_id/${playerId}/team/${teamName}/slot/${slot}`);
+      const response = await fetch(`${this.baseUrl}/team_pokemon/player_id/${playerId}/team/${teamName}/slot/${slot}`, {
+        headers: this.getAuthHeaders(),
+      });
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
@@ -86,7 +94,9 @@ export class ApiService {
 
   async getTeamPokemonMoveByPlayerIdAndTeamName(playerId: number, teamName: string): Promise<any[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/team_pokemon_move/player_id/${playerId}/team/${teamName}`);
+      const response = await fetch(`${this.baseUrl}/team_pokemon_move/player_id/${playerId}/team/${teamName}`, {
+        headers: this.getAuthHeaders(),
+      });
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
@@ -99,7 +109,9 @@ export class ApiService {
 
   async getTeamPokemonMoveByPlayerIdTeamNameAndSlot(playerId: number, teamName: string, slot: number): Promise<any> {
     try {
-      const response = await fetch(`${this.baseUrl}/team_pokemon_move/player_id/${playerId}/team/${teamName}/slot/${slot}`);
+      const response = await fetch(`${this.baseUrl}/team_pokemon_move/player_id/${playerId}/team/${teamName}/slot/${slot}`, {
+        headers: this.getAuthHeaders(),
+      });
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
@@ -122,7 +134,9 @@ export class ApiService {
 
   async getTeamPokemonMoveByTeamIdAndSlot(teamId: number, slot: number): Promise<any> {
     try {
-      const response = await fetch(`${this.baseUrl}/team_pokemon_move/team_id/${teamId}/slot/${slot}`);
+      const response = await fetch(`${this.baseUrl}/team_pokemon_move/team_id/${teamId}/slot/${slot}`, {
+        headers: this.getAuthHeaders(),
+      });
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
@@ -133,85 +147,66 @@ export class ApiService {
     }
   }
 
-  async getType(): Promise<any[]> {
-    return this.getAll('type');
-  }
-
-  // Helper method for POST requests
-  public async post(endpoint: string, body: any, token?: string): Promise<any> {
+  // Auth endpoints (login, register, refresh) don't use AuthService
+  // Logout use token but have it's own method
+  public async post(endpoint: string, body: any): Promise<any> {
     try {
-      const response = await fetch(`${this.baseUrl}/${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify(body),
-      });
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+      if (endpoint.startsWith('auth/')) {
+        const response = await fetch(`${this.baseUrl}/${endpoint}`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body),
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => null);
+          const error = new Error(`API error: ${response.status}`);
+          (error as any).status = response.status;
+          (error as any).data = errorData;
+          throw error;
+        }
+        
+        return await response.json();
+      } else {
+        return await AuthService.makeAuthenticatedRequest(endpoint, {
+          method: 'POST',
+          body: JSON.stringify(body)
+        });
       }
-      return await response.json();
     } catch (error) {
       console.error(`Error posting to ${endpoint}:`, error);
       throw error;
     }
   }
 
-  // Helper method for PATCH requests
-  public async patch(endpoint: string, body: any, token?: string): Promise<any> {
+  public async patch(endpoint: string, body: any): Promise<any> {
     try {
-      const response = await fetch(`${this.baseUrl}/${endpoint}`, {
+      return await AuthService.makeAuthenticatedRequest(endpoint, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify(body),
+        body: JSON.stringify(body)
       });
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
-      return await response.json();
     } catch (error) {
       console.error(`Error patching ${endpoint}:`, error);
       throw error;
     }
   }
 
-  // Helper method for DELETE requests
-  public async delete(endpoint: string, token?: string): Promise<void> {
+  public async delete(endpoint: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/${endpoint}`, {
-        method: 'DELETE',
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
+      await AuthService.makeAuthenticatedRequest(endpoint, {
+        method: 'DELETE'
       });
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
     } catch (error) {
       console.error(`Error deleting ${endpoint}:`, error);
       throw error;
     }
   }
 
-  // Authentication endpoints
-  async register(username: string, password: string): Promise<any> {
-    return this.post('register', { username, password });
-  }
-
-  async login(username: string, password: string): Promise<any> {
-    return this.post('login', { username, password });
-  }
-
-  async logout(token: string): Promise<void> {
-    return this.post('logout', {}, token);
-  }
-
-  async refresh(token: string): Promise<any> {
-    return this.post('refresh', {}, token);
+  async logout(): Promise<any> {
+    return AuthService.logout();
   }
 
   // Team endpoints

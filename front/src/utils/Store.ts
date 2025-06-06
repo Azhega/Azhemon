@@ -14,6 +14,13 @@ export class Store {
         screen: 'menu', // 'menu', 'teambuilder', 'battle'
         isLoading: false
       },
+      user: {
+        id: null,
+        username: null,
+        role_id: null,
+        role: null,
+        isAuthenticated: false
+      },
       battle: null,
       currentTeam: [],
       currentTeamIndex: null,

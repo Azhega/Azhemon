@@ -19,7 +19,7 @@ class PlayerController extends Controller {
 
   /*========================= POST ==========================================*/
 
-  #[Route("POST", "/back/player"/*,
+  #[Route("POST", "/player"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function createPlayer() {
@@ -30,7 +30,7 @@ class PlayerController extends Controller {
 
   /*========================= GET BY ID =====================================*/
 
-  #[Route("GET", "/back/player/:id"/*,
+  #[Route("GET", "/player/:id"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function getPlayer() {
@@ -39,7 +39,7 @@ class PlayerController extends Controller {
 
   /*========================= GET BY NAME ====================================*/
 
-  #[Route("GET", "/back/player/name/:name"/*,
+  #[Route("GET", "/player/name/:name"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function getPlayerByName() {
@@ -48,7 +48,7 @@ class PlayerController extends Controller {
 
   /*========================= GET ALL =======================================*/
 
-  #[Route("GET", "/back/player"/*,
+  #[Route("GET", "/player"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function getPlayers() {
@@ -59,7 +59,7 @@ class PlayerController extends Controller {
 
   /*========================= PATCH =========================================*/
 
-  #[Route("PATCH", "/back/player/:id"/*,
+  #[Route("PATCH", "/player/:id"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function updatePlayer() {
@@ -88,7 +88,7 @@ class PlayerController extends Controller {
 
   /*========================= DELETE ========================================*/
 
-  #[Route("DELETE", "/back/player/:id"/*,
+  #[Route("DELETE", "/player/:id"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function deletePlayer() {

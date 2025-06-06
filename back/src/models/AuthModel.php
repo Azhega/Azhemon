@@ -27,7 +27,7 @@ class AuthModel extends SqlConnect {
     $queryRole = "SELECT id FROM $this->roleTable WHERE name = :name";
     $reqRole = $this->db->prepare($queryRole);
     $reqRole->execute([
-      'name' => 'user'
+      'name' => 'player'
     ]);
     $role = $reqRole->fetch(PDO::FETCH_ASSOC);
     var_dump($role);
@@ -108,9 +108,10 @@ class AuthModel extends SqlConnect {
           setcookie("refresh_token", $refreshToken, [
             'expires'   => time() + REFRESH_TOKEN_EXPIRATION,
             'path'      => '/',
+            'domain'    => '',
             'secure'    => false, //true pour https en prod
             'httponly'  => true,
-            'samesite'  => 'Strict'
+            'samesite'  => 'Lax' // Better compatibility than 'Strict'
           ]);
 
           return [
@@ -149,7 +150,7 @@ class AuthModel extends SqlConnect {
       $payload = JWT::verify($accessToken);
       
       if (isset($payload['jti'])) {
-        self::revokeToken($payload['jti'], $this->db);
+        $this->revokeToken($payload['jti']);
       }
     } catch (Exception $e) {
       //Continue even if verification fails (token already expired or invalid)
@@ -158,9 +159,10 @@ class AuthModel extends SqlConnect {
     setcookie('refresh_token', '', [
       'expires'  => time() - 3600,
       'path'     => '/',
+      'domain'    => '',
       'secure'   => false,
       'httponly' => true,
-      'samesite' => 'Strict'
+      'samesite' => 'Lax' // Better compatibility than 'Strict'
     ]);
 
     return true;
@@ -207,17 +209,17 @@ class AuthModel extends SqlConnect {
 
   /*========================= TOKEN BLACKLIST ================================*/
 
-  public static function isTokenRevoked($jti, $db) {
-    $stmt = $db->prepare("
+  public function isTokenRevoked($jti) {
+    $stmt = $this->db->prepare("
       SELECT COUNT(*) as count FROM revoked_token WHERE jti = :jti
     ");
     $stmt->execute(['jti' => $jti]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     return ($result['count'] > 0);
   }
-  
-  public function revokeToken($jti, $db) {
-    $stmt = $db->prepare("INSERT INTO revoked_token (jti, revoked_at) VALUES (:jti, NOW())");
+
+  public function revokeToken($jti) {
+    $stmt = $this->db->prepare("INSERT INTO revoked_token (jti, revoked_at) VALUES (:jti, NOW())");
     return $stmt->execute(['jti' => $jti]);
   }
 }

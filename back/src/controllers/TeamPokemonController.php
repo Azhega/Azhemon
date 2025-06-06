@@ -19,7 +19,7 @@ class TeamPokemonController extends Controller {
 
     /*========================= POST ========================================*/
 
-  #[Route("POST", "/back/team_pokemon"/*,
+  #[Route("POST", "/team_pokemon"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function createTeamPokemon() {
@@ -30,7 +30,7 @@ class TeamPokemonController extends Controller {
 
   /*========================= GET BY ID =====================================*/
 
-  #[Route("GET", "/back/team_pokemon/:id"/*,
+  #[Route("GET", "/team_pokemon/:id"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function getTeamPokemon() {
@@ -39,7 +39,7 @@ class TeamPokemonController extends Controller {
 
   /*========================= GET ALL BY TEAM ID =============================*/
 
-  #[Route("GET", "/back/team_pokemon/team/:id"/*,
+  #[Route("GET", "/team_pokemon/team/:id"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function getAllByTeamID() {
@@ -48,7 +48,7 @@ class TeamPokemonController extends Controller {
 
   /*================ GET ALL BY TEAM ID AND SLOT =============================*/
 
-  #[Route("GET", "/back/team_pokemon/team/:id/slot/:slot"/*,
+  #[Route("GET", "/team_pokemon/team/:id/slot/:slot"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function getByTeamIDAndSlot() {
@@ -58,7 +58,7 @@ class TeamPokemonController extends Controller {
 
   /*===================== GET ALL BY PLAYER ID ===============================*/
 
-  #[Route("GET", "/back/team_pokemon/player_id/:id"/*,
+  #[Route("GET", "/team_pokemon/player_id/:id"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function getAllByPlayerID() {
@@ -67,7 +67,7 @@ class TeamPokemonController extends Controller {
 
   /*================ GET BY PLAYER NAME AND TEAM NAME===========================*/
 
-  #[Route("GET", "/back/team_pokemon/player_id/:player_id/team/:team_name"/*,
+  #[Route("GET", "/team_pokemon/player_id/:player_id/team/:team_name"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function getByPlayerIDAndTeamName() {
@@ -77,7 +77,7 @@ class TeamPokemonController extends Controller {
 
   /*================ GET BY PLAYER NAME AND TEAM ID AND SLOT==================*/
 
-  #[Route("GET", "/back/team_pokemon/player_id/:player_id/team/:team_name/slot/:slot"/*,
+  #[Route("GET", "/team_pokemon/player_id/:player_id/team/:team_name/slot/:slot"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function getByPlayerIDAndTeamNameAndSlot() {
@@ -87,7 +87,7 @@ class TeamPokemonController extends Controller {
 
   /*========================== GET ALL =======================================*/
 
-  #[Route("GET", "/back/team_pokemon"/*,
+  #[Route("GET", "/team_pokemon"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function getTeamPokemons() {
@@ -98,7 +98,7 @@ class TeamPokemonController extends Controller {
 
   /*========================== PATCH =========================================*/
 
-  #[Route("PATCH", "/back/team_pokemon/:id"/*,
+  #[Route("PATCH", "/team_pokemon/:id"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function updateTeamPokemon() {
@@ -130,7 +130,7 @@ class TeamPokemonController extends Controller {
 
   /*========================= DELETE ========================================*/
 
-  #[Route("DELETE", "/back/team_pokemon/:id"/*,
+  #[Route("DELETE", "/team_pokemon/:id"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function deleteTeamPokemon() {

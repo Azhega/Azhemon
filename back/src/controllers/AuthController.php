@@ -8,7 +8,7 @@ use Exception;
 use back\controllers\Controller;
 use back\models\AuthModel;
 use back\utils\{Route, HttpException, JWT};
-use App\Middlewares\{AuthMiddleware,Roles,RoleMiddleware};
+use back\middlewares\{AuthMiddleware,Roles,RoleMiddleware};
 
 class AuthController extends Controller {
   protected object $auth;
@@ -20,7 +20,7 @@ class AuthController extends Controller {
 
  /*========================= REGISTER =======================================*/
 
-  #[Route("POST", "/back/auth/register",
+  #[Route("POST", "/auth/register",
   /*middlewares: [AuthMiddleware::class, 
   [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function register() {
@@ -38,7 +38,7 @@ class AuthController extends Controller {
 
  /*========================= LOGIN ==========================================*/
 
-  #[Route("POST", "/back/auth/login")]
+  #[Route("POST", "/auth/login")]
   public function login() {
     try {
       $data = $this->body;
@@ -57,7 +57,7 @@ class AuthController extends Controller {
 
  /*========================= LOGOUT =========================================*/
 
-  #[Route("POST", "/back/auth/logout")]
+  #[Route("POST", "/auth/logout")]
   public function logout() {
     try {
       $success = $this->auth->logout();
@@ -77,7 +77,7 @@ class AuthController extends Controller {
 
   /*========================= REFRESH ========================================*/
 
-  #[Route("POST", "/back/auth/refresh")]
+  #[Route("POST", "/auth/refresh")]
   public function refresh() {
     if (!isset($_COOKIE['refresh_token'])) {
       http_response_code(400);
@@ -112,11 +112,36 @@ class AuthController extends Controller {
 
       return [
         'access_token'  => $newAccessToken, 
+        'user_id'       => $payload['sub'],
+        'username'      => $payload['username'], 
+        'role_id'       => $payload['role_id'],
+        'role'          => $payload['role'],
         'message'       => 'Token refreshed.'
       ];
 
     } catch (Exception $e) {
       throw new HttpException($e->getMessage(), 401);
     }
+  }
+
+  /*========================= VERIFY TOKEN ===================================*/
+
+  #[Route("GET", "/auth/verify", middlewares: [AuthMiddleware::class])]
+  public function verify() {
+    // The AuthMiddleware has already verified the token and populated $this->params with user data
+    $userData = $this->params['user'] ?? null;
+    
+    if (!$userData) {
+      throw new HttpException("User data not found in request", 500);
+    }
+    
+    // Return user information from the verified token
+    return [
+      'user_id'   => $userData['sub'],
+      'username'  => $userData['username'],
+      'role_id'   => $userData['role_id'],
+      'role'      => $userData['role'],
+      'message'   => 'Token is valid'
+    ];
   }
 }

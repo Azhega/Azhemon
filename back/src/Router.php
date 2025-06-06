@@ -79,7 +79,7 @@ class Router {
                 }
 
                 $queryParams = $_GET; // Automatically populated by PHP with query parameters
-                $params = array_merge($pathParams, $queryParams);
+                $params = array_merge($pathParams, $queryParams, $request);
                 $controllerInstance = new $controller($params);
 
                 // Check if the method exists in the controller
