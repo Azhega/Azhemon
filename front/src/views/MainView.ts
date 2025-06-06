@@ -3,14 +3,12 @@ import Store from '../utils/Store';
 import { MenuView } from './MenuView.ts';
 
 export class MainView {
-  private menuView: MenuView;
+  private menuView: MenuView | null = null;
   private loadingScreen: HTMLElement;
   
   constructor() {
     this.loadingScreen = document.getElementById('loading-screen') as HTMLElement;
-    this.menuView = new MenuView();
 
-    // Listen to screen change events
     EventBus.on('screen:changed', (screen) => this.updateScreen(screen));
     
     // Subscribe to store changes
@@ -35,7 +33,13 @@ export class MainView {
     });
 
     switch (screen) {
+      case 'login':
+        document.getElementById('login-screen')!.style.display = 'flex';
+        break;
       case 'menu':
+        if (!this.menuView) {
+          this.menuView = new MenuView();
+        }
         document.getElementById('menu-screen')!.style.display = 'flex';
         break;
       case 'teambuilder':

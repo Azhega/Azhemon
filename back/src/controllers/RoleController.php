@@ -19,7 +19,7 @@ class RoleController extends Controller {
 
     /*========================= POST ========================================*/
 
-  #[Route("POST", "/back/role"/*,
+  #[Route("POST", "/role"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function createRole() {
@@ -30,7 +30,7 @@ class RoleController extends Controller {
 
   /*========================= GET BY ID =====================================*/
 
-  #[Route("GET", "/back/role/:id"/*,
+  #[Route("GET", "/role/:id"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function getRole() {
@@ -39,7 +39,7 @@ class RoleController extends Controller {
 
   /*========================= GET BY NAME ====================================*/
 
-  #[Route("GET", "/back/role/name/:name"/*,
+  #[Route("GET", "/role/name/:name"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function getRoleCategoryByName() {
@@ -48,7 +48,7 @@ class RoleController extends Controller {
 
   /*========================= GET ALL =======================================*/
 
-  #[Route("GET", "/back/role"/*,
+  #[Route("GET", "/role"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function getRoles() {
@@ -59,7 +59,7 @@ class RoleController extends Controller {
 
   /*========================= PATCH =========================================*/
 
-  #[Route("PATCH", "/back/role/:id"/*,
+  #[Route("PATCH", "/role/:id"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function updateRole() {
@@ -91,7 +91,7 @@ class RoleController extends Controller {
 
   /*========================= DELETE ========================================*/
 
-  #[Route("DELETE", "/back/role/:id"/*,
+  #[Route("DELETE", "/role/:id"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function deleteRole() {

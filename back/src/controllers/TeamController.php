@@ -19,7 +19,7 @@ class TeamController extends Controller {
 
     /*========================= POST ========================================*/
 
-  #[Route("POST", "/back/team"/*,
+  #[Route("POST", "/team"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function createTeam() {
@@ -30,7 +30,7 @@ class TeamController extends Controller {
 
   /*==================== POST CREATE COMPLETE TEAM ===========================*/
 
-  #[Route("POST", "/back/create_team"/*,
+  #[Route("POST", "/create_team"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function createCompleteTeam() {
@@ -42,7 +42,7 @@ class TeamController extends Controller {
 
   /*========================= GET BY ID =====================================*/
 
-  #[Route("GET", "/back/team/:id"/*,
+  #[Route("GET", "/team/:id"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function getTeam() {
@@ -51,7 +51,7 @@ class TeamController extends Controller {
 
   /*========================= GET BY NAME ====================================*/
 
-  #[Route("GET", "/back/team/name/:name"/*,
+  #[Route("GET", "/team/name/:name"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function getTeamByName() {
@@ -60,7 +60,7 @@ class TeamController extends Controller {
 
   /*========================= GET ALL =======================================*/
 
-  #[Route("GET", "/back/team"/*,
+  #[Route("GET", "/team"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function getTeams() {
@@ -71,7 +71,7 @@ class TeamController extends Controller {
 
   /*========================= PATCH =========================================*/
 
-  #[Route("PATCH", "/back/team/:id"/*,
+  #[Route("PATCH", "/team/:id"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function updateTeam() {
@@ -102,7 +102,7 @@ class TeamController extends Controller {
 
   /*========================= PATCH COMPLETE TEAM ============================*/
 
-  #[Route("PATCH", "/back/update_team/:id"/*,
+  #[Route("PATCH", "/update_team/:id"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function updateCompleteTeam() {
@@ -133,7 +133,7 @@ class TeamController extends Controller {
 
   /*========================= DELETE ========================================*/
 
-  #[Route("DELETE", "/back/team/:id"/*,
+  #[Route("DELETE", "/team/:id"/*,
     middlewares: [AuthMiddleware::class, 
     [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
   public function deleteTeam() {

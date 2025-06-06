@@ -1,7 +1,9 @@
 import Store from '../utils/Store';
 import EventBus from '../utils/EventBus';
+import AuthService from '../services/AuthService';
 import { ApiService } from '../services/ApiService';
 import { MainView } from '../views/MainView';
+import { LoginView } from '../views/LoginView';
 import { Pokemon, PokemonAbility, PokemonItem, PokemonMove } from '../models/PokemonModel';
 import { TeamBuilderView } from '../views/TeamBuilderView';
 import { BattleView } from '../views/BattleView';
@@ -10,6 +12,7 @@ import { BattleController } from './BattleController';
 export class GameController {
   private apiService: ApiService;
   private mainView: MainView;
+  private loginView: LoginView | null = null;
   private teamBuilderView: TeamBuilderView | null = null;
   private battleView: BattleView | null = null;
   private battleController: BattleController | null = null;
@@ -27,8 +30,8 @@ export class GameController {
 
     this.mainView.initialize();
 
-    this.loadInitialData().then(() => {
-      this.switchScreen('menu');
+    this.loadInitialData().then(async () => {
+      await this.checkAuthenticationStatus();
     });
   }
   
@@ -39,14 +42,27 @@ export class GameController {
 
     // Teambuilder events
     EventBus.on('teambuilder:back-to-menu', () => this.switchScreen('menu'));
+
+    // Session events
+    EventBus.on('auth:login-success', () => this.switchScreen('menu'));
+    EventBus.on('auth:logout', () => this.switchScreen('login'));
+  }
+
+  private async checkAuthenticationStatus(): Promise<void> {
+    const isAuthenticated = await AuthService.checkAuthStatus();
+    
+    if (isAuthenticated) {
+      AuthService.startTokenValidation();
+      this.switchScreen('menu');
+    } else {
+      this.switchScreen('login');
+    }
   }
   
   private async loadInitialData(): Promise<void> {
     Store.setState({ game: { ...Store.getState().game, isLoading: true } });
     
     try {
-      
-      // Store data in the store
       Store.setState({ 
         currentTeam: [null, null, null, null, null, null],
         currentBattleTeam: [null, null, null, null, null, null]
@@ -61,7 +77,7 @@ export class GameController {
     }
   }
 
-  switchScreen(screen: 'menu' | 'teambuilder' | 'battle'): void {
+  switchScreen(screen: 'menu' | 'teambuilder' | 'battle' | 'login'): void {
     Store.setState({
       game: {
         ...Store.getState().game,
@@ -69,7 +85,25 @@ export class GameController {
       }
     });
 
+    console.log('Store updated:', Store.getState());
+    console.log('Store user username:', Store.getState().user.username);
+
     EventBus.emit('screen:changed', screen);
+
+    if (screen === 'login') {
+      if (!this.loginView) {
+        this.loginView = new LoginView();
+      } else {
+        this.loginView.reset();
+      }
+    }
+
+    if (screen === 'menu') {
+      if (this.mainView && (this.mainView as any).menuView) {
+        (this.mainView as any).menuView = null;
+      }
+      // MainView will create a new MenuView instance
+    }
 
     if (screen === 'teambuilder' && !this.teamBuilderView) {
       this.teamBuilderView = new TeamBuilderView();

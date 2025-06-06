@@ -3,7 +3,6 @@
 namespace back\utils;
 
 use Exception;
-use back\models\AuthModel;
 
 class JWT {
   private static $secret;
@@ -79,15 +78,8 @@ class JWT {
       throw new Exception('Invalid audience.');
     }
 
-    if (isset($payload['jti'])) {
-      if (!self::$db) {
-        throw new Exception('Database connection not set in JWT.');
-      }
-
-      if (AuthModel::isTokenRevoked($payload['jti'], self::$db)) {
-        throw new Exception('This token has been revoked.');
-      }
-    }
+    // Token blacklist checking done in the middleware since it
+    // requires database access and JWT should remain stateless
 
     // Token is valid; return the payload
     return $payload;
