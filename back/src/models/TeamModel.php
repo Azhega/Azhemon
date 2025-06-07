@@ -114,6 +114,23 @@ class TeamModel extends SqlConnect {
       $req->fetch(PDO::FETCH_ASSOC) : new stdClass();
   }
 
+  /*========================= GET BY PLAYER ID ===============================*/
+
+  public function getByPlayerId(int $id) {
+    $query = "
+      SELECT team.id, team.name FROM $this->table 
+      JOIN player
+      ON team.player_id = player.id
+      WHERE player.id = :id
+    ";
+    $req = $this->db->prepare($query);
+    $req->execute(["id" => $id]);
+
+    // No error handling here, player may not have a team
+
+    return $req->fetchAll(PDO::FETCH_ASSOC);
+  }
+
   /*========================= GET ALL =======================================*/
 
   public function getAll(?int $limit = null) {

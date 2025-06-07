@@ -32,7 +32,7 @@ export class ApiService {
   }
 
   async getTeamByPlayerId(playerId: number): Promise<any[]> {
-    return this.getById('team', playerId);
+    return this.getById('team/player_id', playerId);
   }
 
   async getTeamPokemonByTeamId(teamId: number): Promise<any[]> {

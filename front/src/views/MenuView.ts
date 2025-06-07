@@ -20,6 +20,22 @@ export class MenuView {
     this.loadTeams();
     this.displayTeamPreview(Array(6).fill(null));
 
+    EventBus.on('auth:login-success', () => {
+      console.log('MenuView : User logged in - reloading teams in MenuView');
+      this.loadTeams();
+
+      const userInfoSpan = document.querySelector('.user-info span');
+      if (userInfoSpan) {
+        const username = Store.getState().user.username || 'Joueur';
+        userInfoSpan.textContent = `Bienvenue, ${username}`;
+      }
+    });
+
+    EventBus.on('auth:logout', () => {
+      console.log('MenuView : User logged out - clearing teams in MenuView');
+      this.clearTeams();
+    });
+
     EventBus.on('teambuilder:team-saved', () => {
       this.loadTeams();
     });
@@ -88,10 +104,23 @@ export class MenuView {
       </div>
     `;
   }
+
+  private clearTeams(): void {
+    const dropdown = document.getElementById('battle-teams-dropdown') as HTMLSelectElement;
+    if (dropdown) {
+      dropdown.innerHTML = `<option value="">Aucune équipe disponible</option>`;
+    }
+    
+    this.displayTeamPreview(Array(6).fill(null));
+    Store.setState({ 
+      currentBattleTeam: Array(6).fill(null)
+    });
+    this.updateBattleButtonState();
+  }
   
   public async loadTeams(): Promise<void> {
     try {
-      const teamsData = await ApiService.getAll('team');
+      const teamsData = await ApiService.getTeamByPlayerId(Store.getState().user.id);
       this.populateTeamsDropdown(teamsData);
     } catch (error) {
       console.error('Erreur lors du chargement des équipes', error);
@@ -244,7 +273,6 @@ export class MenuView {
       const selectedValue = (e.target as HTMLSelectElement).value;
       
       if (!selectedValue) {
-        // this.hideTeamPreview();
         this.displayTeamPreview(Array(6).fill(null));
         Store.setState({ 
           currentBattleTeam: Array(6).fill(null)

@@ -98,13 +98,6 @@ export class GameController {
       }
     }
 
-    if (screen === 'menu') {
-      if (this.mainView && (this.mainView as any).menuView) {
-        (this.mainView as any).menuView = null;
-      }
-      // MainView will create a new MenuView instance
-    }
-
     if (screen === 'teambuilder' && !this.teamBuilderView) {
       this.teamBuilderView = new TeamBuilderView();
     }
