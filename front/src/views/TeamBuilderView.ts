@@ -22,6 +22,18 @@ export class TeamBuilderView {
     this.attachEvents();
 
     this.loadTeams();
+
+    EventBus.on('auth:login-success', () => {
+      console.log('User logged in - reloading teams in TeamBuilderView');
+      this.loadTeams();
+      this.resetTeamBuilder();
+    });
+
+    EventBus.on('auth:logout', () => {
+      console.log('User logged out - clearing teams in TeamBuilderView');
+      this.clearTeams();
+      this.resetTeamBuilder();
+    });
     
     // Subscribe to team changes in the store
     Store.subscribe((state) => {
@@ -253,7 +265,7 @@ export class TeamBuilderView {
 
   private async loadTeams(): Promise<void> {
     try {
-      const teamsData = await ApiService.getAll('team');
+      const teamsData = await ApiService.getTeamByPlayerId(Store.getState().user.id);
       this.populateTeamsDropdown(teamsData);
     } catch (error) {
       console.error('Erreur lors du chargement des équipes', error);
@@ -646,7 +658,7 @@ export class TeamBuilderView {
             pokemon_species: pokemon.key,
             ability: pokemon.abilityKey,
             item: pokemon.itemKey,
-            nature: pokemon.natureKey, // To implement later
+            nature: pokemon.natureKey,
             moves: (pokemon.moves || []).map((move: any, index: number) => ({
               slot: index + 1,
               move: move?.moveKey
@@ -656,7 +668,7 @@ export class TeamBuilderView {
         .filter(pokemon => pokemon !== null);
       
       const payload = {
-        player_id: 1, //To implement later
+        player_id: Store.getState().user.id,
         name: teamNameInputValue ? teamNameInputValue : Store.getState().currentTeamName,
         pokemons: pokemonsPayload
       };
@@ -852,6 +864,35 @@ export class TeamBuilderView {
         selectedPokemon.moves[moveIndex] = null;
         this.updatePokemonInSlot(this.selectedPokemonIndex, selectedPokemon);
       }
+    }
+  }
+
+  private resetTeamBuilder(): void {
+    this.currentTeam = [null, null, null, null, null, null];
+    this.currentTeamName = '';
+    this.selectedPokemonIndex = null;
+    this.selectedAttributeType = null;
+    
+    Store.setState({ 
+      currentTeam: this.currentTeam,
+      currentTeamIndex: null,
+      currentTeamName: null
+    });
+    
+    this.updateTeamDisplay();
+    
+    const teamNameInput = document.getElementById('team-name-input') as HTMLInputElement;
+    if (teamNameInput) {
+      teamNameInput.value = '';
+    }
+    
+    this.loadSelector('');
+  }
+
+  private clearTeams(): void {
+    const dropdown = document.getElementById('teams-dropdown') as HTMLSelectElement;
+    if (dropdown) {
+      dropdown.innerHTML = `<option value="">Aucune équipe disponible</option>`;
     }
   }
 }

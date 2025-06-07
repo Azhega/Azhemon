@@ -10,6 +10,11 @@ export class MainView {
     this.loadingScreen = document.getElementById('loading-screen') as HTMLElement;
 
     EventBus.on('screen:changed', (screen) => this.updateScreen(screen));
+
+    EventBus.on('auth:logout', () => {
+      console.log('MainView : Auth logout - destroying MenuView');
+      this.menuView = null;
+    });
     
     // Subscribe to store changes
     Store.subscribe((state) => {
