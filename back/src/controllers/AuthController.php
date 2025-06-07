@@ -20,9 +20,7 @@ class AuthController extends Controller {
 
  /*========================= REGISTER =======================================*/
 
-  #[Route("POST", "/auth/register",
-  /*middlewares: [AuthMiddleware::class, 
-  [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("POST", "/auth/register")]
   public function register() {
     try {
       $data = $this->body;
@@ -57,7 +55,8 @@ class AuthController extends Controller {
 
  /*========================= LOGOUT =========================================*/
 
-  #[Route("POST", "/auth/logout")]
+  #[Route("POST", "/auth/logout", 
+  middlewares: [AuthMiddleware::class])]
   public function logout() {
     try {
       $success = $this->auth->logout();
@@ -126,7 +125,8 @@ class AuthController extends Controller {
 
   /*========================= VERIFY TOKEN ===================================*/
 
-  #[Route("GET", "/auth/verify", middlewares: [AuthMiddleware::class])]
+  #[Route("GET", "/auth/verify", 
+  middlewares: [AuthMiddleware::class])]
   public function verify() {
     // The AuthMiddleware has already verified the token and populated $this->params with user data
     $userData = $this->params['user'] ?? null;

@@ -1,26 +1,21 @@
 import Store from '../utils/Store';
 import EventBus from '../utils/EventBus';
 import AuthService from '../services/AuthService';
-import { ApiService } from '../services/ApiService';
 import { MainView } from '../views/MainView';
 import { LoginView } from '../views/LoginView';
-import { Pokemon, PokemonAbility, PokemonItem, PokemonMove } from '../models/PokemonModel';
+import { Pokemon } from '../models/PokemonModel';
 import { TeamBuilderView } from '../views/TeamBuilderView';
-import { BattleView } from '../views/BattleView';
 import { BattleController } from './BattleController';
 
 export class GameController {
-  private apiService: ApiService;
   private mainView: MainView;
   private loginView: LoginView | null = null;
   private teamBuilderView: TeamBuilderView | null = null;
-  private battleView: BattleView | null = null;
   private battleController: BattleController | null = null;
   
   constructor() {
-    this.apiService = new ApiService();
     this.mainView = new MainView();
-    
+
     // Subscribe to events
     this.registerEventListeners();
   }
