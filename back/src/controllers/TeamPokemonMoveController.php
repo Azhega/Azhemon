@@ -80,9 +80,8 @@ class TeamPokemonMoveController extends Controller {
 
   /*========================== GET BY TEAM ID ================================*/
 
-  #[Route("GET", "/team_pokemon_move/team_id/:id"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("GET", "/team_pokemon_move/team_id/:id",
+    middlewares: [AuthMiddleware::class])]
   public function getByTeamID() {
     return $this->teamPokemonMove->getByTeamID(intval($this->params['id']));
   }

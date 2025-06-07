@@ -30,9 +30,8 @@ class TeamController extends Controller {
 
   /*==================== POST CREATE COMPLETE TEAM ===========================*/
 
-  #[Route("POST", "/create_team"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("POST", "/create_team",
+    middlewares: [AuthMiddleware::class])]
   public function createCompleteTeam() {
     $data = json_decode(file_get_contents('php://input'), true);
     $this->team->createCompleteTeam($data);
@@ -49,11 +48,10 @@ class TeamController extends Controller {
     return $this->team->get(intval($this->params['id']));
   }
 
-  /*========================= GET BY ID =====================================*/
+  /*========================= GET BY PLAYER ID ===============================*/
 
-  #[Route("GET", "/team/player_id/:id"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("GET", "/team/player_id/:id",
+    middlewares: [AuthMiddleware::class])]
   public function getTeamByPlayerId() {
     return $this->team->getByPlayerId(intval($this->params['id']));
   }
@@ -111,9 +109,8 @@ class TeamController extends Controller {
 
   /*========================= PATCH COMPLETE TEAM ============================*/
 
-  #[Route("PATCH", "/update_team/:id"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("PATCH", "/update_team/:id",
+    middlewares: [AuthMiddleware::class])]
   public function updateCompleteTeam() {
     try {
       $id = intval($this->params['id']);
@@ -142,9 +139,8 @@ class TeamController extends Controller {
 
   /*========================= DELETE ========================================*/
 
-  #[Route("DELETE", "/team/:id"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("DELETE", "/team/:id",
+    middlewares: [AuthMiddleware::class])]
   public function deleteTeam() {
     return $this->team->delete(intval($this->params['id']));
   }
