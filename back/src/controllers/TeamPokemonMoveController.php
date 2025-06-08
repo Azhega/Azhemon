@@ -19,9 +19,8 @@ class TeamPokemonMoveController extends Controller {
 
     /*========================= POST ========================================*/
 
-  #[Route("POST", "/team_pokemon_move"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("POST", "/team_pokemon_move",
+    middlewares: [AuthMiddleware::class, [RoleMiddleware::class, 'admin']])]
   public function createTeamPokemonMove() {
     $this->teamPokemonMove->add($this->body);
 
@@ -30,27 +29,24 @@ class TeamPokemonMoveController extends Controller {
 
   /*========================= GET BY ID =====================================*/
 
-  #[Route("GET", "/team_pokemon_move/:id"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("GET", "/team_pokemon_move/:id",
+    middlewares: [AuthMiddleware::class, [RoleMiddleware::class, 'admin']])]
   public function getTeamPokemonMove() {
     return $this->teamPokemonMove->get(intval($this->params['id']));
   }
 
   /*===================== GET ALL BY PLAYER ID ===============================*/
 
-  #[Route("GET", "/team_pokemon_move/player_id/:id"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("GET", "/team_pokemon_move/player_id/:id",
+    middlewares: [AuthMiddleware::class, [RoleMiddleware::class, 'admin']])]
   public function getAllByPlayerID() {
     return $this->teamPokemonMove->getByPlayerID(intval($this->params['id']));
   }
 
   /*================== GET ALL BY PLAYER ID AND TEAM NAME ====================*/
 
-  #[Route("GET", "/team_pokemon_move/player_id/:player_id/team/:name"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("GET", "/team_pokemon_move/player_id/:player_id/team/:name",
+    middlewares: [AuthMiddleware::class, [RoleMiddleware::class, 'admin']])]
   public function getAllByPlayerIDAndTeamName() {
     return $this->teamPokemonMove->getByPlayerIDAndTeamName(
       intval($this->params['player_id']), $this->params['name']);
@@ -58,9 +54,8 @@ class TeamPokemonMoveController extends Controller {
 
   /*============= GET ALL BY PLAYER ID AND TEAM NAME AND SLOT ================*/
 
-  #[Route("GET", "/team_pokemon_move/player_id/:player_id/team/:name/slot/:slot"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("GET", "/team_pokemon_move/player_id/:player_id/team/:name/slot/:slot",
+    middlewares: [AuthMiddleware::class, [RoleMiddleware::class, 'admin']])]
   public function getAllByPlayerIDAndTeamNameAndSlot() {
     return $this->teamPokemonMove->getByPlayerIDAndTeamNameAndSlot(
       intval($this->params['player_id']), 
@@ -71,9 +66,8 @@ class TeamPokemonMoveController extends Controller {
 
   /*======================= GET BY TEAM POKEMON ID ===========================*/
 
-  #[Route("GET", "/team_pokemon_move/pokemon_id/:id"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("GET", "/team_pokemon_move/pokemon_id/:id",
+    middlewares: [AuthMiddleware::class, [RoleMiddleware::class, 'admin']])]
   public function getByPokemonID() {
     return $this->teamPokemonMove->getByPokemonID(intval($this->params['id']));
   }
@@ -88,9 +82,8 @@ class TeamPokemonMoveController extends Controller {
 
   /*========================== GET BY TEAM ID ================================*/
 
-  #[Route("GET", "/team_pokemon_move/team_id/:id/slot/:slot"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("GET", "/team_pokemon_move/team_id/:id/slot/:slot",
+    middlewares: [AuthMiddleware::class, [RoleMiddleware::class, 'admin']])]
   public function getByTeamIDAndSlot() {
     return $this->teamPokemonMove->getByTeamIDAndSlot(
       intval($this->params['id']), intval($this->params['slot']));
@@ -98,9 +91,8 @@ class TeamPokemonMoveController extends Controller {
 
   /*========================= GET ALL =======================================*/
 
-  #[Route("GET", "/team_pokemon_move"/*,
-    middlewares: [AuthMiddleware::class/*, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("GET", "/team_pokemon_move",
+    middlewares: [AuthMiddleware::class, [RoleMiddleware::class, 'admin']])]
   public function getTeamPokemonMoves() {
       $limit = isset($this->params['limit']) ? 
         intval($this->params['limit']) : null;
@@ -109,9 +101,8 @@ class TeamPokemonMoveController extends Controller {
 
   /*========================= PATCH =========================================*/
 
-  #[Route("PATCH", "/team_pokemon_move/:id"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("PATCH", "/team_pokemon_move/:id",
+    middlewares: [AuthMiddleware::class, [RoleMiddleware::class, 'admin']])]
   public function updateTeamPokemonMove() {
     try {
       $id = intval($this->params['id']);
@@ -141,9 +132,8 @@ class TeamPokemonMoveController extends Controller {
 
   /*========================= DELETE ========================================*/
 
-  #[Route("DELETE", "/team_pokemon_move/:id"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("DELETE", "/team_pokemon_move/:id",
+    middlewares: [AuthMiddleware::class, [RoleMiddleware::class, 'admin']])]
   public function deleteTeamPokemonMove() {
     return $this->teamPokemonMove->delete(intval($this->params['id']));
   }

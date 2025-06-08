@@ -36,11 +36,6 @@ class RoleMiddleware {
 
     $userRole = $request['user']['role'] ?? null;
 
-    var_dump($request['user']);
-
-    var_dump("user role : " . $userRole);
-    var_dump("required role : " . $this->requiredRole);
-
     if ($userRole !== $this->requiredRole) {
       return $this->forbiddenResponse("Insufficient permissions");
     }

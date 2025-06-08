@@ -19,9 +19,8 @@ class TeamController extends Controller {
 
     /*========================= POST ========================================*/
 
-  #[Route("POST", "/team"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("POST", "/team",
+    middlewares: [AuthMiddleware::class, [RoleMiddleware::class, 'admin']])]
   public function createTeam() {
     $this->team->add($this->body);
 
@@ -41,9 +40,8 @@ class TeamController extends Controller {
 
   /*========================= GET BY ID =====================================*/
 
-  #[Route("GET", "/team/:id"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("GET", "/team/:id",
+    middlewares: [AuthMiddleware::class, [RoleMiddleware::class, 'admin']])]
   public function getTeam() {
     return $this->team->get(intval($this->params['id']));
   }
@@ -58,18 +56,16 @@ class TeamController extends Controller {
 
   /*========================= GET BY NAME ====================================*/
 
-  #[Route("GET", "/team/name/:name"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("GET", "/team/name/:name",
+    middlewares: [AuthMiddleware::class, [RoleMiddleware::class, 'admin']])]
   public function getTeamByName() {
     return $this->team->getByName($this->params['name']);
   }
 
   /*========================= GET ALL =======================================*/
 
-  #[Route("GET", "/team"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("GET", "/team",
+    middlewares: [AuthMiddleware::class, [RoleMiddleware::class, 'admin']])]
   public function getTeams() {
       $limit = isset($this->params['limit']) ? 
         intval($this->params['limit']) : null;
@@ -78,9 +74,8 @@ class TeamController extends Controller {
 
   /*========================= PATCH =========================================*/
 
-  #[Route("PATCH", "/team/:id"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("PATCH", "/team/:id",
+    middlewares: [AuthMiddleware::class, [RoleMiddleware::class, 'admin']])]
   public function updateTeam() {
     try {
       $id = intval($this->params['id']);
