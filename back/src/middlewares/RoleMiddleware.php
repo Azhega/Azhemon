@@ -2,7 +2,7 @@
 
 namespace back\middlewares;
 
-use back\utils\JWT;
+use back\utils\{JWT, HttpException};
 use Exception;
 
 class RoleMiddleware {
@@ -16,12 +16,12 @@ class RoleMiddleware {
     if (!isset($request['user'])) {
       $headers = getallheaders();
       if (!isset($headers['Authorization'])) {
-        return $this->unauthorizedResponse("Authorization header not found");
+        throw new HttpException("Authorization header not found", 401);
       }
 
       $authHeader = $headers['Authorization'];
       if (!preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
-        return $this->unauthorizedResponse("Invalid Authorization header format");
+        throw new HttpException("Invalid Authorization header format", 401);
       }
 
       $jwt = $matches[1];
@@ -30,28 +30,16 @@ class RoleMiddleware {
         $payload = JWT::verify($jwt);
         $request['user'] = $payload;
       } catch (Exception $e) {
-        return $this->unauthorizedResponse($e->getMessage());
+        throw new HttpException($e->getMessage(), 401);
       }
     }
 
     $userRole = $request['user']['role'] ?? null;
 
     if ($userRole !== $this->requiredRole) {
-      return $this->forbiddenResponse("Insufficient permissions");
+      throw new HttpException("Insufficient permissions", 403);
     }
 
     return true;
-  }
-
-  private function unauthorizedResponse($message) {
-    echo json_encode(['error' => $message]);
-    http_response_code(401);
-    return false;
-  }
-
-  private function forbiddenResponse($message) {
-    echo json_encode(['error' => $message]);
-    http_response_code(403);
-    return false;
   }
 }

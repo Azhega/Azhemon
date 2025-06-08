@@ -2,7 +2,7 @@
 
 namespace back;
 
-use back\utils\Route;
+use back\utils\{Route, HttpException};
 use back\utils\JWT;
 
 class Router {
@@ -56,7 +56,8 @@ class Router {
         $request = $_REQUEST; // Initialize $request with the global $_REQUEST
         ob_start(); // Start output buffering to capture any output
 
-        foreach ($this->routes[$this->method] as $route => $action) {
+        try {
+            foreach ($this->routes[$this->method] as $route => $action) {
             if ($this->matchRule($this->url, $route)) {
                 list($controller, $method, $middlewares) = $action;
                 $pathParams = $this->extractParams($this->url, $route);
@@ -73,8 +74,9 @@ class Router {
                         $middleware = new $middlewareClass();
                     }
 
-                    if (method_exists($middleware, 'handle') && !$middleware->handle($request)) {
-                        exit;
+                    // Instead of using exit, router handles Exceptions
+                    if (method_exists($middleware, 'handle')) {
+                        $middleware->handle($request);
                     }
                 }
 
@@ -84,16 +86,9 @@ class Router {
 
                 // Check if the method exists in the controller
                 if (method_exists($controllerInstance, $method)) {
-                    try {
-                        // Call the method on the controller instance with the parameters
-                        $response = call_user_func_array([$controllerInstance, $method], array_values($params));
-                    } catch (\Exception $e) {
-                        http_response_code(500);
-                        $response = ["error" => $e->getMessage()];
-                    }
+                    $response = call_user_func_array([$controllerInstance, $method], array_values($params));
                 } else {
-                    http_response_code(405);
-                    $response = ["error" => "Method Not Allowed"];
+                    throw new HttpException("Method Not Allowed", 405);
                 }
                 break;
             }
@@ -101,13 +96,20 @@ class Router {
 
         // If no matching route was found, set the response to a "Not Found" error with a 404 status code
         if ($response === null) {
-            http_response_code(404);
-            $response = ["error" => "Not Found"];
+            throw new HttpException("Not Found", 404);
         }
 
-        ob_end_clean(); // End output buffering and clean the buffer
-        header('Content-Type: application/json');
-        echo json_encode($response);
+    } catch (HttpException $e) {
+        http_response_code($e->getHttpCode());
+        $response = ["error" => $e->getMessage()];
+    } catch (\Exception $e) {
+        http_response_code(500);
+        $response = ["error" => $e->getMessage()];
+    }
+ 
+    ob_end_clean(); // End output buffering and clean the buffer
+    header('Content-Type: application/json');
+    echo json_encode($response);
     }
 
     /**
