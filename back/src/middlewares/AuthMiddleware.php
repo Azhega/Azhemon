@@ -4,7 +4,7 @@ namespace back\middlewares;
 
 require_once __DIR__ . '/../utils/Config.php';
 
-use back\utils\JWT;
+use back\utils\{JWT, HttpException};
 use back\models\AuthModel;
 use Exception;
 
@@ -12,7 +12,6 @@ class AuthMiddleware {
   private AuthModel $authModel;
   
   public function __construct() {
-    // AuthModel instance will automatically connect to database via SqlConnect
     $this->authModel = new AuthModel();
   }
 
@@ -22,13 +21,13 @@ class AuthMiddleware {
     $headers = getallheaders();
     
     if (!isset($headers['Authorization'])) {
-      return $this->unauthorizedResponse("Authorization header not found");
+      throw new HttpException("Authorization header not found", 401);
     }
 
     $authHeader = $headers['Authorization'];
 
     if (!preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
-      return $this->unauthorizedResponse("Invalid Authorization header format");
+      throw new HttpException("Invalid Authorization header format", 401);
     }
 
     $token = $matches[1];
@@ -38,21 +37,17 @@ class AuthMiddleware {
 
       // Check if token is blacklisted
       if (isset($payload['jti']) && $this->authModel->isTokenRevoked($payload['jti'])) {
-        return $this->unauthorizedResponse("Token has been revoked");
+        throw new HttpException("Token has been revoked", 401);
       }
 
       $request['user'] = $payload;
     } catch (Exception $e) {
-      return $this->unauthorizedResponse($e->getMessage());
+      if ($e instanceof HttpException) {
+        throw $e;
+      }
+      throw new HttpException($e->getMessage(), 401);
     }
 
     return true;
-  }
-
-  private function unauthorizedResponse($message) {
-    header("Content-Type: application/json");
-    echo json_encode(['error' => $message]);
-    http_response_code(401);
-    return false;
   }
 }
