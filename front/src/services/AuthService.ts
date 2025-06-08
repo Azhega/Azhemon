@@ -5,9 +5,18 @@ export class AuthService {
   private static baseUrl = 'http://localhost:8099';
   private static refreshTokenPromise: Promise<boolean> | null = null;
   private static tokenCheckInterval: number | null = null;
-  private static isCheckingToken = false;
   private static REFRESH_TOKEN_LIFETIME = 30 * 24 * 60 * 60 * 1000;
   private static RENEWAL_THRESHOLD = 2 * 24 * 60 * 60 * 1000;
+
+  private static isTokenExpired(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const expiration = payload.exp * 1000;
+      return Date.now() > expiration;
+    } catch {
+      return true;
+    }
+  }
 
   static setRefreshTokenTimestamp(): void {
     const now = Date.now();
@@ -31,31 +40,26 @@ export class AuthService {
 
   // Start automatic token validation
   static startTokenValidation(): void {
-    const VALIDATION_INTERVAL = 5 * 60 * 1000; // 5 minutes
+    const VALIDATION_INTERVAL = 60 * 1000; // 1 minute
 
     this.tokenCheckInterval = window.setInterval(async () => {
-      if (this.isCheckingToken) return; // Prevent concurrent checks
-      
-      this.isCheckingToken = true;
-      console.log('Automatic token validation check...');
-      
-      try {
-        const isValid = await this.checkAuthStatus();
-        if (!isValid) {
-          console.log('Session expired - logging out user');
-          this.logout();
-        } else {
-          console.log('Session still valid');
-        }
-      } catch (error) {
-        console.error('Token validation error:', error);
+      const token = localStorage.getItem('access_token');
+      console.log('Starting token validation...');
+
+      if (!token) {
         this.logout();
-      } finally {
-        this.isCheckingToken = false;
+        return;
+      }
+
+      // Check expiration client-side (no server call)
+      if (this.isTokenExpired(token)) {
+        console.log('Token expiring, refreshing...');
+        const success = await this.refreshToken();
+        if (!success) {
+          this.logout();
+        }
       }
     }, VALIDATION_INTERVAL);
-
-    console.log(`Token validation started (every ${VALIDATION_INTERVAL / 60000} minutes)`);
   }
 
   // Stop automatic token validation
@@ -79,30 +83,30 @@ export class AuthService {
       return false; // This will redirect to login
     }
 
+    if (this.isTokenExpired(token)) {
+      console.log('Access token expired during startup, attempting refresh...');
+      const refreshSuccess = await this.refreshToken();
+      return refreshSuccess;
+    }
+
     try {
-      const response = await this.makeAuthenticatedRequest('auth/verify');
-      
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      console.log('Validating token payload:', payload);
       Store.setState({
         user: {
-          id: response.user_id,
-          username: response.username,
-          role_id: response.role_id,
-          role: response.role,
+          id: payload.sub,
+          username: payload.username,
+          role_id: payload.role_id,
+          role: payload.role,
           isAuthenticated: true
         }
       });
       
+      console.log('Token valid, user authenticated from JWT');
       return true;
-    } catch (error: any) {
-      console.log('Token verification failed, attempting refresh...');
-      
-      const refreshSuccess = await this.refreshToken();
-      if (!refreshSuccess) {
-        console.log('Both tokens invalid - session expired');
-        return false;
-      }
-      
-      return true;
+    } catch (error) {
+      console.log('Invalid token format');
+      return false;
     }
   }
 
