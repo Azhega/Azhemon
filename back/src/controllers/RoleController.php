@@ -19,9 +19,8 @@ class RoleController extends Controller {
 
     /*========================= POST ========================================*/
 
-  #[Route("POST", "/role"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("POST", "/role",
+    middlewares: [AuthMiddleware::class, [RoleMiddleware::class, 'admin']])]
   public function createRole() {
     $this->role->add($this->body);
 
@@ -30,27 +29,24 @@ class RoleController extends Controller {
 
   /*========================= GET BY ID =====================================*/
 
-  #[Route("GET", "/role/:id"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("GET", "/role/:id",
+    middlewares: [AuthMiddleware::class, [RoleMiddleware::class, 'admin']])]
   public function getRole() {
     return $this->role->get(intval($this->params['id']));
   }
 
   /*========================= GET BY NAME ====================================*/
 
-  #[Route("GET", "/role/name/:name"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("GET", "/role/name/:name",
+    middlewares: [AuthMiddleware::class, [RoleMiddleware::class, 'admin']])]
   public function getRoleCategoryByName() {
     return $this->role->getByName($this->params['name']);
   }
 
   /*========================= GET ALL =======================================*/
 
-  #[Route("GET", "/role"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("GET", "/role",
+    middlewares: [AuthMiddleware::class, [RoleMiddleware::class, 'admin']])]
   public function getRoles() {
       $limit = isset($this->params['limit']) ? 
         intval($this->params['limit']) : null;
@@ -59,9 +55,8 @@ class RoleController extends Controller {
 
   /*========================= PATCH =========================================*/
 
-  #[Route("PATCH", "/role/:id"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("PATCH", "/role/:id",
+    middlewares: [AuthMiddleware::class, [RoleMiddleware::class, 'admin']])]
   public function updateRole() {
     try {
       $id = intval($this->params['id']);
@@ -91,9 +86,8 @@ class RoleController extends Controller {
 
   /*========================= DELETE ========================================*/
 
-  #[Route("DELETE", "/role/:id"/*,
-    middlewares: [AuthMiddleware::class, 
-    [RoleMiddleware::class, Roles::ROLE_ADMIN]]*/)]
+  #[Route("DELETE", "/role/:id",
+    middlewares: [AuthMiddleware::class, [RoleMiddleware::class, 'admin']])]
   public function deleteRole() {
     return $this->role->delete(intval($this->params['id']));
   }
