@@ -595,10 +595,17 @@ export class TeamBuilderView {
   
   private attachEvents(): void {
     document.getElementById('back-to-menu')?.addEventListener('click', () => {
+      // Reset the selector
+      this.selectedAttributeType = null;
+      this.loadSelector('');
       EventBus.emit('teambuilder:back-to-menu');
     });
 
     document.getElementById('delete-team')?.addEventListener('click', () => {
+      // Reset the selector
+      this.selectedAttributeType = null;
+      this.loadSelector('');
+
       const teamIndex = Store.getState().currentTeamIndex;
       if (teamIndex) {
         ApiService.delete('team/' + teamIndex)
@@ -617,6 +624,11 @@ export class TeamBuilderView {
             console.error('Erreur lors de la suppression de l\'équipe:', error);
             alert('Erreur lors de la suppression de l\'équipe.');
           });
+      } else {
+        this.loadTeams();
+        this.currentTeam = [null, null, null, null, null, null];
+        Store.setState({ currentTeam: this.currentTeam , currentTeamIndex: null });
+        this.updateTeamDisplay();
       }
     });
 
@@ -710,6 +722,10 @@ export class TeamBuilderView {
     const teamContainer = document.getElementById('team-slots');
     if (teamContainer) {
       teamContainer.addEventListener('click', (e) => {
+        // Reset the selector
+        this.selectedAttributeType = null;
+        this.loadSelector('');
+        
         const slot = (e.target as HTMLElement).closest('.pokemon-slot');
         if (slot) {
           const slotIndex = parseInt(slot.getAttribute('data-slot') || '0');
@@ -731,6 +747,10 @@ export class TeamBuilderView {
     document.getElementById('new-team-btn')?.addEventListener('click', () => {
       // Reset current team
       this.currentTeam = [null, null, null, null, null, null];
+
+      // Reset the selector
+      this.selectedAttributeType = null;
+      this.loadSelector('');
       
       this.selectedPokemonIndex = null;
       Store.setState({ currentTeam: this.currentTeam , currentTeamIndex: null });
@@ -741,6 +761,10 @@ export class TeamBuilderView {
     // Dropdown event for teams via API
     const teamsDropdown = document.getElementById('teams-dropdown') as HTMLSelectElement;
     teamsDropdown?.addEventListener('change', async (e: Event) => {
+      // Reset the selector
+      this.selectedAttributeType = null;
+      this.loadSelector('');
+
       const selectedValue = (e.target as HTMLSelectElement).value;
 
       const selectedTeamId = parseInt(selectedValue);
@@ -845,6 +869,10 @@ export class TeamBuilderView {
             this.updatePokemonInSlot(this.selectedPokemonIndex, null);
             this.selectedPokemonIndex = null;
             this.updateTeamDisplay();
+
+            // Reset the selector
+            this.selectedAttributeType = null;
+            this.loadSelector('');
           }
         });
       }
