@@ -136,8 +136,8 @@ export class TeamBuilderView {
       }
     }
 
-    // If there's a selected Pokémon, update the details panel
     this.updateDetailsPanel();
+    this.updateButtonStates();
   }
 
   private updateDetailsPanel(): void {
@@ -753,9 +753,27 @@ export class TeamBuilderView {
       this.loadSelector('');
       
       this.selectedPokemonIndex = null;
-      Store.setState({ currentTeam: this.currentTeam , currentTeamIndex: null });
+      Store.setState({ 
+        currentTeam: this.currentTeam, 
+        currentTeamIndex: null,
+        currentTeamName: null 
+      });
+
+      // Reset dropdown
+      const teamsDropdown = document.getElementById('teams-dropdown') as HTMLSelectElement;
+      if (teamsDropdown) {
+        teamsDropdown.value = "0"; // Reset to "Sélectionner une équipe"
+      }
+      
+      // Clear team name input
+      const teamNameInput = document.getElementById('team-name-input') as HTMLInputElement;
+      if (teamNameInput) {
+        teamNameInput.value = '';
+      }
+
       console.log(Store.getState());
       this.updateTeamDisplay();
+      this.updateButtonStates();
     });
     
     // Dropdown event for teams via API
@@ -774,7 +792,11 @@ export class TeamBuilderView {
       }
       if (selectedTeamId === 0) { // "Sélectionner une équipe" button
         this.currentTeam = [null, null, null, null, null, null];
-        Store.setState({ currentTeam: this.currentTeam , currentTeamIndex: null });
+        Store.setState({ 
+          currentTeam: this.currentTeam, 
+          currentTeamIndex: null,
+          currentTeamName: null 
+        });
         this.updateTeamDisplay();
         return;
       }
@@ -909,6 +931,13 @@ export class TeamBuilderView {
     
     this.updateTeamDisplay();
     
+    // Reset dropdown
+    const teamsDropdown = document.getElementById('teams-dropdown') as HTMLSelectElement;
+    if (teamsDropdown) {
+      teamsDropdown.value = "0";
+    }
+
+    // Clear team name input
     const teamNameInput = document.getElementById('team-name-input') as HTMLInputElement;
     if (teamNameInput) {
       teamNameInput.value = '';
@@ -921,6 +950,26 @@ export class TeamBuilderView {
     const dropdown = document.getElementById('teams-dropdown') as HTMLSelectElement;
     if (dropdown) {
       dropdown.innerHTML = `<option value="">Aucune équipe disponible</option>`;
+    }
+  }
+
+  private updateButtonStates(): void {
+    const saveButton = document.getElementById('save-team') as HTMLButtonElement;
+    const deleteButton = document.getElementById('delete-team') as HTMLButtonElement;
+    
+    const hasAnyPokemon = this.currentTeam.some(pokemon => pokemon !== null);
+    
+    const isEditingExistingTeam = Store.getState().currentTeamIndex !== null;
+    
+    if (saveButton) {
+      // Enable save if: has Pokémon OR editing existing team (allow saving empty team as deletion)
+      saveButton.disabled = !hasAnyPokemon;
+      saveButton.textContent = isEditingExistingTeam ? 'Mettre à jour' : 'Sauvegarder';
+    }
+    
+    if (deleteButton) {
+      // Enable delete only when editing an existing team
+      deleteButton.disabled = !isEditingExistingTeam;
     }
   }
 }
