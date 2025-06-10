@@ -291,13 +291,14 @@ export class BattleView {
     
     // Add action buttons
     const fightButton = document.createElement('button');
-    fightButton.className = 'action-button';
-    fightButton.textContent = 'Combat';
+    fightButton.className = 'battle-action-button';
+    fightButton.textContent = 'Attaque';
     fightButton.onclick = () => {
       if (playerPokemon.moves.every((move: PokemonMove) => move.currentPP <= 0)) {
         console.log('No moves available, using struggle');
         if (this.actionMenu?.style.display) {
-          this.actionMenu.style.display = 'none';
+          const buttons = this.actionMenu.querySelectorAll('button');
+          buttons.forEach(button => button.style.display = 'none');
         } 
         EventBus.emit('battle:select-move', { moveIndex: -1 });
         return;
@@ -307,7 +308,7 @@ export class BattleView {
     this.actionMenu.appendChild(fightButton);
     
     const pokemonButton = document.createElement('button');
-    pokemonButton.className = 'action-button';
+    pokemonButton.className = 'battle-action-button';
     pokemonButton.textContent = 'Pokémon';
     pokemonButton.onclick = () => this.showTeamSelection(false);
     this.actionMenu.appendChild(pokemonButton);
@@ -350,7 +351,8 @@ export class BattleView {
         move.currentPP--;
         EventBus.emit('battle:select-move', { moveIndex: index });
         if (this.moveMenu) {
-          this.moveMenu.style.display = 'none';
+          const buttons = this.moveMenu.querySelectorAll('button');
+          buttons.forEach(button => button.style.display = 'none');
         }
       }
       this.moveMenu?.appendChild(moveButton);
@@ -368,9 +370,9 @@ export class BattleView {
     
     // Add back button
     const backButton = document.createElement('button');
-    backButton.className = 'back-button';
+    backButton.className = 'battle-back-button';
     backButton.textContent = 'Retour';
-    backButton.style.gridColumn = '1 / span 2';
+    backButton.style.gridColumn = '1 / -1';
     backButton.onclick = () => this.showActionSelection();
     this.moveMenu.appendChild(backButton);
   }
@@ -426,7 +428,7 @@ export class BattleView {
       teamButton.innerHTML = `
         ${pokemon.name} Nv.${pokemon.level}<br>
         <small>PV: ${pokemon.currentHp}/${pokemon.maxHp}</small>
-        ${isActive ? '<br><small>(Actif)</small>' : ''}
+        ${isActive && isAlive ? '<br><small>(Actif)</small>' : ''}
         ${!isAlive ? '<br><small>(K.O.)</small>' : ''}
       `;
       
@@ -439,7 +441,9 @@ export class BattleView {
         teamButton.onclick = () => {
           EventBus.emit('battle:switch-pokemon', { pokemonIndex: index });
           if (this.teamMenu) {
-            this.teamMenu.style.display = 'none';
+            // this.teamMenu.style.display = 'none';
+            const buttons = this.teamMenu.querySelectorAll('button');
+            buttons.forEach(button => button.style.display = 'none');
           }
         };
       } else {
@@ -462,9 +466,9 @@ export class BattleView {
     if (!activePokemonFainted) {
       // Add back button
       const backButton = document.createElement('button');
-      backButton.className = 'back-button';
+      backButton.className = 'battle-back-button';
       backButton.textContent = 'Retour';
-      backButton.style.gridColumn = '1 / span 2';
+      backButton.style.gridColumn = '1 / -1';
       backButton.onclick = () => this.showActionSelection();
       this.teamMenu.appendChild(backButton);
     }
@@ -511,9 +515,8 @@ export class BattleView {
     resultContainer.appendChild(resultText);
     
     const returnButton = document.createElement('button');
-    returnButton.className = 'action-button';
+    returnButton.className = 'back-to-menu-button';
     returnButton.textContent = 'Retour au menu';
-    returnButton.style.marginTop = '20px';
     returnButton.onclick = () => {
       this.unsubscribe();
       EventBus.emit('battle:back-to-menu');
