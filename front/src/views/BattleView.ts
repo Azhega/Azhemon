@@ -435,7 +435,11 @@ export class BattleView {
       if (leadSelection) {
         teamButton.onclick = () => {
           EventBus.emit('battle:lead-selected', { pokemonIndex: index });
-          this.teamMenu!.style.display = 'none';
+          if (this.teamMenu) {
+            // this.teamMenu.style.display = 'none';
+            const buttons = this.teamMenu.querySelectorAll('button');
+            buttons.forEach(button => button.style.display = 'none');
+          }
         };
       } else if (!activePokemonFainted) {
         teamButton.onclick = () => {
@@ -476,7 +480,8 @@ export class BattleView {
 
   private hideTeamSelection(): void {
     if (this.teamMenu) {
-      this.teamMenu.style.display = 'none';
+      const buttons = this.teamMenu.querySelectorAll('button');
+      buttons.forEach(button => button.style.display = 'none');
     }
   }
 

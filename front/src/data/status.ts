@@ -18,21 +18,22 @@ export const status = {
       console.log(`${pokemon.name} n'est plus brûlé !`);
       pokemon.status = null;
       pokemon.statusKey = null;
-      // EffectManager.resetEffects(pokemon); // IDK how to handle this, will check later
     },
     onTurnEnd: (context: any) => {
       const battleState = Store.getState().battle;
       console.log('battleState : ', battleState);
       for (const pokemon of Object.values(battleState.activePokemon) as Pokemon[]) {
-        if (pokemon.statusKey === 'burn' && pokemon.currentHp > 0) {
-          const statusMessage = `Brûlure ! ${pokemon.name} subit des dégâts !`;
-          context.pendingLogs.push(statusMessage);
-          console.log('burn before : ', pokemon.name, pokemon.currentHp);
-          pokemon.currentHp = Math.max(
-            0,
-            pokemon.currentHp - Math.floor(pokemon.maxHp / 16)
-          );
-          console.log('burn after : ', pokemon.name, pokemon.currentHp);
+        if (pokemon.statusKey === 'burn' && pokemon.currentHp > 0 && pokemon.abilityKey !== 'magicGuard') { // To avoid bugs
+          context.pendingLogsAndEffects.push({
+            log: `Brûlure ! ${pokemon.name} subit des dégâts !`,
+            effect: () => {
+              console.log('burn before : ', pokemon.name, pokemon.currentHp);
+              pokemon.currentHp = Math.max(
+                0, pokemon.currentHp - Math.floor(pokemon.maxHp / 16)
+              );
+              console.log('burn after : ', pokemon.name, pokemon.currentHp);
+            }
+          });
         }
       }
     }
@@ -52,18 +53,20 @@ export const status = {
       console.log(`${pokemon.name} n'est plus paralysé !`);
       pokemon.status = null;
       pokemon.statusKey = null;
-      // EffectManager.resetEffects(pokemon); IDK how to handle this, will check later
     },
     onPreMove: (context: any) => {
       console.log('Status : onPreMove paralysis', context);
       const random = Math.random();
       if (context.attacker.statusKey === 'paralysis' && random < 0.25) {
-        console.log('Status : random act false', random);
         context.attacker.canAct = false;
-        console.log(`${context.attacker.name} est paralysé et ne peut pas agir !`);
+        context.pendingLogsAndEffects.push({
+          log: `${context.attacker.name} est paralysé et ne peut pas agir !`,
+        });
       } else {
-        console.log('Status : random act true', random);
         context.attacker.canAct = true;
+        context.pendingLogsAndEffects.push({
+          log: `${context.attacker.name} est paralysé mais peut agir !`
+        });
       }
     }
   },
@@ -80,21 +83,24 @@ export const status = {
       console.log(`${pokemon.name} n'est plus empoisonné !`);
       pokemon.status = null;
       pokemon.statusKey = null;
-      // EffectManager.resetEffects(pokemon); // IDK how to handle this, will check later
     },
     onTurnEnd: (context: any) => {
       const battleState = Store.getState().battle;
       console.log('battleState : ', battleState);
       for (const pokemon of Object.values(battleState.activePokemon) as Pokemon[]) {
-        if (pokemon.statusKey === 'poison' && pokemon.currentHp > 0 && pokemon.abilityKey !== 'poisonHeal') {
-          const statusMessage = `Poison ! ${pokemon.name} subit des dégâts !`;
-          context.pendingLogs.push(statusMessage);
-          console.log('poison before : ', pokemon.name, pokemon.currentHp);
-          pokemon.currentHp = Math.max(
-            0,
-            pokemon.currentHp - Math.floor(pokemon.maxHp / 8)
-          );
-          console.log('poison after : ', pokemon.name, pokemon.currentHp);
+        if (pokemon.statusKey === 'poison' && pokemon.currentHp > 0 && 
+          pokemon.abilityKey !== 'poisonHeal' && pokemon.abilityKey !== 'magicGuard') { // To avoid bugs
+          context.pendingLogsAndEffects.push({
+            log: `Poison ! ${pokemon.name} subit des dégâts !`,
+            effect: () => {
+              console.log('poison before : ', pokemon.name, pokemon.currentHp);
+              pokemon.currentHp = Math.max(
+                0,
+                pokemon.currentHp - Math.floor(pokemon.maxHp / 8)
+              );
+              console.log('poison after : ', pokemon.name, pokemon.currentHp);
+            }
+          });
         }
       }
     }
@@ -113,7 +119,6 @@ export const status = {
       console.log(`${pokemon.name} n'est plus endormi !`);
       pokemon.status = null;
       pokemon.statusKey = null;
-      // EffectManager.resetEffects(pokemon); // IDK how to handle this, will check later
     },
     onPreMove: (context: any) => {
       if (context.attacker.statusKey === 'sleep') {
@@ -123,10 +128,13 @@ export const status = {
           context.attacker.status = null;
           context.attacker.statusKey = null;
           context.attacker.canAct = true;
-          console.log(`${context.attacker.name} se réveille !`);
-          const statusMessage = `${context.attacker.name} se réveille !`;
-          context.pendingLogs.push(statusMessage);
+          context.pendingLogsAndEffects.push({
+            log: `${context.attacker.name} se réveille !`
+          });
         } else {
+          context.pendingLogsAndEffects.push({
+            log: `${context.attacker.name} est endormi et ne peut pas agir !`
+          });
           context.attacker.canAct = false;
           context.attacker.status.sleepTurns += 1;
           console.log(`${context.attacker.name} est endormi et ne peut pas agir !`, context.attacker.status.sleepTurns);
@@ -147,7 +155,6 @@ export const status = {
       console.log(`${pokemon.name} n'est plus gelé !`);
       pokemon.status = null;
       pokemon.statusKey = null;
-      // EffectManager.resetEffects(pokemon); // IDK how to handle this, will check later
     },
     onPreMove: (context: any) => {
       if (context.attacker.statusKey === 'freeze') {
@@ -158,12 +165,15 @@ export const status = {
           context.attacker.statusKey = null;
           context.attacker.canAct = true;
           console.log(`${context.attacker.name} n'est plus gelé !`);
-          const statusMessage = `${context.attacker.name} n'est plus gelé !`;
-          context.pendingLogs.push(statusMessage);
+          context.pendingLogsAndEffects.push({
+            log: `${context.attacker.name} n'est plus gelé !`
+          });
         } else {
           context.attacker.canAct = false;
           context.attacker.status.sleepTurns += 1;
-          console.log(`${context.attacker.name} est gelé et ne peut pas agir !`);
+          context.pendingLogsAndEffects.push({
+            log: `${context.attacker.name} est gelé et ne peut pas agir !`
+          });
         }
       }
     }

@@ -12,9 +12,12 @@ export const abilities = {
       console.log('battleState : ', battleState);
       for (const pokemon of Object.values(battleState.activePokemon) as Pokemon[]) {
         if (pokemon.abilityKey === 'magicGuard' && pokemon.statusKey) {
-          const abilityMessage = `Talent Garde Magik ! ${pokemon.name} se soigne de son statut !`;
-          context.pendingLogs.push(abilityMessage);
-          status[pokemon.statusKey as keyof typeof status].onRemove(pokemon);
+          context.pendingLogsAndEffects.push({
+            log: `Talent Garde Magik ! ${pokemon.name} se soigne de son statut !`,
+            effect: () => {
+              status[pokemon.statusKey as keyof typeof status].onRemove(pokemon);
+            }
+          });
         }
       }
     }
@@ -25,8 +28,13 @@ export const abilities = {
     description: 'Le Pokémon absorbe les attaques de type Eau et les neutralise tout en augmentant son Attaque Spéciale',
     onDamageModifier: (damage:number, context: any): number => {
       if (context.defender.abilityKey === 'stormDrain' && context.moveType === 'Eau') {
-        const abilityMessage = `Talent Lavabo ! ${context.defender.name} absorbe les dégâts Eau !`;
-        context.pendingLogs.push(abilityMessage);
+        context.pendingLogsAndEffects.push({
+          log: `Talent Lavabo ! ${context.defender.name} absorbe les dégâts Eau et augmente son Attaque Spéciale !`,
+          effect: () => {
+            context.defender.statModifiers.specialAttack += 1;
+            context.defender.calculateModifiedStats();
+          }
+        });
         context.hits = false;
         return 0;
       }
@@ -36,11 +44,16 @@ export const abilities = {
   flashFire: {
     id: 3,
     name: 'Torche',
-    description: 'Le Pokémon absorbe les capacités de type Feu et augmente la puissance des siennes',
+    description: 'Le Pokémon absorbe les capacités de type Feu et augmente son Attaque Spéciale',
     onDamageModifier: (damage: number, context: any): number => {
       if (context.defender.abilityKey === 'flashFire' && context.moveType === 'Feu') {
-        const abilityMessage = `Talent Torche ! ${context.defender.name} absorbe les dégâts Feu !`;
-        context.pendingLogs.push(abilityMessage);
+        context.pendingLogsAndEffects.push({
+          log: `Talent Torche ! ${context.defender.name} absorbe les dégâts Feu et augmente son Attaque Spéciale !`,
+          effect: () => {
+            context.defender.statModifiers.specialAttack += 1;
+            context.defender.calculateModifiedStats();
+          }
+        });
         context.hits = false;
         return 0;
       }
@@ -54,8 +67,9 @@ export const abilities = {
     onDamageModifier: (damage: number, context: any): number => {
       if (context.attacker.abilityKey === 'swarm' && context.moveType === 'Insecte' 
         && context.attacker.currentHp < context.attacker.maxHp / 3) {
-        const abilityMessage = `Talent Essaim ! ${context.attacker.name} augmente ses dégâts Insecte !`;
-        context.pendingLogs.push(abilityMessage);
+        context.pendingLogsAndEffects.push({
+          log: `Talent Essaim ! ${context.attacker.name} augmente ses dégâts Insecte !`
+        });
         return Math.floor(context.damage * 1.5);
       }
       return damage;
@@ -68,10 +82,13 @@ export const abilities = {
     onSwitch: (context: any): void => {
       if (context.switchedPokemon) {
         if (context.switchedPokemon.abilityKey === 'intimidate') {
-          const abilityMessage = `Talent Intimidation ! ${context.switchedPokemon.name} baisse l'attaque de son adversaire !`;
-          context.pendingLogs.push(abilityMessage);
-          context.opponentPokemon.statModifiers.attack -= 1;
-          context.opponentPokemon.calculateModifiedStats();
+          context.pendingLogsAndEffects.push({
+            log: `Talent Intimidation ! ${context.switchedPokemon.name} baisse l'attaque de son adversaire !`,
+            effect: () => {
+              context.opponentPokemon.statModifiers.attack -= 1;
+              context.opponentPokemon.calculateModifiedStats();
+            }
+          });
         }
       }
     }
@@ -82,8 +99,9 @@ export const abilities = {
     description: 'Le Pokémon flotte, ce qui l\'immunise contre les capacités de type Sol',
     onDamageModifier: (damage: number, context: any): number => {
       if (context.defender.abilityKey === 'levitate' && context.moveType === 'Sol') {
-        const abilityMessage = `Talent Lévitation ! ${context.defender.name} est immunisé contre les attaques de type Sol !`;
-        context.pendingLogs.push(abilityMessage);
+        context.pendingLogsAndEffects.push({
+          log: `Talent Lévitation ! ${context.defender.name} est immunisé contre les attaques de type Sol !`
+        });
         context.hits = false;
         return 0;
       }
@@ -97,11 +115,13 @@ export const abilities = {
     onPostMove: (context: any): void => {
       if (context.defender.abilityKey === 'roughSkin' && context.move.category === 'Physique' 
         && context.attacker.canAct === true && context.damage > 0) {
-        const abilityMessage = `Talent Peau Dure de ${context.defender.name} ! ${context.attacker.name} subit des dégâts !`;
-        context.pendingLogs.push(abilityMessage);
-        const damage = Math.floor(context.defender.maxHp / 8);
-        context.attacker.currentHp = Math.max(0, context.attacker.currentHp - damage);
-        console.log(`${context.attacker.name} subit ${damage} points de dégâts à cause du talent Peau Dure !`);
+        context.pendingLogsAndEffects.push({
+          log: `Talent Peau Dure ! ${context.defender.name} blesse son attaquant !`,
+          effect: () => {
+            const damage = Math.floor(context.defender.maxHp / 8);
+            context.attacker.currentHp = Math.max(0, context.attacker.currentHp - damage);
+          }
+        });
       }
     }
   },
@@ -115,14 +135,17 @@ export const abilities = {
       for (const pokemon of Object.values(battleState.activePokemon) as Pokemon[]) {
         if (pokemon.abilityKey === 'poisonHeal' && pokemon.statusKey === 'poison' 
           && pokemon.currentHp > 0 && pokemon.currentHp < pokemon.maxHp) {
-          const abilityMessage = `Soin-Poison ! ${pokemon.name} récupère des PV au lieu d'en perdre !`;
-          context.pendingLogs.push(abilityMessage);
-          console.log('PoisonHeal before : ', pokemon.name, pokemon.currentHp);
-          pokemon.currentHp = Math.min(
-            pokemon.maxHp,
-            pokemon.currentHp + Math.floor(pokemon.maxHp / 8)
-          );
-          console.log('PoisonHeal after : ', pokemon.name, pokemon.currentHp);
+          context.pendingLogsAndEffects.push({
+            log: `Talent Soin-Poison ! ${pokemon.name} récupère des PV !`,
+            effect: () => {
+              console.log('PoisonHeal before : ', pokemon.name, pokemon.currentHp);
+              pokemon.currentHp = Math.min(
+                pokemon.maxHp,
+                pokemon.currentHp + Math.floor(pokemon.maxHp / 8)
+              );
+              console.log('PoisonHeal after : ', pokemon.name, pokemon.currentHp);
+            }
+          });
         }
       }
     }
@@ -133,8 +156,9 @@ export const abilities = {
     description: 'Augmente la puissance des coups critiques de 50%',
     onDamageModifier: (damage: number, context: any): number => {
       if (context.attacker.abilityKey === 'sniper' && context.critical) {
-        const abilityMessage = `Talent Sniper ! ${context.attacker.name} augmente les dégâts de ses coups critiques !`;
-        context.pendingLogs.push(abilityMessage);
+        context.pendingLogsAndEffects.push({
+          log: `Talent Sniper ! ${context.attacker.name} augmente les dégâts de ses coups critiques !`
+        });
         return context.damage * 1.5;
       }
       return damage;
@@ -146,10 +170,13 @@ export const abilities = {
     description: 'Quand le Pokémon met un ennemi K.O., son Attaque augmente',
     onPostMove: (context: any): void => {
       if (context.attacker.abilityKey === 'moxie' && context.defender.isAlive === false) {
-        const abilityMessage = `Talent Impudence ! ${context.attacker.name} augmente son attaque de 1 !`;
-        context.pendingLogs.push(abilityMessage);
-        context.attacker.statModifiers.attack += 1;
-        context.attacker.calculateModifiedStats();
+        context.pendingLogsAndEffects.push({
+          log: `Talent Impudence ! ${context.attacker.name} augmente son attaque !`,
+          effect: () => {
+            context.attacker.statModifiers.attack += 1;
+            context.attacker.calculateModifiedStats();
+          }
+        });
       }
     }
   },
@@ -159,11 +186,15 @@ export const abilities = {
     description: 'Si le Pokémon est touché par une capacité Eau, il ne subit aucun dégât et regagne des PV à la place',
     onDamageModifier: (damage: number, context: any): number => {
       if (context.defender.abilityKey === 'waterAbsorb' && context.moveType === 'Eau') {
-        const abilityMessage = `Talent Absorbe-Eau ! ${context.defender.name} absorbe les dégâts Eau et récupère des PV !`;
-        context.pendingLogs.push(abilityMessage);
+        context.pendingLogsAndEffects.push({
+          log: `Talent Absorbe-Eau ! ${context.defender.name} absorbe les dégâts Eau et récupère des PV !`,
+          effect: () => {
+            context.hits = false;
+            context.defender.currentHp = Math.min(context.defender.maxHp, 
+              context.defender.currentHp + Math.floor(context.defender.maxHp / 5));
+          }
+        });
         context.hits = false;
-        context.defender.currentHp = Math.min(context.defender.maxHp, 
-          context.defender.currentHp + Math.floor(context.defender.maxHp / 5));
         return 0;
       }
       return damage;
@@ -176,10 +207,13 @@ export const abilities = {
     onSwitch: (context: any): void => {
       if (context.switchedPokemon) {
         if (context.switchedPokemon.abilityKey === 'regenerator' && context.switchedPokemon.currentHp < context.switchedPokemon.maxHp) {
-          const abilityMessage = `Talent Régé-Force ! ${context.switchedPokemon.name} récupère des PV après un switch !`;
-          context.pendingLogs.push(abilityMessage);
-          context.switchedPokemon.currentHp = Math.min(context.switchedPokemon.maxHp, 
-            context.switchedPokemon.currentHp + Math.floor(context.switchedPokemon.maxHp / 3));
+          context.pendingLogsAndEffects.push({
+            log: `Talent Régé-Force ! ${context.switchedPokemon.name} récupère des PV après un switch !`,
+            effect: () => {
+              context.switchedPokemon.currentHp = Math.min(context.switchedPokemon.maxHp,
+                context.switchedPokemon.currentHp + Math.floor(context.switchedPokemon.maxHp / 3));
+            }
+          });
         }
       }
     }
@@ -190,8 +224,9 @@ export const abilities = {
     description: 'Quand le Pokémon utilise une capacité du même type que lui, le bonus de puissance qu\'elle reçoit est encore plus important que normalement',
     onDamageModifier: (damage: number, context: any): number => {
       if (context.attacker.abilityKey === 'adaptability' && context.attacker.types.includes(context.moveType)) {
-        const abilityMessage = `Talent Adaptabilité ! ${context.attacker.name} augmente ses dégâts de STAB !`;
-        context.pendingLogs.push(abilityMessage);
+        context.pendingLogsAndEffects.push({
+          log: `Talent Adaptabilité ! ${context.attacker.name} augmente ses dégâts de STAB !`
+        });
         return Math.floor((context.damage / 1.5) * 2);
       }
       return damage;
@@ -207,10 +242,13 @@ export const abilities = {
         const random = Math.random();
         if (random < 0.3 && context.attacker.statusKey === null 
           && !context.attacker.types.includes('Électrik') && context.attacker.isAlive) {
-          const abilityMessage = `Talent Statik ! ${context.attacker.name} est paralysé !`;
-          context.pendingLogs.push(abilityMessage);
-          context.attacker.statusKey = 'paralysis';
-          status['paralysis'].onApply(context.attacker);
+          context.pendingLogsAndEffects.push({
+            log: `Talent Statik ! ${context.attacker.name} est paralysé !`,
+            effect: () => {
+              context.attacker.statusKey = 'paralysis';
+              status['paralysis'].onApply(context.attacker);
+            }
+          });
         }
       }
     }
@@ -225,10 +263,13 @@ export const abilities = {
         const random = Math.random();
         if (random < 0.3 && context.attacker.statusKey === null 
           && !context.attacker.types.includes('Feu') && context.attacker.isAlive) {
-          const abilityMessage = `Talent Corps Ardent ! ${context.attacker.name} est brûlé !`;
-          context.pendingLogs.push(abilityMessage);
-          context.attacker.statusKey = 'burn';
-          status['burn'].onApply(context.attacker);
+          context.pendingLogsAndEffects.push({
+            log: `Talent Corps Ardent ! ${context.attacker.name} est brûlé !`,
+            effect: () => {
+              context.attacker.statusKey = 'burn';
+              status['burn'].onApply(context.attacker);
+            }
+          });
         }
       }
     }

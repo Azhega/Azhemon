@@ -264,7 +264,7 @@ export class BattleEngine {
       hits: true,
       effectiveness: effectiveness,
       critical: critical,
-      pendingLogs: []
+      pendingLogsAndEffects: []
     }
 
     battleState.context = context;
@@ -352,21 +352,12 @@ export class BattleEngine {
     // Calculate damage
     const damageResult = this.calculateDamage(move, attacker, defender, battleState);
     
-    // Apply damage
-    if (damageResult.damage > 0) {
-      // HP cannot go below 0
-      console.log('BattleEngine : Defender hp before:', defender.currentHp);
-      defender.currentHp = Math.max(0, defender.currentHp - damageResult.damage);
-      console.log('BattleEngine : Defender hp after:', defender.currentHp); 
-      defender.hasBeenDamaged = true;
-      // Check if the defender is knocked out
-      if (defender.currentHp <= 0) {
-        defender.isAlive = false;
-      }
-    }
-
-    // Handle effects WIP (hardest part)
-    // const statChanges = this.applyMoveEffects(move, attacker, defender, battleState);
+    // Store damage to apply later (for animation and delay purposes)
+    battleState.context.pendingDamage = {
+      target: defender,
+      damage: damageResult.damage,
+      applied: false
+    };
     
     // Result message
     let message = `${attacker.name} utilise ${move.name}`;
@@ -387,8 +378,29 @@ export class BattleEngine {
       damage: damageResult.damage,
       criticalHit: damageResult.critical,
       effectiveness: damageResult.effectiveness,
-      // statChanges: statChanges,
       message: message
     };
+  }
+
+  public applyPendingDamage(battleState: any): void {
+    if (battleState.context.pendingDamage && !battleState.context.pendingDamage.applied) {
+      const { target, damage } = battleState.context.pendingDamage;
+      
+      if (damage > 0) {
+        console.log('BattleEngine : Applying stored damage:', damage, 'to', target.name);
+        console.log('BattleEngine : HP before:', target.currentHp);
+        
+        target.currentHp = Math.max(0, target.currentHp - damage);
+        target.hasBeenDamaged = true;
+        
+        console.log('BattleEngine : HP after:', target.currentHp);
+        
+        if (target.currentHp <= 0) {
+          target.isAlive = false;
+        }
+      }
+      
+      battleState.context.pendingDamage.applied = true;
+    }
   }
 }

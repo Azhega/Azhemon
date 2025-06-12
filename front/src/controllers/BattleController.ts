@@ -4,7 +4,6 @@ import { BattleView } from '../views/BattleView';
 import { Pokemon, PokemonMove } from '../models/PokemonModel';
 import { TurnManager } from './TurnManager.ts';
 import { BattleAction, BattleState, BattleTurn } from '../models/BattleModel.ts';
-import { Pokedex } from '../data/pokedex.ts';
 import { items } from '../data/items.ts';
 import { abilities } from '../data/abilities.ts';
 import { moves } from '../data/moves.ts';
@@ -13,6 +12,7 @@ import { cpuPokedex } from '../data/cpuPokedex.ts';
 import { createBattlePokemon } from '../utils/PokemonFactory.ts';
 import EffectManager from './EffectManager.ts';
 import { PokemonAI } from './PokemonAI.ts';
+import BattleFlowManager from './BattleFlowManager.ts';
 
 export class BattleController {
   private battleView: BattleView | null;
@@ -38,8 +38,6 @@ export class BattleController {
     }
     
     const validPlayerTeam = playerTeam.filter((pokemon: Pokemon | null) => pokemon !== null);
-    
-    // Generate a CPU team (to implement later)
     const cpuTeam = this.generateCpuTeam(validPlayerTeam.length);
 
     /*
@@ -58,7 +56,8 @@ export class BattleController {
       effectiveness: null,
       critical: null,
       requestSwitch: false,
-      pendingLogs: [],
+      pendingLogsAndEffects: [],
+      pendingDamage: {}
     };
 
     // Initialize battle state
@@ -123,67 +122,88 @@ export class BattleController {
     this.startBattle();
   }
   
-  private startBattle(): void {
+  private async startBattle(): Promise<void> {
     let battleState = Store.getState().battle;
     
     if (!battleState) {
       console.error('Battle state not initialized');
       return;
     }
-    
-    Store.setState({
-      battle: {
-        ...battleState,
-        status: 'active',
-        turn: 1,
-        log: [...battleState.log, 'La bataille commence !']
+
+    await BattleFlowManager.executeSequence([
+      {
+        name: 'battle-initialization',
+        action: () => {
+          Store.setState({
+            battle: {
+              ...battleState,
+              status: 'active',
+              turn: 1,
+              log: [...battleState.log, 'La bataille commence !']
+            }
+          });
+        },
+        delay: 0,
+        message: 'Initialisation du combat...'
+      },
+      {
+        name: 'clear-register-effects',
+        action: () => {
+          /* 
+          ============================================================================
+          - CLEAR ALL EFFECTS FOR NEW BATTLE
+          - REGISTER ABILITIES/ITEMS EFFECTS FOR BOTH POKEMON
+          - THESE EFFECTS ARE RESET AT THE START OF EACH TURN
+          ============================================================================
+          */
+          EffectManager.clearAllEffects();
+          EffectManager.registerPokemonEffects(battleState.activePokemon.player);
+          EffectManager.registerPokemonEffects(battleState.activePokemon.cpu);
+          
+          battleState = Store.getState().battle;
+          console.log(`BattleController : ====== TURN START : ${battleState.turn} ======`);
+          Store.setState({
+            battle: {
+              ...battleState,
+              log: [...battleState.log, `===== Début du Tour ${battleState.turn} ! =====`]
+            }
+          });
+        },
+        delay: 500,
+        message: 'Initialisation des effets...'
+      },
+      {
+        name: 'lead-effects',
+        action: async () => {
+          /*
+          ============================================================================
+          - HOOK : ON SWITCH ===> BEGINNING OF BATTLE
+          ============================================================================
+          */
+          battleState = Store.getState().battle;
+          battleState.context.switchedPokemon = battleState.activePokemon.player;
+          battleState.context.opponentPokemon = battleState.activePokemon.cpu;
+          EffectManager.applyOnSwitchEffects(battleState.context);
+          
+          await this.turnManager?.displayLogsAndEffectsSequentially(battleState.context.pendingLogsAndEffects, 1000);
+        },
+        delay: 0
+      },
+      {
+        name: 'on-turn-start-effects',
+        action: async () => {
+          /*
+          ============================================================================
+          - HOOK : ON TURN START ===> BEGINNING OF BATTLE
+          ============================================================================
+          */
+          EffectManager.applyTurnStartEffects(battleState.context);
+
+          await this.turnManager?.displayLogsAndEffectsSequentially(battleState.context.pendingLogsAndEffects, 1000);
+        },
+        delay: 0
       }
-    });
-
-    /* 
-    ============================================================================
-    - CLEAR ALL EFFECTS FOR NEW BATTLE
-    - REGISTER ABILITIES/ITEMS EFFECTS FOR BOTH POKEMON
-    - THESE EFFECTS ARE RESET AT THE START OF EACH TURN
-    ============================================================================
-    */
-    EffectManager.clearAllEffects();
-    EffectManager.registerPokemonEffects(battleState.activePokemon.player);
-    EffectManager.registerPokemonEffects(battleState.activePokemon.cpu);
-
-    battleState = Store.getState().battle;
-    console.log(`BattleController : ====== TURN START : ${battleState.turn} ======`);
-    Store.setState({
-      battle: {
-        ...battleState,
-        log: [...battleState.log, `===== Début du Tour ${battleState.turn} ! =====`]
-      }
-    });
-
-    /*
-    ============================================================================
-    - HOOK : ON SWITCH ===> BEGINNING OF BATTLE
-    ============================================================================
-    */
-    battleState = Store.getState().battle;
-    battleState.context.switchedPokemon = battleState.activePokemon.player;
-    battleState.context.opponentPokemon = battleState.activePokemon.cpu;
-    EffectManager.applyOnSwitchEffects(battleState.context);
-    Store.setState({
-      battle: {
-        ...battleState,
-        log: [...battleState.log, ...battleState.context.pendingLogs]
-      }
-    });
-
-    battleState.context.pendingLogs.length = 0;
-
-    /*
-    ============================================================================
-    - HOOK : ON TURN START ===> BEGINNING OF BATTLE
-    ============================================================================
-    */
-    // EffectManager.applyTurnStartEffects(battleState); I don't implement one yet
+    ]);
 
     this.battleView?.showActionSelection();
   }
@@ -408,10 +428,13 @@ export class BattleController {
   }
   
   private checkBattleState(): void {
+    console.log('BattleController : Checking battle state...');
     if (this.checkIfBattleOver()) {
+      console.log('BattleController : Battle is over.');
       return;
     }
 
+    console.log('BattleController : Starting next turn...');
     this.startNextTurn();
   }
 
@@ -451,62 +474,85 @@ export class BattleController {
     return false;
   }
 
-  private startNextTurn(): void {
+  private async startNextTurn(): Promise<void> {
     let battleState = Store.getState().battle;
 
-    // Battle continues
-    Store.setState({
-      battle: {
-        ...battleState,
-        turn: battleState.turn + 1
+    await BattleFlowManager.executeSequence([
+      {
+        name: 'turn-preparation',
+        action: () => {
+          // Battle continues
+          Store.setState({
+            battle: {
+              ...battleState,
+              turn: battleState.turn + 1
+            }
+          });
+
+          // Prepare for next turn
+          battleState.activePokemon.player.canAct = true;
+          battleState.activePokemon.cpu.canAct = true;
+          battleState.activePokemon.player.hasBeenDamaged = false;
+          battleState.activePokemon.cpu.hasBeenDamaged = false;
+
+          battleState.context = {
+            damage: null,
+            move: null,
+            moveType: null,
+            attacker: null,
+            defender: null,
+            defenderInitialHp: null,
+            hits: false,
+            effectiveness: null,
+            critical: null,
+            requestSwitch: false,
+            pendingLogsAndEffects: [],
+            pendingDamage: {}
+          };
+        },
+        delay: 0,
+        message: 'Préparation du prochain tour...'
+      },
+      {
+        name: 'reset-effects',
+        action: () => {
+          /*
+          ============================================================================
+          - RESET ALL EFFECTS FOR NEW TURN
+          - REGISTER EFFECTS FOR (NEW) ACTIVE POKEMON
+          ============================================================================
+          */
+          EffectManager.resetEffects(battleState.activePokemon.player, battleState.activePokemon.cpu);
+          
+          battleState = Store.getState().battle;
+          console.log(`BattleController : ====== TURN START : ${battleState.turn} ======`);
+          Store.setState({
+            battle: {
+              ...battleState,
+              log: [...battleState.log, `===== Début du Tour ${battleState.turn} ! =====`]
+            }
+          });
+        },
+        delay: 0,
+        message: `Tour ${battleState.turn + 1} !`
+      },
+      {
+        name: 'on-turn-start-effects',
+        action: async () => {
+          /*
+          ============================================================================
+          - HOOK : ON TURN START ===> BEGINNING OF TURN
+          ============================================================================
+          */
+          EffectManager.applyTurnStartEffects(battleState);
+
+          await this.turnManager?.displayLogsAndEffectsSequentially(battleState.context.pendingLogsAndEffects, 1000);
+        },
+        delay: 0,
+        message: 'Effets de début de tour appliqués...'
       }
-    });
+    ]);
 
-    // Prepare for next turn
-
-    battleState.activePokemon.player.canAct = true;
-    battleState.activePokemon.cpu.canAct = true;
-    battleState.activePokemon.player.hasBeenDamaged = false;
-    battleState.activePokemon.cpu.hasBeenDamaged = false;
-
-    battleState.context = {
-      damage: null,
-      move: null,
-      moveType: null,
-      attacker: null,
-      defender: null,
-      defenderInitialHp: null,
-      hits: false,
-      effectiveness: null,
-      critical: null,
-      requestSwitch: false,
-      pendingLogs: [],
-    };
-
-    /*
-    ============================================================================
-    - RESET ALL EFFECTS FOR NEW TURN
-    - REGISTER EFFECTS FOR (NEW) ACTIVE POKEMON
-    ============================================================================
-    */
-    EffectManager.resetEffects(battleState.activePokemon.player, battleState.activePokemon.cpu); 
-
-    battleState = Store.getState().battle;
-    console.log(`BattleController : ====== TURN START : ${battleState.turn} ======`);
-    Store.setState({
-      battle: {
-        ...battleState,
-        log: [...battleState.log, `===== Début du Tour ${battleState.turn} ! =====`]
-      }
-    });
-
-    /*
-    ============================================================================
-    - HOOK : ON TURN START ===> BEGINNING OF TURN
-    ============================================================================
-    */
-    // EffectManager.applyTurnStartEffects(battleState); I don't implemented one yet
-    
     this.battleView?.showActionSelection();
   }
 }
