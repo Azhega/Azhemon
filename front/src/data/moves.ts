@@ -3,6 +3,7 @@ import { TurnManager } from '../controllers/TurnManager';
 import Store from '../utils/Store';
 import EventBus from '../utils/EventBus'; 
 import { Pokemon } from '../models/PokemonModel';
+import { Effect } from '../models/EffectModel';
 
 export const moves = {
   auraSphere: {
@@ -58,11 +59,13 @@ export const moves = {
         console.log('Ébullition : random', random);
         if (context.defender.statusKey === null || context.defender.statusKey === undefined) {
           if (random < 0.3 && !context.defender.types.includes('Feu') && context.defender.isAlive) {
-            const moveMessage = `Ébullition ! ${context.defender.name} est brûlé !`;
-            context.pendingLogs.push(moveMessage);
-            console.log(moveMessage);
-            context.defender.statusKey = 'burn';
-            status['burn'].onApply(context.defender);
+            context.pendingLogsAndEffects.push({
+              log: `Ébullition ! ${context.defender.name} est brûlé !`,
+              effect: () => {
+                context.defender.statusKey = 'burn';
+                status['burn'].onApply(context.defender);
+              }
+            });
           }
         }
       }
@@ -84,11 +87,13 @@ export const moves = {
         const random = Math.random();
         console.log('Ball\'ombre : random', random);
         if (random < 0.2 && context.defender.isAlive) {
-          const moveMessage = `Ball'ombre ! La Défense Spéciale de ${context.defender.name} baisse !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
-          context.defender.statModifiers.specialDefense -= 1;
-          context.defender.calculateModifiedStats();
+          context.pendingLogsAndEffects.push({
+            log: `Ball'ombre ! La Défense Spéciale de ${context.defender.name} baisse !`,
+            effect: () => {
+              context.defender.statModifiers.specialDefense -= 1;
+              context.defender.calculateModifiedStats();
+            }
+          });
         }
       }
     }
@@ -134,11 +139,13 @@ export const moves = {
         console.log('Tonnerre : random', random);
         if (context.defender.statusKey === null || context.defender.statusKey === undefined) {
           if (random < 0.1 && !context.defender.types.includes('Électrik') && context.defender.isAlive) {
-            const moveMessage = `Tonnerre ! ${context.defender.name} est paralysé !`;
-            context.pendingLogs.push(moveMessage);
-            console.log(moveMessage);
-            context.defender.statusKey = 'paralysis';
-            status['paralysis'].onApply(context.defender);
+            context.pendingLogsAndEffects.push({
+              log: `Tonnerre ! ${context.defender.name} est paralysé !`,
+              effect: () => {
+                context.defender.statusKey = 'paralysis';
+                status['paralysis'].onApply(context.defender);
+              }
+            });
           }
         }
       }
@@ -160,8 +167,10 @@ export const moves = {
         const random = Math.random();
         console.log('Lame de Roc : random', random);
         if (random < 0.125) {
+          context.pendingLogsAndEffects.push({
+            log: `Lame de Roc ! Coup critique !`          
+          });
           context.critical = true;
-          console.log('Lame de Roc : coup critique !');
           return Math.floor(damage * 1.5);
         }
       }
@@ -181,12 +190,14 @@ export const moves = {
     description: 'Baisse la Défense et la Défense Spéciale du lanceur',
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
-        const moveMessage = `Close Combat ! La Défense et la Défense Spéciale de ${context.attacker.name} baissent !`;
-        context.pendingLogs.push(moveMessage);
-        console.log(moveMessage);
-        context.attacker.statModifiers.defense -= 1;
-        context.attacker.statModifiers.specialDefense -= 1;
-        context.attacker.calculateModifiedStats();
+        context.pendingLogsAndEffects.push({
+          log: `Close Combat ! La Défense et la Défense Spéciale de ${context.attacker.name} baissent !`,
+          effect: () => {
+            context.attacker.statModifiers.defense -= 1;
+            context.attacker.statModifiers.specialDefense -= 1;
+            context.attacker.calculateModifiedStats();
+          }
+        });
       }
     }
   },
@@ -206,8 +217,10 @@ export const moves = {
         const random = Math.random();
         console.log('Poison-Croix : random', random);
         if (random < 0.125) {
+          context.pendingLogsAndEffects.push({
+            log: `Poison-Croix ! Coup critique !`
+          });
           context.critical = true;
-          console.log('Poison-Croix : coup critique !');
           return Math.floor(damage * 1.5);
         }
       }
@@ -218,11 +231,13 @@ export const moves = {
         const random = Math.random();
         console.log('Poison-Croix : random', random);
         if (random < 0.1 && context.defender.statusKey === null && context.defender.isAlive) {
-          const moveMessage = `Poison-Croix ! ${context.defender.name} est empoisonné !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
-          context.defender.statusKey = 'poison';
-          status['poison'].onApply(context.defender);
+          context.pendingLogsAndEffects.push({
+            log: `Poison-Croix ! ${context.defender.name} est empoisonné !`,
+            effect: () => {
+              context.defender.statusKey = 'poison';
+              status['poison'].onApply(context.defender);
+            }
+          });
         }
       }
     }
@@ -244,11 +259,13 @@ export const moves = {
         console.log('Laser Glace : random', random);
         if (context.defender.statusKey === null || context.defender.statusKey === undefined) {
           if (random < 0.1 && !context.defender.types.includes('Glace') && context.defender.isAlive) {
-            const moveMessage = `Laser Glace ! ${context.defender.name} est gelé !`;
-            context.pendingLogs.push(moveMessage);
-            console.log(moveMessage);
-            context.defender.statusKey = 'freeze';
-            status['freeze'].onApply(context.defender);
+            context.pendingLogsAndEffects.push({
+              log: `Laser Glace ! ${context.defender.name} est gelé !`,
+              effect: () => {
+                context.defender.statusKey = 'freeze';
+                status['freeze'].onApply(context.defender);
+              }
+            });
           }
         }
       }
@@ -270,11 +287,13 @@ export const moves = {
         const random = Math.random();
         console.log('Psyko : random', random);
         if (random < 0.1 && context.defender.isAlive) {
-          const moveMessage = `Psyko ! La Défense Spéciale de ${context.defender.name} baisse !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
-          context.defender.statModifiers.specialDefense -= 1;
-          context.defender.calculateModifiedStats();
+          context.pendingLogsAndEffects.push({
+            log: `Psyko ! La Défense Spéciale de ${context.defender.name} baisse !`,
+            effect: () => {
+              context.defender.statModifiers.specialDefense -= 1;
+              context.defender.calculateModifiedStats();
+            }
+          });
         }
       }
     }
@@ -296,23 +315,29 @@ export const moves = {
         const random = Math.random();
         console.log('Triplattaque : random', random);
         if (random < 0.067 && !context.defender.types.includes('Glace') && context.defender.isAlive) {
-          const moveMessage = `Triplattaque ! ${context.defender.name} est gelé !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
-          context.defender.statusKey = 'freeze';
-          status['freeze'].onApply(context.defender);
+          context.pendingLogsAndEffects.push({
+            log: `Triplattaque ! ${context.defender.name} est gelé !`,
+            effect: () => {
+              context.defender.statusKey = 'freeze';
+              status['freeze'].onApply(context.defender);
+            }
+          });
         } else if ((random > 0.067 && random < 0.133) && !context.defender.types.includes('Feu') && context.defender.isAlive) {
-          const moveMessage = `Triplattaque ! ${context.defender.name} est brûlé !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
-          context.defender.statusKey = 'burn';
-          status['burn'].onApply(context.defender);
+          context.pendingLogsAndEffects.push({
+            log: `Triplattaque ! ${context.defender.name} est brûlé !`,
+            effect: () => {
+              context.defender.statusKey = 'burn';
+              status['burn'].onApply(context.defender);
+            }
+          });
         } else if ((random > 0.133 && random < 0.2) && !context.defender.types.includes('Électrik') && context.defender.isAlive) {
-          const moveMessage = `Triplattaque ! ${context.defender.name} est paralysé !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
-          context.defender.statusKey = 'paralysis';
-          status['paralysis'].onApply(context.defender);
+          context.pendingLogsAndEffects.push({
+            log: `Triplattaque ! ${context.defender.name} est paralysé !`,
+            effect: () => {
+              context.defender.statusKey = 'paralysis';
+              status['paralysis'].onApply(context.defender);
+            }
+          });
         }
       }
     }
@@ -333,11 +358,13 @@ export const moves = {
         const random = Math.random();
         console.log('Lance-Flammes : random', random);
         if (random < 0.1 && !context.defender.types.includes('Feu') && context.defender.isAlive) {
-          const moveMessage = `Lance-Flammes ! ${context.defender.name} est brûlé !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
-          context.defender.statusKey = 'burn';
-          status['burn'].onApply(context.defender);
+          context.pendingLogsAndEffects.push({
+            log: `Lance-Flammes ! ${context.defender.name} est brûlé !`,
+            effect: () => {
+              context.defender.statusKey = 'burn';
+              status['burn'].onApply(context.defender);
+            }
+          });
         }
       }
     }
@@ -358,11 +385,13 @@ export const moves = {
         const random = Math.random();
         console.log('Éco-Sphère : random', random);
         if (random < 0.1 && context.defender.isAlive) {
-          const moveMessage = `Éco-Sphère ! La Défense Spéciale de ${context.defender.name} baisse !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
-          context.defender.statModifiers.specialDefense -= 1;
-          context.defender.calculateModifiedStats();
+          context.pendingLogsAndEffects.push({
+            log: `Éco-Sphère ! La Défense Spéciale de ${context.defender.name} baisse !`,
+            effect: () => {
+              context.defender.statModifiers.specialDefense -= 1;
+              context.defender.calculateModifiedStats();
+            }
+          });
         }
       }
     }
@@ -395,8 +424,10 @@ export const moves = {
         const random = Math.random();
         console.log('Tranche-Nuit : random', random);
         if (random < 0.125) {
+          context.pendingLogsAndEffects.push({
+            log: `Tranche-Nuit : coup critique !`
+          });
           context.critical = true;
-          console.log('Tranche-Nuit : coup critique !');
           return Math.floor(damage * 1.5);
         }
       }
@@ -430,21 +461,23 @@ export const moves = {
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         if (context.defender.types.includes('Feu')) {
-          const moveMessage = `Feu Follet ! ${context.defender.name} est immunisé !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
+          context.pendingLogsAndEffects.push({
+            log: `Feu Follet ! ${context.defender.name} est immunisé !`
+          });
           return;
         }
         if (!context.defender.statusKey || context.defender.statusKey === undefined) {
-          const moveMessage = `Feu Follet ! ${context.defender.name} est brûlé !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
-          context.defender.statusKey = 'burn';
-          status['burn'].onApply(context.defender);
+          context.pendingLogsAndEffects.push({
+            log: `Feu Follet ! ${context.defender.name} est brûlé !`,
+            effect: () => {
+              context.defender.statusKey = 'burn';
+              status['burn'].onApply(context.defender);
+            }
+          });
         } else {
-          const moveMessage = `Feu Follet ! ${context.defender.name} a déjà un statut !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
+          context.pendingLogsAndEffects.push({
+            log: `Feu Follet ! ${context.defender.name} a déjà un statut !`
+          });
         }
       }
     }
@@ -464,21 +497,23 @@ export const moves = {
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         if (context.defender.types.includes('Électrik')) {
-          const moveMessage = `Cage-Éclair ! ${context.defender.name} est immunisé !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
+          context.pendingLogsAndEffects.push({
+            log: `Cage-Éclair ! ${context.defender.name} est immunisé !`
+          });
           return;
         }
         if (context.defender.statusKey === null || context.defender.statusKey === undefined) {
-          const moveMessage = `Cage-Éclair ! ${context.defender.name} est paralysé !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
-          context.defender.statusKey = 'paralysis';
-          status['paralysis'].onApply(context.defender);
+          context.pendingLogsAndEffects.push({
+            log: `Cage-Éclair ! ${context.defender.name} est paralysé !`,
+            effect: () => {
+              context.defender.statusKey = 'paralysis';
+              status['paralysis'].onApply(context.defender);
+            }
+          });
         } else {
-          const moveMessage = `Cage-Éclair ! ${context.defender.name} a déjà un statut !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
+          context.pendingLogsAndEffects.push({
+            log: `Cage-Éclair ! ${context.defender.name} a déjà un statut !`
+          });
         }
       }
     }
@@ -498,21 +533,23 @@ export const moves = {
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         if (context.defender.types.includes('Poison') || context.defender.types.includes('Acier')) {
-          const moveMessage = `Toxic ! ${context.defender.name} est immunisé !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
+          context.pendingLogsAndEffects.push({
+            log: `Toxic ! ${context.defender.name} est immunisé !`
+          });
           return;
         }
         if (context.defender.statusKey === null || context.defender.statusKey === undefined) {
-          const moveMessage = `Toxic ! ${context.defender.name} est empoisonné !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
-          context.defender.statusKey = 'poison';
-          status['poison'].onApply(context.defender);
+          context.pendingLogsAndEffects.push({
+            log: `Toxic ! ${context.defender.name} est empoisonné !`,
+            effect: () => {
+              context.defender.statusKey = 'poison';
+              status['poison'].onApply(context.defender);
+            }
+          });
         } else {
-          const moveMessage = `Toxic ! ${context.defender.name} a déjà un statut !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
+          context.pendingLogsAndEffects.push({
+            log: `Toxic ! ${context.defender.name} a déjà un statut !`
+          });
         }
       }
     }
@@ -532,15 +569,17 @@ export const moves = {
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         if (context.defender.statusKey === null || context.defender.statusKey === undefined) {
-          const moveMessage = `Hypnose ! ${context.defender.name} est endormi !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
-          context.defender.statusKey = 'sleep';
-          status['sleep'].onApply(context.defender);
+          context.pendingLogsAndEffects.push({
+            log: `Hypnose ! ${context.defender.name} est endormi !`,
+            effect: () => {
+              context.defender.statusKey = 'sleep';
+              status['sleep'].onApply(context.defender);
+            }
+          });
         } else {
-          const moveMessage = `Hypnose ! ${context.defender.name} a déjà un statut !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
+          context.pendingLogsAndEffects.push({
+            log: `Hypnose ! ${context.defender.name} a déjà un statut !`
+          });
         }
       }
     }
@@ -560,21 +599,23 @@ export const moves = {
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         if (context.defender.types.includes('Glace')) {
-          const moveMessage = `Vague Glace ! ${context.defender.name} est immunisé !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
+          context.pendingLogsAndEffects.push({
+            log: `Vague Glace ! ${context.defender.name} est immunisé !`
+          });
           return;
         }
         if (context.defender.statusKey === null || context.defender.statusKey === undefined) {
-          const moveMessage = `Vague Glace ! ${context.defender.name} est gelé !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
-          context.defender.statusKey = 'freeze';
-          status['freeze'].onApply(context.defender);
+          context.pendingLogsAndEffects.push({
+            log: `Vague Glace ! ${context.defender.name} est gelé !`,
+            effect: () => {
+              context.defender.statusKey = 'freeze';
+              status['freeze'].onApply(context.defender);
+            }
+          });
         } else {
-          const moveMessage = `Vague Glace ! ${context.defender.name} a déjà un statut !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
+          context.pendingLogsAndEffects.push({
+            log: `Vague Glace ! ${context.defender.name} a déjà un statut !`
+          });
         }
       }
     }
@@ -593,11 +634,13 @@ export const moves = {
     flags: { statEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
-        const moveMessage = `Danse-Lames ! L'attaque de ${context.attacker.name} augmente beaucoup !`;
-        context.pendingLogs.push(moveMessage);
-        console.log(moveMessage);
-        context.attacker.statModifiers.attack += 2;
-        context.attacker.calculateModifiedStats();
+        context.pendingLogsAndEffects.push({
+          log: `Danse-Lames ! L'attaque de ${context.attacker.name} augmente beaucoup !`,
+          effect: () => {
+            context.attacker.statModifiers.attack += 2;
+            context.attacker.calculateModifiedStats();
+          }
+        });
       }
     }
   },
@@ -615,11 +658,13 @@ export const moves = {
     flags: { statEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
-        const moveMessage = `Mur de Fer ! La défense de ${context.attacker.name} augmente beaucoup !`;
-        context.pendingLogs.push(moveMessage);
-        console.log(moveMessage);
-        context.attacker.statModifiers.defense += 2;
-        context.attacker.calculateModifiedStats();
+        context.pendingLogsAndEffects.push({
+          log: `Mur de Fer ! La défense de ${context.attacker.name} augmente beaucoup !`,
+          effect: () => {
+            context.attacker.statModifiers.defense += 2;
+            context.attacker.calculateModifiedStats();
+          }
+        });
       }
     }
   },
@@ -637,11 +682,13 @@ export const moves = {
     flags: { statEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
-        const moveMessage = `Machination ! L'attaque spéciale de ${context.attacker.name} augmente beaucoup !`;
-        context.pendingLogs.push(moveMessage);
-        console.log(moveMessage);
-        context.attacker.statModifiers.specialAttack += 2;
-        context.attacker.calculateModifiedStats();
+        context.pendingLogsAndEffects.push({
+          log: `Machination ! L'attaque spéciale de ${context.attacker.name} augmente beaucoup !`,
+          effect: () => {
+            context.attacker.statModifiers.specialAttack += 2;
+            context.attacker.calculateModifiedStats();
+          }
+        });
       }
     }
   },
@@ -659,11 +706,13 @@ export const moves = {
     flags: { statEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
-        const moveMessage = `Amnésie ! La défense spéciale de ${context.attacker.name} augmente beaucoup !`;
-        context.pendingLogs.push(moveMessage);
-        console.log(moveMessage);
-        context.attacker.statModifiers.specialDefense += 2;
-        context.attacker.calculateModifiedStats();
+        context.pendingLogsAndEffects.push({
+          log: `Amnésie ! La défense spéciale de ${context.attacker.name} augmente beaucoup !`,
+          effect: () => {
+            context.attacker.statModifiers.specialDefense += 2;
+            context.attacker.calculateModifiedStats();
+          }
+        });
       }
     }
   },
@@ -681,11 +730,13 @@ export const moves = {
     flags: { statEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
-        const moveMessage = `Hâte ! La vitesse de ${context.attacker.name} augmente beaucoup !`;
-        context.pendingLogs.push(moveMessage);
-        console.log(moveMessage);
-        context.attacker.statModifiers.speed += 2;
-        context.attacker.calculateModifiedStats();
+        context.pendingLogsAndEffects.push({
+          log: `Hâte ! La vitesse de ${context.attacker.name} augmente beaucoup !`,
+          effect: () => {
+            context.attacker.statModifiers.speed += 2;
+            context.attacker.calculateModifiedStats();
+          }
+        });
       }
     }
   },
@@ -703,12 +754,14 @@ export const moves = {
     flags: { statEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
-        const moveMessage = `Plénitude ! L'attaque spéciale et la défense spéciale de ${context.attacker.name} augmentent !`;
-        context.pendingLogs.push(moveMessage);
-        console.log(moveMessage);
-        context.attacker.statModifiers.specialAttack += 1;
-        context.attacker.statModifiers.specialDefense += 1;
-        context.attacker.calculateModifiedStats();
+        context.pendingLogsAndEffects.push({
+          log: `Plénitude ! L'attaque spéciale et la défense spéciale de ${context.attacker.name} augmentent !`,
+          effect: () => {
+            context.attacker.statModifiers.specialAttack += 1;
+            context.attacker.statModifiers.specialDefense += 1;
+            context.attacker.calculateModifiedStats();
+          }
+        });
       }
     }
   },
@@ -726,11 +779,13 @@ export const moves = {
     flags: { statEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
-        const moveMessage = `Charme ! L'attaque de ${context.defender.name} baisse beaucoup !`;
-        context.pendingLogs.push(moveMessage);
-        console.log(moveMessage);
-        context.defender.statModifiers.attack -= 2;
-        context.defender.calculateModifiedStats();
+        context.pendingLogsAndEffects.push({
+          log: `Charme ! L'attaque de ${context.defender.name} baisse beaucoup !`,
+          effect: () => {
+            context.defender.statModifiers.attack -= 2;
+            context.defender.calculateModifiedStats();
+          }
+        });
       }
     }
   },
@@ -748,11 +803,13 @@ export const moves = {
     flags: { statEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
-        const moveMessage = `Grincement ! La défense de ${context.defender.name} baisse beaucoup !`;
-        context.pendingLogs.push(moveMessage);
-        console.log(moveMessage);
-        context.defender.statModifiers.defense -= 2;
-        context.defender.calculateModifiedStats();
+        context.pendingLogsAndEffects.push({
+          log: `Grincement ! La défense de ${context.defender.name} baisse beaucoup !`,
+          effect: () => {
+            context.defender.statModifiers.defense -= 2;
+            context.defender.calculateModifiedStats();
+          }
+        });
       }
     }
   },
@@ -770,11 +827,13 @@ export const moves = {
     flags: { statEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
-        const moveMessage = `Impulsion Étrange ! L'attaque spéciale de ${context.defender.name} baisse beaucoup !`;
-        context.pendingLogs.push(moveMessage);
-        console.log(moveMessage);
-        context.defender.statModifiers.specialAttack -= 2;
-        context.defender.calculateModifiedStats();
+        context.pendingLogsAndEffects.push({
+          log: `Impulsion Étrange ! L'attaque spéciale de ${context.defender.name} baisse beaucoup !`,
+          effect: () => {
+            context.defender.statModifiers.specialAttack -= 2;
+            context.defender.calculateModifiedStats();
+          }
+        });
       }
     }
   },
@@ -792,11 +851,13 @@ export const moves = {
     flags: { statEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
-        const moveMessage = `Croco Larme ! La défense spéciale de ${context.defender.name} baisse beaucoup !`;
-        context.pendingLogs.push(moveMessage);
-        console.log(moveMessage);
-        context.defender.statModifiers.specialDefense -= 2;
-        context.defender.calculateModifiedStats();
+        context.pendingLogsAndEffects.push({
+          log: `Croco Larme ! La défense spéciale de ${context.defender.name} baisse beaucoup !`,
+          effect: () => {
+            context.defender.statModifiers.specialDefense -= 2;
+            context.defender.calculateModifiedStats();
+          }
+        });
       }
     }
   },
@@ -814,11 +875,13 @@ export const moves = {
     flags: { statEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
-        const moveMessage = `Strido-Son ! La défense spéciale de ${context.defender.name} baisse beaucoup !`;
-        context.pendingLogs.push(moveMessage);
-        console.log(moveMessage);
-        context.defender.statModifiers.specialDefense -= 2;
-        context.defender.calculateModifiedStats();
+        context.pendingLogsAndEffects.push({
+          log: `Strido-Son ! La défense spéciale de ${context.defender.name} baisse beaucoup !`,
+          effect: () => {
+            context.defender.statModifiers.specialDefense -= 2;
+            context.defender.calculateModifiedStats();
+          }
+        });
       }
     }
   },
@@ -836,11 +899,13 @@ export const moves = {
     flags: { statEffect: true },
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
-        const moveMessage = `Spore Coton ! La vitesse de ${context.defender.name} baisse beaucoup !`;
-        context.pendingLogs.push(moveMessage);
-        console.log(moveMessage);
-        context.defender.statModifiers.speed -= 2;
-        context.defender.calculateModifiedStats();
+        context.pendingLogsAndEffects.push({
+          log: `Spore Coton ! La vitesse de ${context.defender.name} baisse beaucoup !`,
+          effect: () => {
+            context.defender.statModifiers.speed -= 2;
+            context.defender.calculateModifiedStats();
+          }
+        });
       }
     }
   },
@@ -860,14 +925,17 @@ export const moves = {
       if (context.attacker.canAct === true && context.hits) {
         if (context.attacker.currentHp < context.attacker.maxHp) {
           const healAmount = Math.floor(context.attacker.maxHp / 2);
-          context.attacker.currentHp = Math.min(context.attacker.currentHp + healAmount, context.attacker.maxHp);
-          const moveMessage = `Soin ! ${context.attacker.name} récupère ${healAmount} PV !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
+
+          context.pendingLogsAndEffects.push({
+            log: `Soin ! ${context.attacker.name} récupère ${healAmount} PV !`,
+            effect: () => {
+              context.attacker.currentHp = Math.min(context.attacker.currentHp + healAmount, context.attacker.maxHp);
+            }
+          });
         } else {
-          const moveMessage = `Soin ! Les PV de ${context.attacker.name} sont déjà au max !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
+          context.pendingLogsAndEffects.push({
+            log: `Soin ! Les PV de ${context.attacker.name} sont déjà au max !`,
+          });
         }
       }
     }
@@ -886,12 +954,15 @@ export const moves = {
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits
         && context.attacker.currentHp < context.attacker.maxHp 
-        && context.attacker.isAlive) {
+        && (context.attacker.isAlive || context.attacker.currentHp <= 0)) {
         const healAmount = Math.ceil(context.damage / 2);
-        context.attacker.currentHp = Math.min(context.attacker.currentHp + healAmount, context.attacker.maxHp);
-        const moveMessage = `Vampipoing ! ${context.attacker.name} récupère ${healAmount} PV !`;
-        context.pendingLogs.push(moveMessage);
-        console.log(moveMessage);
+
+        context.pendingLogsAndEffects.push({
+          log: `Vampipoing ! ${context.attacker.name} récupère ${healAmount} PV !`,
+          effect: () => {
+            context.attacker.currentHp = Math.min(context.attacker.currentHp + healAmount, context.attacker.maxHp);
+          }
+        });
       }
     }
   },
@@ -909,12 +980,15 @@ export const moves = {
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits
         && context.attacker.currentHp < context.attacker.maxHp 
-        && context.attacker.isAlive) {
+        && (context.attacker.isAlive || context.attacker.currentHp <= 0)) {
         const healAmount = Math.ceil(context.damage / 2);
-        context.attacker.currentHp = Math.min(context.attacker.currentHp + healAmount, context.attacker.maxHp);
-        const moveMessage = `Giga-Sangsue ! ${context.attacker.name} récupère ${healAmount} PV !`;
-        context.pendingLogs.push(moveMessage);
-        console.log(moveMessage);
+
+        context.pendingLogsAndEffects.push({
+          log: `Giga-Sangsue ! ${context.attacker.name} récupère ${healAmount} PV !`,
+          effect: () => {
+            context.attacker.currentHp = Math.min(context.attacker.currentHp + healAmount, context.attacker.maxHp);
+          }
+        });
       }
     }
   },
@@ -933,10 +1007,13 @@ export const moves = {
       if (context.attacker.canAct === true && context.hits) {
         const actualDamage = Math.max(0, context.defenderInitialHp - context.defender.currentHp);
         const recoilDamage = Math.floor(actualDamage / 2);
-        context.attacker.currentHp = Math.max(context.attacker.currentHp - recoilDamage, 0);
-        const moveMessage = `Fracass\'Tête ! ${context.attacker.name} subit ${recoilDamage} points de dégâts de recul !`;
-        context.pendingLogs.push(moveMessage);
-        console.log(moveMessage);
+
+        context.pendingLogsAndEffects.push({
+          log: `Fracass'Tête ! ${context.attacker.name} subit ${recoilDamage} points de dégâts de recul !`,
+          effect: () => {
+            context.attacker.currentHp = Math.max(context.attacker.currentHp - recoilDamage, 0);
+          }
+        });
       }
     }
   },
@@ -954,11 +1031,14 @@ export const moves = {
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         const actualDamage = Math.max(0, context.defenderInitialHp - context.defender.currentHp);
-        const recoilDamage = Math.floor(actualDamage / 2);
-        context.attacker.currentHp = Math.max(context.attacker.currentHp - recoilDamage, 0);
-        const moveMessage = `Éclair Fou ! ${context.attacker.name} subit ${recoilDamage} points de dégâts de recul !`;
-        context.pendingLogs.push(moveMessage);
-        console.log(moveMessage);
+        const recoilDamage = Math.floor(actualDamage / 4);
+
+        context.pendingLogsAndEffects.push({
+          log: `Éclair Fou ! ${context.attacker.name} subit ${recoilDamage} points de dégâts de recul !`,
+          effect: () => {
+            context.attacker.currentHp = Math.max(context.attacker.currentHp - recoilDamage, 0);
+          }
+        });
       }
     }
   },
@@ -978,19 +1058,26 @@ export const moves = {
         const actualDamage = Math.max(0, context.defenderInitialHp - context.defender.currentHp);
         const recoilDamage = Math.floor(actualDamage / 2);
         context.attacker.currentHp = Math.max(context.attacker.currentHp - recoilDamage, 0);
-        const moveMessage = `Boutefeu ! ${context.attacker.name} subit ${recoilDamage} points de dégâts de recul !`;
-        context.pendingLogs.push(moveMessage);
-        console.log(moveMessage);
+        context.pendingLogsAndEffects.push({
+          log: `Boutefeu ! ${context.attacker.name} subit ${recoilDamage} points de dégâts de recul !`,
+          effect: () => {
+            const actualDamage = Math.max(0, context.defenderInitialHp - context.defender.currentHp);
+            const recoilDamage = Math.floor(actualDamage / 2);
+            context.attacker.currentHp = Math.max(context.attacker.currentHp - recoilDamage, 0);
+          }
+        });
 
         const random = Math.random();
         console.log('Boutefeu : random', random);
         if (random < 0.1 && !context.defender.types.includes('Feu') 
           && context.defender.isAlive && context.defender.statusKey === null) {
-          const burnMessage = `Boutefeu ! ${context.defender.name} est brûlé !`;
-          context.pendingLogs.push(burnMessage);
-          console.log(burnMessage);
-          context.defender.statusKey = 'burn';
-          status['burn'].onApply(context.defender);
+          context.pendingLogsAndEffects.push({
+            log: `Boutefeu ! ${context.defender.name} est brûlé !`,
+            effect: () => {
+              context.defender.statusKey = 'burn';
+              status['burn'].onApply(context.defender);
+            }
+          });
         }
       }
     }
@@ -1010,10 +1097,13 @@ export const moves = {
       if (context.attacker.canAct === true && context.hits) {
         const actualDamage = Math.max(0, context.defenderInitialHp - context.defender.currentHp);
         const recoilDamage = Math.floor(actualDamage / 2);
-        context.attacker.currentHp = Math.max(context.attacker.currentHp - recoilDamage, 0);
-        const moveMessage = `Rapace ! ${context.attacker.name} subit ${recoilDamage} points de dégâts de recul !`;
-        context.pendingLogs.push(moveMessage);
-        console.log(moveMessage);
+
+        context.pendingLogsAndEffects.push({
+          log: `Rapace ! ${context.attacker.name} subit ${recoilDamage} points de dégâts de recul !`,
+          effect: () => {
+            context.attacker.currentHp = Math.max(context.attacker.currentHp - recoilDamage, 0);
+          }
+        });
       }
     }
   },
@@ -1102,10 +1192,12 @@ export const moves = {
     description: 'Double les dégâts si l\'utilisateur a été touché par une attaque lors du tour précédent',
     onDamageModifier: (damage: number, context: any): number => {
       if (context.attacker.hasBeenDamaged) {
-        console.log('Avalanche : coup double !');
+        context.pendingLogsAndEffects.push({
+          log: `Avalanche : Puissance augmentée !`
+        });
         return damage * 2;
       }
-      
+
       return damage;
     }
   },
@@ -1122,7 +1214,9 @@ export const moves = {
     description: 'Double les dégâts si l\'utilisateur a été touché par une attaque lors du tour précédent',
     onDamageModifier: (damage: number, context: any): number => {
       if (context.attacker.hasBeenDamaged) {
-        console.log('Vendetta : coup double !');
+        context.pendingLogsAndEffects.push({
+          log: `Vendetta : Puissance augmentée !`
+        });
         return damage * 2;
       }
       
@@ -1153,9 +1247,10 @@ export const moves = {
         const aliveCount = team.filter((p: Pokemon) => p.isAlive && p !== context.attacker).length;
 
         if (aliveCount > 0) {
-          const moveMessage = `Demi-Tour ! ${context.attacker.name} change de Pokémon !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
+          context.pendingLogsAndEffects.push({
+            log: `Demi-Tour ! ${context.attacker.name} change de Pokémon !`
+          });
+
           context.requestSwitch = true;
         }
       }
@@ -1177,11 +1272,13 @@ export const moves = {
         const random = Math.random();
         console.log('Telluriforce : random', random);
         if (random < 0.1 && context.defender.isAlive) {
-          const moveMessage = `Telluriforce ! La Défense Spéciale de ${context.defender.name} baisse !`;
-          context.pendingLogs.push(moveMessage);
-          console.log(moveMessage);
-          context.defender.statModifiers.specialDefense -= 1;
-          context.defender.calculateModifiedStats();
+          context.pendingLogsAndEffects.push({
+            log: `Telluriforce ! La Défense Spéciale de ${context.defender.name} baisse !`,
+            effect: () => {
+              context.defender.statModifiers.specialDefense -= 1;
+              context.defender.calculateModifiedStats();
+            }
+          });
         }
       }
     }
