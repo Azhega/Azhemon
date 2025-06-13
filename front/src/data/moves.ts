@@ -138,7 +138,7 @@ export const moves = {
         const random = Math.random();
         console.log('Tonnerre : random', random);
         if (context.defender.statusKey === null || context.defender.statusKey === undefined) {
-          if (random < 0.1 && !context.defender.types.includes('Électrik') && context.defender.isAlive) {
+          if (random < 0.1 && (!context.defender.types.includes('Électrik') || !context.defender.types.includes('Sol')) && context.defender.isAlive) {
             context.pendingLogsAndEffects.push({
               log: `Tonnerre ! ${context.defender.name} est paralysé !`,
               effect: () => {

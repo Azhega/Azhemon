@@ -8,6 +8,7 @@ import { abilities } from '../data/abilities';
 import { natures } from '../data/natures';
 import { createBattlePokemon } from '../utils/PokemonFactory';
 import ApiService from '../services/ApiService';
+import { AudioManager } from '../controllers/AudioManager';
 
 export class TeamBuilderView {
   private element: HTMLElement;
@@ -15,9 +16,11 @@ export class TeamBuilderView {
   private currentTeamName: string = '';
   private selectedPokemonIndex: number | null = null;
   private selectedAttributeType: string | null = null; // 'pokemon', 'item', 'ability', 'move'
-  
+  private audioManager: AudioManager;
+
   constructor() {
     this.element = document.getElementById('teambuilder-screen')!;
+    this.audioManager = AudioManager.getInstance();
     this.render();
     this.attachEvents();
 
@@ -48,6 +51,11 @@ export class TeamBuilderView {
   
   private render(): void {
     this.element.innerHTML = `
+      <div class="sound-toggle">
+        <div class="sound-icon">
+          ${this.audioManager.isMusicMuted() ? '🔇' : '🔊'}
+        </div>
+      </div>
       <div class="teambuilder-layout">
         <!-- Left panel - Team management -->
         <div class="team-panel">
@@ -373,6 +381,7 @@ export class TeamBuilderView {
             return;
           }
           const [key, _] = PokemonEntry;
+          console.log('SelectedPokemonIndex:', this.selectedPokemonIndex);
 
           const selectedPokemon = createBattlePokemon(
             key as keyof typeof Pokedex, 
@@ -383,7 +392,8 @@ export class TeamBuilderView {
               },
               moves: [],
               ability: { id: 0, name: 'Aucun', description: ''},
-              item: null
+              item: null,
+              slot: this.selectedPokemonIndex!
             });
           selectedPokemon.key = key;
 
@@ -733,10 +743,12 @@ export class TeamBuilderView {
           if (this.currentTeam[slotIndex]) {
             // If the slot has a Pokémon, select it
             this.selectedPokemonIndex = slotIndex;
+            console.log("selectedPokemonIndex : ", this.selectedPokemonIndex);
             this.updateTeamDisplay();
           } else {
             // If the slot is empty, open the Pokémon selector
             this.selectedPokemonIndex = slotIndex;
+            console.log("selectedPokemonIndex : ", this.selectedPokemonIndex);
             this.loadSelector('pokemon');
             this.updateTeamDisplay();
           }
@@ -824,11 +836,13 @@ export class TeamBuilderView {
             }
           });
 
+          console.log('selectedPokemonIndex:', this.selectedPokemonIndex);
           const battlePokemon = createBattlePokemon(apiPokemon.pokemon_name as keyof typeof Pokedex, {
             nature: apiPokemonNature,
             moves: apiPokemonMoves,
             ability: apiPokemonAbility,
-            item: apiPokemonItem
+            item: apiPokemonItem,
+            slot: apiPokemon.slot - 1
           })
 
           battlePokemon.abilityKey = apiPokemon.ability;

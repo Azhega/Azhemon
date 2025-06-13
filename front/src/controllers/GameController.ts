@@ -6,15 +6,19 @@ import { LoginView } from '../views/LoginView';
 import { Pokemon } from '../models/PokemonModel';
 import { TeamBuilderView } from '../views/TeamBuilderView';
 import { BattleController } from './BattleController';
+import { AudioManager } from './AudioManager';
 
 export class GameController {
   private mainView: MainView;
   private loginView: LoginView | null = null;
   private teamBuilderView: TeamBuilderView | null = null;
   private battleController: BattleController | null = null;
-  
+  private audioManager: AudioManager;
+
   constructor() {
     this.mainView = new MainView();
+    this.audioManager = AudioManager.getInstance();
+    this.audioManager.initialize();
 
     // Subscribe to events
     this.registerEventListeners();
@@ -38,6 +42,8 @@ export class GameController {
     // Teambuilder events
     EventBus.on('teambuilder:back-to-menu', () => this.switchScreen('menu'));
 
+    EventBus.on('battle:back-to-menu', () => this.switchScreen('menu'));
+
     // Session events
     EventBus.on('auth:login-success', () => this.switchScreen('menu'));
     EventBus.on('auth:logout', () => this.switchScreen('login'));
@@ -49,6 +55,7 @@ export class GameController {
     if (isAuthenticated) {
       AuthService.startTokenValidation();
       this.switchScreen('menu');
+      this.audioManager.playMenuMusic();
     } else {
       this.switchScreen('login');
     }
@@ -73,6 +80,9 @@ export class GameController {
   }
 
   switchScreen(screen: 'menu' | 'teambuilder' | 'battle' | 'login'): void {
+    const previousScreen = Store.getState().game.screen;
+    console.log(`Switching screen from ${previousScreen} to ${screen}`);
+
     Store.setState({
       game: {
         ...Store.getState().game,
@@ -83,13 +93,22 @@ export class GameController {
     console.log('Store updated:', Store.getState());
     console.log('Store user username:', Store.getState().user.username);
 
+    // MainView.updateScreen(screen);
     EventBus.emit('screen:changed', screen);
 
     if (screen === 'login') {
+      this.audioManager.stopCurrentMusic();
       if (!this.loginView) {
         this.loginView = new LoginView();
       } else {
         this.loginView.reset();
+      }
+    }
+
+    if (screen === 'menu' || screen === 'teambuilder') {
+      if (previousScreen === 'login') {
+        this.audioManager.playMenuMusic();
+        EventBus.emit('menu:toggle-music-mute');
       }
     }
 

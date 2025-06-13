@@ -9,12 +9,15 @@ import { moves } from '../data/moves';
 import { abilities } from '../data/abilities';
 import { natures } from '../data/natures';
 import { createBattlePokemon } from '../utils/PokemonFactory';
+import { AudioManager } from '../controllers/AudioManager';
 
 export class MenuView {
   private element: HTMLElement;
-  
+  private audioManager: AudioManager;
+
   constructor() {
     this.element = document.getElementById('menu-screen')!;
+    this.audioManager = AudioManager.getInstance();
     this.render();
     this.attachEvents();
     this.loadTeams();
@@ -43,10 +46,20 @@ export class MenuView {
     EventBus.on('teambuilder:team-deleted', () => {
       this.resetTeamPreview();
     });
+
+    EventBus.on('menu:toggle-music-mute', () => {
+      this.toggleMusicMute();
+    });
+    
   }
   
   private render(): void {
     this.element.innerHTML = `
+      <div class="sound-toggle">
+        <div class="sound-icon">
+          ${this.audioManager.isMusicMuted() ? '🔇' : '🔊'}
+        </div>
+      </div>
       <div class="menu-container">
         <!-- User info and logout button -->
         <div class="menu-header">
@@ -153,7 +166,8 @@ export class MenuView {
             nature: apiPokemonNature,
             moves: apiPokemonMoves,
             ability: apiPokemonAbility,
-            item: apiPokemonItem
+            item: apiPokemonItem,
+            slot: apiPokemon.slot - 1
           }
         );
         
@@ -237,6 +251,9 @@ export class MenuView {
     const teambuilderButton = document.getElementById('teambuilder-button');
     const battleButton = document.getElementById('battle-button');
     const teamsDropdown = document.getElementById('battle-teams-dropdown') as HTMLSelectElement;
+    const logoutButton = document.getElementById('logout-button');
+    const soundToggle = document.querySelector('.sound-toggle');
+    const soundIcon = document.querySelector('.sound-icon') as HTMLElement;
     
     teambuilderButton?.addEventListener('click', () => {
       EventBus.emit('menu:open-teambuilder');
@@ -270,9 +287,30 @@ export class MenuView {
       await this.loadTeamPreview(selectedTeamId);
     });
 
-    document.getElementById('logout-button')?.addEventListener('click', async () => {
+    logoutButton?.addEventListener('click', async () => {
       await AuthService.logout();
     });
+
+    soundToggle?.addEventListener('click', () => {
+      // Toggle mute state
+      const isMuted = this.audioManager.toggleMute();
+      
+      // Update icon
+      soundIcon.textContent = isMuted ? '🔇' : '🔊';
+      
+      // Add animation class
+      soundToggle.classList.add('clicked');
+      
+      // Remove animation class after animation completes
+      setTimeout(() => {
+        soundToggle.classList.remove('clicked');
+      }, 300);
+    });
+  }
+
+  public toggleMusicMute(): void {
+    const soundIcon = document.querySelector('.sound-icon') as HTMLElement;
+    soundIcon.textContent = this.audioManager.isMusicMuted() ? '🔇' : '🔊';
   }
 
   private resetTeamPreview(): void {

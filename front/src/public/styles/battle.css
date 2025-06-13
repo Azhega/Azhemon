@@ -51,8 +51,6 @@
 }
 
 .pokemon-battle-sprite {
-  width: 250px;
-  height: 250px;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -60,18 +58,23 @@
   filter: drop-shadow(4px 4px 12px rgba(0,0,0,0.6));
   transition: transform 0.3s ease;
   z-index: 10;
+  image-rendering: pixelated; /* Helps maintain pixel-art quality */
 }
 
 .cpu-field .pokemon-battle-sprite {
   position: absolute;
-  top: 40%;
-  right: 25%;
+  top: 42%;
+  right: 26%;
+  width: 200px;
+  height: 200px;
 }
 
 .player-field .pokemon-battle-sprite {
   position: absolute;
   bottom: 8%;
   left: 28%;
+  width: 250px;
+  height: 250px;
 }
 
 .pokemon-data {
@@ -104,22 +107,39 @@
 }
 
 .hp-bar {
-  height: 14px;
+  width: 100%;
+  height: 20px;
   background: linear-gradient(90deg, #2c3e50, #34495e);
-  border-radius: 7px;
   position: relative;
   margin-top: 8px;
-  border: 1px solid #5d6d7e;
   overflow: hidden;
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+  border-radius: 10px;
+  border: 2px solid #333;
 }
 
 .hp-fill {
   height: 100%;
-  border-radius: 6px;
-  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: width 0.8s ease-out;
+  border-radius: inherit;
+}
+
+/* Smooth color transitions for different HP levels */
+.hp-fill.hp-high {
+  background-color: #38cd38;
+  transition: width 0.8s ease-out, background-color 0.3s ease;
+}
+
+.hp-fill.hp-medium {
+  background-color: #dcdc3b;
+  transition: width 0.8s ease-out, background-color 0.3s ease;
+}
+
+.hp-fill.hp-low {
+  background-color: #d63939;
+  transition: width 0.8s ease-out, background-color 0.3s ease;
 }
 
 .battle-log {
@@ -377,4 +397,94 @@
 
 .battle-log::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, #5dade2, #3498db);
+}
+
+
+/* Physical attack animation */
+@keyframes physicalAttack {
+  0% { transform: translate(0, 0); }
+  30% { transform: translate(120%, -100%); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes physicalAttackCpu {
+  0% { transform: translate(0, 0); }
+  30% { transform: translate(-120%, 100%); }
+  100% { transform: translate(0, 0); }
+}
+
+.pokemon-battle-sprite.physical-attack {
+  animation: physicalAttack 0.8s ease-in-out;
+}
+
+.cpu-field .pokemon-battle-sprite.physical-attack {
+  animation: physicalAttackCpu 0.8s ease-in-out;
+}
+
+
+/* Special attack animation */
+@keyframes specialAttack {
+  0% { transform: scale(1); filter: brightness(1); }
+  25% { transform: scale(1.05); filter: brightness(1.3); }
+  50% { transform: scale(1.1); filter: brightness(1.5); }
+  75% { transform: scale(1.05); filter: brightness(1.3); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+@keyframes energyBall {
+  0% { 
+    opacity: 0;
+    transform: translate(0, 0) scale(0.5);
+  }
+  20% { 
+    opacity: 1;
+    transform: translate(0, 0) scale(2);
+  }
+  80% { 
+    opacity: 1;
+    transform: translate(var(--target-x), var(--target-y)) scale(2);
+  }
+  100% { 
+    opacity: 0;
+    transform: translate(var(--target-x), var(--target-y)) scale(0.5);
+  }
+}
+
+.pokemon-battle-sprite.special-attack {
+  animation: specialAttack 1s ease-in-out;
+}
+
+.energy-ball {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background: radial-gradient(circle, #ffffff, #7a7a7a);
+  border-radius: 50%;
+  box-shadow: 0 0 20px #a5a5a5;
+  z-index: 20;
+  animation: energyBall 1s ease-out forwards;
+}
+
+
+/* Status attack animation */
+@keyframes statusGlow {
+  0% { 
+    filter: brightness(1) drop-shadow(4px 4px 12px rgba(0,0,0,0.6));
+  }
+  25% { 
+    filter: brightness(1.5) drop-shadow(0 0 20px rgba(255,255,255,0.8));
+  }
+  50% { 
+    filter: brightness(2) drop-shadow(0 0 30px rgba(255,255,255,1));
+  }
+  75% { 
+    filter: brightness(1.5) drop-shadow(0 0 20px rgba(255,255,255,0.8));
+  }
+  100% { 
+    filter: brightness(1) drop-shadow(4px 4px 12px rgba(0,0,0,0.6));
+  }
+}
+
+.pokemon-battle-sprite.status-attack {
+  animation: statusGlow 0.6s ease-in-out;
 }
