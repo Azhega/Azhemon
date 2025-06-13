@@ -92,6 +92,7 @@ export class Pokemon {
   terrain: /*Terrain |*/ any = null; // Terrain, to implement later
   canAct: boolean = true;
   hasBeenDamaged: boolean = false;
+  slot: number;
   
   constructor(data: any) {
     this.key = data.key;
@@ -110,6 +111,7 @@ export class Pokemon {
     this.nature = data.nature;
     this.natureKey = data.natureKey;
     this.status = null;
+    this.slot = data.slot;
     
     // Initialize stat modifiers to 0
     this.statModifiers = {

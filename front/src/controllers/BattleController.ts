@@ -105,7 +105,7 @@ export class BattleController {
     // Battle events
     EventBus.on('battle:select-move', (data) => this.selectMove(data.moveIndex));
     EventBus.on('battle:switch-pokemon', (data) => this.switchPokemon(data.pokemonIndex));
-    EventBus.on('battle:back-to-menu', () => this.exitBattle());
+    EventBus.on('battle:exit-battle', () => this.exitBattle());
     EventBus.on('battle:lead-selected', (data) => this.setLeadPokemon(data.pokemonIndex));
   }
 
@@ -308,51 +308,47 @@ export class BattleController {
 
     // Reset Current Team
     const resetTeam = currentBattleTeam.map((pokemon: Pokemon | null) => {
-        if (pokemon) {
-            // Create a new instance of the Pokemon class
-            const resetPokemon = new Pokemon({
-                ...pokemon,
-                currentHp: pokemon.maxHp,
-                moves: pokemon.moves.map((move: PokemonMove | null) => ({
-                  ...move,
-                  currentPP: move?.pp
-                })),
-                isAlive: true,
-                status: null,
-                terrain: null,
-                statModifiers: {
-                    hp: 0,
-                    attack: 0,
-                    defense: 0,
-                    specialAttack: 0,
-                    specialDefense: 0,
-                    speed: 0,
-                    accuracy: 0,
-                    evasion: 0,
-                },
-            });
+      if (pokemon) {
+        // Create a new instance of the Pokemon class
+        const resetPokemon = new Pokemon({
+          ...pokemon,
+          currentHp: pokemon.maxHp,
+          moves: pokemon.moves.map((move: PokemonMove | null) => ({
+            ...move,
+            currentPP: move?.pp
+          })),
+          isAlive: true,
+          status: null,
+          terrain: null,
+          statModifiers: {
+            hp: 0,
+            attack: 0,
+            defense: 0,
+            specialAttack: 0,
+            specialDefense: 0,
+            speed: 0,
+            accuracy: 0,
+            evasion: 0,
+          },
+        });
 
-            // Recalculate stats
-            resetPokemon.currentStats = resetPokemon.calculateStats();
+        // Recalculate stats
+        resetPokemon.currentStats = resetPokemon.calculateStats();
 
-            return resetPokemon;
-        }
-        return null;
+        return resetPokemon;
+      }
+      return null;
     });
 
     console.log('Reset Team : ', resetTeam);
 
     // Update the state with the reset team
     Store.setState({
-        currentBattleTeam: resetTeam,
-        battle: null,
-        game: {
-          screen: 'menu',
-          isLoading: false
-        },
+      currentBattleTeam: resetTeam,
+      battle: null,
     });
 
-    EventBus.emit('screen:changed', 'menu');
+    EventBus.emit('battle:back-to-menu');
   }
 
   private generateCpuTeam(size: number): Pokemon[] {
@@ -374,7 +370,8 @@ export class BattleController {
           nature: natures[natureKey as keyof typeof natures],
           moves: this.generateCpuMoves(cpuPokemonKey),
           ability: abilities[abilityKey as keyof typeof abilities],
-          item: items[itemKey as keyof typeof items]
+          item: items[itemKey as keyof typeof items],
+          slot: i
         });
       cpuPokemon.key = cpuPokemonKey;
       cpuPokemon.abilityKey = abilityKey;

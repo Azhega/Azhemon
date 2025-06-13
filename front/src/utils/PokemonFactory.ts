@@ -3,7 +3,9 @@ import { Pokemon, PokemonAbility, PokemonMove, PokemonItem, PokemonNature } from
 
 export function createBattlePokemon(
   speciesName: keyof typeof Pokedex,
-  options: { nature: PokemonNature; moves: PokemonMove[]; ability: PokemonAbility; item: PokemonItem | null }
+  options: { nature: PokemonNature; moves: PokemonMove[]; 
+      ability: PokemonAbility; item: PokemonItem | null; slot: number
+    }
 ): Pokemon {
   const data = Pokedex[speciesName];
   if (!data) throw new Error(`Species ${speciesName} not found in Pokedex`);
@@ -13,6 +15,7 @@ export function createBattlePokemon(
     nature: options.nature,
     moves: options.moves,
     ability: options.ability,
-    item: options.item || null
+    item: options.item || null,
+    slot: options.slot
   });
 }

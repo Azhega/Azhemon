@@ -206,12 +206,14 @@ export class TurnManager {
           - HOOK : ON DAMAGE MODIFIER ===> WHEN CALCULATING DAMAGE
           ============================================================================
           */
+          let battleState = Store.getState().battle;
+
           const move = action.data.move;
           const moveResult = this.battleEngine.executeMove(move, actor, target);
           console.log('Turn Manager : Move result:', moveResult);
 
           // UI Refresh to display moveResult.message
-          let battleState = Store.getState().battle;
+          battleState = Store.getState().battle;
           Store.setState({
             battle: {
               ...battleState,
@@ -224,6 +226,33 @@ export class TurnManager {
 
           // Delay for player to read the message
           await new Promise(resolve => setTimeout(resolve, 1000));
+
+          // Determine move type and play animation
+          const moveCategory = move.category;
+          const attackerSide = actor === battleState.activePokemon.player ? 'player' : 'cpu';
+
+          console.log('TurnManager: Emitting move animation event:', { moveCategory, attackerSide });
+
+          // Create a Promise that resolves when animation completes
+          const animationPromise = new Promise<void>((resolve) => {
+            const onAnimationComplete = () => {
+              EventBus.off('battle:animation-complete', onAnimationComplete);
+              resolve();
+            };
+            EventBus.on('battle:animation-complete', onAnimationComplete);
+            
+            // Emit the animation event
+            EventBus.emit('battle:play-move-animation', {
+              moveCategory: moveCategory,
+              attackerSide: attackerSide,
+              moveType: move.type,
+            });
+          });
+
+          // Wait for animation to complete
+          await animationPromise;
+          
+          console.log('TurnManager: Animation completed, executing move');
 
           if (battleState.context.pendingDamage.damage > 0) {
             // Apply pending damage

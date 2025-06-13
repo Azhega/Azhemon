@@ -2,6 +2,7 @@ import EventBus from '../utils/EventBus';
 import Store from '../utils/Store';
 import { Pokemon, PokemonMove } from '../models/PokemonModel';
 import { BattleState } from '../models/BattleModel';
+import { AudioManager } from '../controllers/AudioManager';
 
 export class BattleView {
   private isInitialized: boolean = false;
@@ -12,9 +13,11 @@ export class BattleView {
   private actionMenu: HTMLElement | null = null;
   private moveMenu: HTMLElement | null = null;
   private teamMenu: HTMLElement | null = null;
+  private audioManager: AudioManager;
   private unsubscribe: () => void = () => {};
   
   constructor() {
+    this.audioManager = AudioManager.getInstance();
     this.registerEventListeners();
   }
   
@@ -29,14 +32,19 @@ export class BattleView {
     this.createBattleLog();
     
     this.createActionMenu();
+
+    this.createSoundToggle();
     
     this.render();
+
+    this.audioManager.playBattleMusic();
   }
 
   destroy(): void {
     // Remove event listeners
     EventBus.off('battle:show-pokemon-selection');
     EventBus.off('battle:hide-pokemon-selection');
+    EventBus.off('battle:play-move-animation');
 
     // Unsubscribe from the store
     if (this.unsubscribe) {
@@ -58,11 +66,22 @@ export class BattleView {
     this.moveMenu = null;
     this.teamMenu = null;
     this.isInitialized = false;
+
+    this.audioManager.stopCurrentMusic();
   }
   
   private registerEventListeners(): void {
     EventBus.on('battle:show-pokemon-selection', (data?: any) => this.showTeamSelection(true, data?.leadSelection));
     EventBus.on('battle:hide-pokemon-selection', () => this.hideTeamSelection());
+
+    EventBus.on('battle:play-move-animation', async (data: { 
+      moveCategory: 'Physique' | 'Spécial' | 'Statut',
+      attackerSide: 'player' | 'cpu',
+      moveType: string
+    }) => {
+      console.log('BattleView: Received animation event:', data);
+      await this.playMoveAnimation(data.moveCategory, data.attackerSide, data.moveType);
+    });
 
     // Store changes
     const unsubscribe = Store.subscribe(() => {
@@ -151,6 +170,39 @@ export class BattleView {
     this.battleContainer.appendChild(this.teamMenu);
   }
   
+  private createSoundToggle(): void {
+    if (!this.battleContainer) {
+      console.error('Battle container not found');
+      return;
+    }
+
+    const soundToggle = document.createElement('div');
+    soundToggle.className = 'sound-toggle';
+    
+    const soundIcon = document.createElement('div');
+    soundIcon.className = 'sound-icon';
+    soundIcon.textContent = '🔊';  // Default to sound on
+    
+    soundToggle.appendChild(soundIcon);
+    
+    soundToggle.addEventListener('click', () => {
+      // Toggle mute state
+      const isMuted = this.audioManager.toggleMute();
+
+      soundIcon.textContent = isMuted ? '🔇' : '🔊';
+      
+      // Add animation class
+      soundToggle.classList.add('clicked');
+      
+      // Remove animation class after animation completes
+      setTimeout(() => {
+        soundToggle.classList.remove('clicked');
+      }, 300);
+    });
+    
+    this.battleContainer.appendChild(soundToggle);
+  }
+
   private render(): void {
     if (!this.isInitialized) {
       console.error('Battle view not initialized');
@@ -174,11 +226,10 @@ export class BattleView {
       return;
     }
 
-    // Clear existing content
-    this.playerField.innerHTML = '';
-    this.cpuField.innerHTML = '';
-
     if (!battleState.leadSelected) {
+      // Clear existing content
+      this.playerField.innerHTML = '';
+      this.cpuField.innerHTML = '';
       return;
     }
     
@@ -186,33 +237,82 @@ export class BattleView {
     const playerPokemon = battleState.activePokemon.player;
     const cpuPokemon = battleState.activePokemon.cpu;
     
+    // Check if Pokemon changed before clearing
+    const currentPlayerPokemonSlot = this.playerField.dataset.pokemonSlot;
+    const currentCpuPokemonSlot = this.cpuField.dataset.pokemonSlot;
+
+    if (currentPlayerPokemonSlot !== String(playerPokemon?.slot)) {
+      this.playerField.innerHTML = '';
+      this.playerField.dataset.pokemonSlot = String(playerPokemon?.slot);
+    }
+
+    if (currentCpuPokemonSlot !== String(cpuPokemon?.slot)) {
+      this.cpuField.innerHTML = '';
+      this.cpuField.dataset.pokemonSlot = String(cpuPokemon.slot);
+    }
+    
     this.renderPokemonSprite(this.playerField, playerPokemon!, 'player');
     this.renderPokemonSprite(this.cpuField, cpuPokemon, 'cpu');
   }
 
   private renderPokemonSprite(container: HTMLElement, pokemon: Pokemon, side: 'player' | 'cpu'): void {
     console.log(`BattleView : Rendering ${side} Pokemon:`, pokemon);
-    // Create sprite container
-    const spriteContainer = document.createElement('div');
-    spriteContainer.className = 'pokemon-battle-sprite';
+    // Check if elements already exist
+    let spriteContainer = container.querySelector('.pokemon-battle-sprite') as HTMLElement;
+    let dataContainer = container.querySelector('.pokemon-data') as HTMLElement;
     
+    // Create sprite container only if it doesn't exist
+    if (!spriteContainer) {
+      spriteContainer = document.createElement('div');
+      spriteContainer.className = 'pokemon-battle-sprite';
+      container.appendChild(spriteContainer);
+    }
+
     // Set sprite image based on pokemon name and side
     const spriteUrl = side === 'player' 
-      ? `/src/public/images/sprites/${pokemon.name.toLowerCase()}/${pokemon.name.toLowerCase()}_back.png`
-      : `/src/public/images/sprites/${pokemon.name.toLowerCase()}/${pokemon.name.toLowerCase()}_face.png`;
-      
+      ? `/src/public/images/sprites/${pokemon.name.toLowerCase()}/${pokemon.name.toLowerCase()}_back.gif`
+      : `/src/public/images/sprites/${pokemon.name.toLowerCase()}/${pokemon.name.toLowerCase()}_face.gif`;    
     spriteContainer.style.backgroundImage = `url('${spriteUrl}')`;
-    container.appendChild(spriteContainer);
     
-    // Create data container
-    const dataContainer = document.createElement('div');
-    dataContainer.className = `pokemon-data ${side}-data`;
+    // Create data container only if it doesn't exist
+    if (!dataContainer) {
+      dataContainer = document.createElement('div');
+      dataContainer.className = `pokemon-data ${side}-data`;
+      container.appendChild(dataContainer);
+      
+      // Create static structure once
+      const nameLevel = document.createElement('div');
+      nameLevel.className = 'name-level';
+      dataContainer.appendChild(nameLevel);
+      
+      const hpText = document.createElement('div');
+      hpText.className = 'hp-text';
+      dataContainer.appendChild(hpText);
+      
+      const hpBar = document.createElement('div');
+      hpBar.className = 'hp-bar';
+      
+      const hpFill = document.createElement('div');
+      hpFill.className = 'hp-fill';
+      
+      hpBar.appendChild(hpFill);
+      dataContainer.appendChild(hpBar);
+    }
     
-    // Pokemon name and level
-    const nameLevel = document.createElement('div');
+    // Update existing elements
+    const nameLevel = dataContainer.querySelector('.name-level') as HTMLElement;
+    const hpText = dataContainer.querySelector('.hp-text') as HTMLElement;
+    const hpFill = dataContainer.querySelector('.hp-fill') as HTMLElement;
+    
+    // Update name and level
     nameLevel.innerHTML = `<strong>${pokemon.name}</strong> Nv. ${pokemon.level}`;
     
-    // Status condition
+    // Update status condition
+    const existingStatus = nameLevel.querySelector('.status-icon');
+    if (existingStatus) {
+      existingStatus.remove();
+    }
+    
     if (pokemon.status) {
       const statusIcon = document.createElement('span');
       statusIcon.className = `${pokemon.statusKey === 'paralysis' ? 'status-icon status-par' 
@@ -222,29 +322,26 @@ export class BattleView {
       nameLevel.appendChild(statusIcon);
     }
     
-    dataContainer.appendChild(nameLevel);
-    
-    // HP display
-    const hpText = document.createElement('div');
+    // Update HP text
     hpText.textContent = `PV: ${pokemon.currentHp}/${pokemon.maxHp}`;
-    dataContainer.appendChild(hpText);
     
-    // HP bar
-    const hpBar = document.createElement('div');
-    hpBar.className = 'hp-bar';
-    
+    // Update HP Bar width
     const hpPercentage = (pokemon.currentHp / pokemon.maxHp) * 100;
-    const hpColor = hpPercentage > 50 ? '#38cd38' : hpPercentage > 20 ? '#dcdc3b' : '#d63939';
     
-    const hpFill = document.createElement('div');
-    hpFill.className = 'hp-fill';
+    // Remove existing HP level classes
+    hpFill.classList.remove('hp-high', 'hp-medium', 'hp-low');
+    
+    // Add appropriate HP level class
+    if (hpPercentage > 50) {
+      hpFill.classList.add('hp-high');
+    } else if (hpPercentage > 20) {
+      hpFill.classList.add('hp-medium');
+    } else {
+      hpFill.classList.add('hp-low');
+    }
+    
+    // Animated HP Bar
     hpFill.style.width = `${hpPercentage}%`;
-    hpFill.style.backgroundColor = hpColor;
-    
-    hpBar.appendChild(hpFill);
-    dataContainer.appendChild(hpBar);
-    
-    container.appendChild(dataContainer);
   }
   
   private renderBattleLog(battleState: BattleState): void {
@@ -524,12 +621,15 @@ export class BattleView {
     returnButton.textContent = 'Retour au menu';
     returnButton.onclick = () => {
       this.unsubscribe();
-      EventBus.emit('battle:back-to-menu');
+      EventBus.emit('battle:exit-battle'); // BattleController.exitBattle();
+      this.audioManager.stopCurrentMusic();
+      this.audioManager.playMenuMusic();
     }
     resultContainer.appendChild(returnButton);
     
     if (this.battleContainer) {
       this.battleContainer.appendChild(resultContainer);
+      this.audioManager.playVictoryMusic();
     }
   }
 
@@ -556,5 +656,145 @@ export class BattleView {
     };
     
     return typeColors[type] || '#888888';
+  }
+
+  public async playMoveAnimation(moveCategory: 'Physique' | 'Spécial' | 'Statut', 
+    attackerSide: 'player' | 'cpu', moveType: string): Promise<void> {
+    console.log('BattleView: Playing animation:', { moveCategory, attackerSide, moveType });
+
+    return new Promise((resolve) => {
+      const container = attackerSide === 'player' ? this.playerField : this.cpuField;
+      const sprite = container?.querySelector('.pokemon-battle-sprite') as HTMLElement;
+      
+      if (!sprite) {
+        console.warn('BattleView: No sprite found for', attackerSide);
+        EventBus.emit('battle:animation-complete'); // For TurnManager to continue
+        resolve();
+        return;
+      }
+
+      const onComplete = () => {
+        console.log('BattleView: Animation completed, emitting event');
+        EventBus.emit('battle:animation-complete'); // For TurnManager to continue
+        resolve();
+      };
+
+      console.log('BattleView: Found sprite, playing animation type:', moveCategory);
+
+      switch (moveCategory) {
+        case 'Physique':
+          console.log('BattleView: Playing physical attack');
+          this.playPhysicalAttack(sprite, onComplete);
+          break;
+        case 'Spécial':
+          console.log('BattleView: Playing special attack');
+          this.playSpecialAttack(sprite, attackerSide, moveType || 'normal', onComplete);
+          break;
+        case 'Statut':
+          console.log('BattleView: Playing status attack');
+          this.playStatusAttack(sprite, onComplete);
+          break;
+        default:
+          console.warn('BattleView: Unknown move type:', moveCategory);
+          onComplete();
+      }
+    });
+  }
+
+  // Adding and removing the class once will play the animation
+  private playPhysicalAttack(sprite: HTMLElement, callback: () => void): void {
+    console.log('BattleView: Adding physical-attack class to sprite');
+    sprite.classList.add('physical-attack');
+    
+    setTimeout(() => {
+      console.log('BattleView: Removing physical-attack class from sprite');
+      sprite.classList.remove('physical-attack');
+      callback();
+    }, 800);
+  }
+
+  // Adding and removing the class once will play the animation
+  private playSpecialAttack(sprite: HTMLElement, attackerSide: 'player' | 'cpu', moveType: string, callback: () => void): void {
+    console.log('BattleView: Starting special attack animation for type:', moveType);
+  
+    // Start attacker animation
+    sprite.classList.add('special-attack');
+    
+    // Create energy ball with type color
+    const energyBall = document.createElement('div');
+    const typeColor = this.getTypeColor(moveType);
+    
+    // Add type class and set custom properties for the gradient
+    energyBall.className = `energy-ball`;
+    energyBall.style.setProperty('--type-color-primary', typeColor);
+    energyBall.style.setProperty('--type-color-secondary', this.adjustColor(typeColor, 30)); // Lighter version
+    
+    // Apply the custom background with type colors
+    energyBall.style.background = `radial-gradient(circle, var(--type-color-secondary), var(--type-color-primary))`;
+    energyBall.style.boxShadow = `0 0 20px var(--type-color-primary)`;
+    
+    console.log('BattleView: Created energy ball with color:', typeColor);
+    
+    // Position energy ball at attacker
+    const spriteRect = sprite.getBoundingClientRect();
+    const containerRect = sprite.closest('.battle-field')?.getBoundingClientRect();
+    
+    if (containerRect) {
+      energyBall.style.left = `${spriteRect.left - containerRect.left + spriteRect.width/2}px`;
+      energyBall.style.top = `${spriteRect.top - containerRect.top + spriteRect.height/2}px`;
+      
+      // Calculate target position
+      const targetSide = attackerSide === 'player' ? 'cpu' : 'player';
+      const targetContainer = targetSide === 'player' ? this.playerField : this.cpuField;
+      const targetSprite = targetContainer?.querySelector('.pokemon-battle-sprite') as HTMLElement;
+      
+      if (targetSprite) {
+        const targetRect = targetSprite.getBoundingClientRect();
+        const targetX = targetRect.left - containerRect.left + targetRect.width/2 - (spriteRect.left - containerRect.left + spriteRect.width/2);
+        const targetY = targetRect.top - containerRect.top + targetRect.height/2 - (spriteRect.top - containerRect.top + spriteRect.height/2);
+        
+        energyBall.style.setProperty('--target-x', `${targetX}px`);
+        energyBall.style.setProperty('--target-y', `${targetY}px`);
+      }
+      
+      sprite.closest('.battle-field')?.appendChild(energyBall);
+    }
+    
+    setTimeout(() => {
+      console.log('BattleView: Cleaning up special attack animation');
+      sprite.classList.remove('special-attack');
+      energyBall.remove();
+      callback();
+    }, 1000);
+  }
+
+  private adjustColor(color: string, amount: number): string {
+    // Remove # if present
+    color = color.replace('#', '');
+    
+    // Parse the color
+    const r = parseInt(color.substring(0, 2), 16);
+    const g = parseInt(color.substring(2, 4), 16);
+    const b = parseInt(color.substring(4, 6), 16);
+    
+    // Adjust each channel
+    const newR = Math.min(255, r + amount);
+    const newG = Math.min(255, g + amount);
+    const newB = Math.min(255, b + amount);
+    
+    // Convert back to hex
+    return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
+  }
+
+  // Adding and removing the class once will play the animation
+  private playStatusAttack(sprite: HTMLElement, callback: () => void): void {
+    console.log('BattleView: Adding status-attack class to sprite');
+    sprite.classList.add('status-attack');
+    
+    setTimeout(() => {
+      console.log('BattleView: Removing status-attack class from sprite');
+      sprite.classList.remove('status-attack');
+      callback();
+    }, 600);
   }
 }
