@@ -106,9 +106,9 @@ export class GameController {
     }
 
     if (screen === 'menu' || screen === 'teambuilder') {
-      if (previousScreen === 'login') {
+      if (previousScreen === 'login') { // Battle handles music directly
         this.audioManager.playMenuMusic();
-        EventBus.emit('menu:toggle-music-mute');
+        EventBus.emit('menu:toggle-music-mute'); // Handles music toggle icon
       }
     }
 

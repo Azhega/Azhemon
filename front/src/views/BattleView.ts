@@ -34,6 +34,8 @@ export class BattleView {
     this.createActionMenu();
 
     this.createSoundToggle();
+
+    this.createExitButton();
     
     this.render();
 
@@ -201,6 +203,26 @@ export class BattleView {
     });
     
     this.battleContainer.appendChild(soundToggle);
+  }
+
+  private createExitButton(): void {
+    if (!this.battleContainer) {
+      console.error('Battle container not found');
+      return;
+    }
+
+    const exitButton = document.createElement('button');
+    exitButton.className = 'exit-button';
+    exitButton.textContent = 'Quitter';
+
+    exitButton.addEventListener('click', () => {
+      this.unsubscribe();
+      EventBus.emit('battle:exit-battle'); // BattleController.exitBattle();
+      this.audioManager.stopCurrentMusic();
+      this.audioManager.playMenuMusic();
+    });
+
+    this.battleContainer.appendChild(exitButton);
   }
 
   private render(): void {

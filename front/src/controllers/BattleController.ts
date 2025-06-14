@@ -89,7 +89,7 @@ export class BattleController {
     // Remove event listeners
     EventBus.off('battle:select-move');
     EventBus.off('battle:switch-pokemon');
-    EventBus.off('battle:back-to-menu');
+    EventBus.off('battle:exit-battle');
     EventBus.off('battle:lead-selected');
 
     // Clean up views
@@ -302,7 +302,7 @@ export class BattleController {
   private exitBattle(): void {
     const state = Store.getState();
     console.log('Exiting battle...', state);
-    console.log('Current Team : ', state.currentBattleTeam);
+    console.log('Current Battle Team : ', state.currentBattleTeam);
 
     const currentBattleTeam = state.currentBattleTeam;
 
@@ -348,7 +348,7 @@ export class BattleController {
       battle: null,
     });
 
-    EventBus.emit('battle:back-to-menu');
+    EventBus.emit('battle:back-to-menu'); // GameController.switchScreen('menu');
   }
 
   private generateCpuTeam(size: number): Pokemon[] {
