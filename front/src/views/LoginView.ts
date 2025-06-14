@@ -20,7 +20,7 @@ export class LoginView {
       <div class="login-container">
         <div class="login-card">
           <div class="login-header">
-            <h1>Azhemon</h1>
+            <h1 class="login-game-logo">AZHEMON</h1>
             <p>Connectez-vous pour jouer</p>
           </div>
           
