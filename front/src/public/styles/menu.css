@@ -119,17 +119,8 @@
   text-align: center;
 }
 
-.preview-types {
-  display: flex;
-  gap: 0.25rem;
-}
-
-.preview-types .type {
-  font-size: 0.7rem;
-  padding: 0.1rem 0.4rem;
-  border-radius: 4px;
-  color: white;
-  font-weight: 500;
+.type-icon {
+  height: 20px;
 }
 
 /* Menu Buttons */

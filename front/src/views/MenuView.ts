@@ -92,7 +92,7 @@ export class MenuView {
         <!-- Action Buttons -->
         <div class="menu-buttons">
           <button id="teambuilder-button" class="menu-button">Team Builder</button>
-          <button id="battle-button" class="menu-button" disabled>Battle</button>
+          <button id="battle-button" class="menu-button" disabled>Lancer le Combat</button>
         </div>
       </div>
     `;
@@ -210,10 +210,10 @@ export class MenuView {
                alt="${pokemon.name}" class="preview-sprite">
           <div class="preview-info">
             <span class="preview-name">${pokemon.name}</span>
-            <div class="preview-types">
-              <span class="type ${pokemon.types[0].toLowerCase()}">${pokemon.types[0]}</span>
-              ${pokemon.types[1] ? `<span class="type ${pokemon.types[1].toLowerCase()}">${pokemon.types[1]}</span>` : ''}
-            </div>
+            <div class="pokemon-types">
+                <img src="src/public/images/types/${pokemon.types[0].toLowerCase()}.png" alt="${pokemon.types[0]}" class="type-icon">
+                ${pokemon.types[1] ? `<img src="src/public/images/types/${pokemon.types[1]?.toLowerCase()}.png" alt="${pokemon.types[1]}" class="type-icon">` : ''}
+              </div>
           </div>
         </div>
       `;
@@ -241,7 +241,7 @@ export class MenuView {
         battleButton.textContent = 'Lancer le Combat';
         battleButton.classList.add('ready-to-battle');
       } else {
-        battleButton.textContent = 'Battle';
+        battleButton.textContent = 'Lancer le Combat';
         battleButton.classList.remove('ready-to-battle');
       }
     }

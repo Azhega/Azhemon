@@ -122,15 +122,6 @@ body {
   color: var(--primary-color);
 }
 
-.back-button {
-  padding: 8px 16px;
-  background-color: var(--secondary-color);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
 .team-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
