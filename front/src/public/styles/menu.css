@@ -31,9 +31,10 @@
   backdrop-filter: blur(2px);
 }
 
-.logo {
-  margin-bottom: 30px;
-  max-width: 300px;
+.menu-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px;
 }
 
 .menu-button {
@@ -71,6 +72,10 @@
   font-weight: 500;
   font-size: 15px;
   transition: background-color 0.2s ease;
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 100;
 }
 
 .logout-button:hover {
@@ -160,7 +165,7 @@
 .preview-slot.filled-slot {
   background: linear-gradient(135deg, #ffc1ecb0 0%, #8cdbeac7 100%);
   border: 2px solid #dee2e6;
-  cursor: pointer;
+  cursor: default;
 }
 
 .preview-slot.filled-slot:hover {

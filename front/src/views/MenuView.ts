@@ -60,12 +60,14 @@ export class MenuView {
           ${this.audioManager.isMusicMuted() ? '🔇' : '🔊'}
         </div>
       </div>
+      
+      <button id="logout-button" class="logout-button">Déconnexion</button>
+
       <div class="menu-container">
-        <!-- User info and logout button -->
+        <!-- User info -->
         <div class="menu-header">
           <div class="user-info">
             <span>Bienvenue, ${Store.getState().user.username || 'Joueur'}</span>
-            <button id="logout-button" class="logout-button">Déconnexion</button>
           </div>
         </div>
 

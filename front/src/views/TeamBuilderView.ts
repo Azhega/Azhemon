@@ -64,7 +64,7 @@ export class TeamBuilderView {
             <!-- Team controls (dropdown + new team button) -->
             <div class="team-controls">
               <div class="team-selector">
-                <label class="teams-label">Mes équipes</label>
+                <label class="teams-label" for="teams-dropdown">Mes équipes</label>
                 <select id="teams-dropdown" class="teams-dropdown">
                   <!-- Saved teams will be injected here -->
                 </select>

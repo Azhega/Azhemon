@@ -32,6 +32,16 @@
   --type-fairy: #D685AD;
 }
 
+/* TeamBuilder Screen */
+#teambuilder-screen {
+  padding: 20px;
+  background-image: url('/src/public/images/backgrounds/client-bg-horizon.jpg');
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: 100%;
+  overflow-y: auto;
+}
+
 .teambuilder-layout {
   display: flex;
   height: 100%;
@@ -42,7 +52,7 @@
 .team-panel {
   width: 35%;
   min-width: 300px;
-  background-color: var(--panel-bg);
+  background-color: rgba(0, 0, 0, 0.5);
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
@@ -53,8 +63,9 @@
 /* TeamBuilder Header */
 
 .teambuilder-header-section {
-  background-color: var(--panel-bg);
+  background-color: rgb(135 135 135 / 30%);
   border-radius: 10px;
+  border: 1px solid var(--border-color);
   padding: 10px;
   margin-bottom: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -72,13 +83,13 @@
 
 .teambuilder-title {
   font-size: 24px;
-  color: var(--text-color);
+  color: white;
   margin: 0;
   font-weight: 700;
 }
 
 .back-button {
-  background-color: var(--secondary-color);
+  background: linear-gradient(135deg, #ea7fb4 0%, #8d407a 100%);
   color: white;
   border: none;
   border-radius: 6px;
@@ -97,7 +108,7 @@
 }
 
 .back-button:hover {
-  background-color: var(--secondary-hover);
+  background: linear-gradient(135deg, #f874b6 0%, #b04395 100%);
 }
 
 /* Team Controls Section */
@@ -117,21 +128,21 @@
 .teams-label {
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-color);
+  color: white;
   margin: 0;
 }
 
 .teams-dropdown {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid var(--border-color);
+  border: 2px solid #828282;
   border-radius: 6px;
-  font-size: 15px;
-  color: var(--text-color);
-  background-color: white;
-  transition: all 0.2s ease;
-  cursor: pointer;
+  font-size: 14px;
   margin-bottom: 10px;
+  background: rgba(220, 220, 220, 0.75);
+  color: #000000;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
 }
 
 .teams-dropdown:focus {
@@ -141,8 +152,8 @@
 }
 
 .new-team-button {
-  background-color: var(--primary-color);
-  color: white;
+  background: linear-gradient(135deg, #062a79 0%, #355ca4 100%);
+  color: #f0e3ed;
   border: none;
   border-radius: 6px;
   padding: 10px 16px;
@@ -150,7 +161,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  height: 47%;
+  height: 49%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -159,7 +170,7 @@
 }
 
 .new-team-button:hover {
-  background-color: var(--button-hover);
+  background: linear-gradient(135deg, #023093 0%, #3664b9 100%);
 }
 
 .team-name-controls {
@@ -170,17 +181,18 @@
   display: block;
   font-size: 14px;
   font-weight: 600;
-  color: var(--text-color);
+  color: white;
   margin-bottom: 8px;
 }
 
 .team-name-input {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid var(--border-color);
+  border: 2px solid #828282;
   border-radius: 6px;
   font-size: 14px;
   transition: all 0.2s ease;
+  background: rgba(220, 220, 220, 0.751);
 }
 
 .team-name-input:focus {
@@ -221,7 +233,7 @@
 .team-pokemon-list h2 {
   font-size: 18px;
   margin-bottom: 10px;
-  color: var(--text-color);
+  color: white;
 }
 
 #team-slots {
@@ -232,7 +244,7 @@
 }
 
 .pokemon-slot {
-  background-color: var(--panel-bg);
+  background-color: rgb(255 255 255 / 0.75);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 10px;
@@ -243,25 +255,33 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
+  transition: transform 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.pokemon-slot:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .pokemon-slot.empty {
-  background-color: var(--slot-empty-bg);
+  background-color: rgba(220, 220, 220, 0.5);
   border-style: dashed;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.pokemon-slot.empty::after {
+.pokemon-slot.empty::before {
   content: '+';
-  font-size: 24px;
-  color: #aaa;
+  font-size: 40px;
+  color: #ffffff;
 }
 
 .pokemon-slot.selected {
   border: 2px solid var(--primary-color);
-  background-color: var(--selected-bg);
+  background-color: rgba(255, 255, 255, 0.75);
 }
 
 .slot-number {
@@ -298,7 +318,7 @@
 
 .pokemon-name {
   font-weight: 600;
-  color: var(--text-color);
+  color: white;
   grid-column: 2;
 }
 
@@ -343,7 +363,7 @@
 
 .save-team-button {
   padding: 12px 24px;
-  background-color: var(--primary-color);
+  background: linear-gradient(135deg, #062a79 0%, #355ca4 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -355,13 +375,12 @@
 }
 
 .save-team-button:hover {
-  background-color: var(--button-hover);
-  transition: all 0.2s ease;
+  background: linear-gradient(135deg, #023093 0%, #3664b9 100%);
 }
 
 .delete-team-button {
   padding: 12px 24px;
-  background-color: var(--secondary-color);
+  background: linear-gradient(135deg, #ea7fb4 0%, #8d407a 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -374,9 +393,21 @@
 }
 
 .delete-team-button:hover {
-  background-color: var(--secondary-hover);
+  background: linear-gradient(135deg, #f874b6 0%, #b04395 100%);
 }
 
+.save-team-button:disabled,
+.delete-team-button:disabled {
+  opacity: 0.8;
+  cursor: not-allowed;
+  background: #ccc;
+  color: #5b5b5b;
+}
+
+.save-team-button:disabled:hover,
+.delete-team-button:disabled:hover {
+  background: #ccc; /* Prevent hover effects */
+}
 
 /* Right panel - Pokemon details & selector */
 .details-panel {
@@ -389,7 +420,7 @@
 .pokemon-details {
   flex: 0 0 auto;
   padding: 16px;
-  background-color: var(--panel-bg);
+  background-color: rgba(0, 0, 0, 0.5);
   border-bottom: 1px solid var(--border-color);
   overflow-y: auto;
 }
@@ -399,13 +430,14 @@
   align-items: center;
   justify-content: center;
   height: 100px;
-  color: #888;
+  color: #ffffff;
+  font-size: 20px;
   text-align: center;
 }
 
 .editable {
   cursor: pointer;
-  color: var(--primary-color);
+  color: #00ffea;
   padding: 2px 4px;
   border-radius: 4px;
   transition: all 0.2s ease;
@@ -413,14 +445,14 @@
 }
 
 .editable:hover {
-  background-color: rgba(59, 76, 202, 0.1);
+  background-color: rgba(0, 0, 0, 0.5);
   text-decoration: none;
   transform: translateY(-1px);
 }
 
 .selector-panel {
   flex: 1;
-  background-color: var(--background-color);
+  background-color: rgba(0, 0, 0, 0.5);
   padding: 16px;
   overflow-y: auto;
   border-top: 1px solid var(--border-color);
@@ -431,7 +463,8 @@
   align-items: center;
   justify-content: center;
   height: 200px;
-  color: #888;
+  color: #ffffff;
+  font-size: 20px;
   text-align: center;
 }
 
@@ -446,25 +479,25 @@
 
 .selector-header h3 {
   font-size: 1.1rem;
-  color: var(--secondary-color);
+  color: white;
   margin: 0;
   font-weight: 600;
 }
 
 .search-input {
-  padding: 8px 12px;
-  border: 1px solid var(--border-color);
+  width: 25%;
+  padding: 10px 12px;
+  border: 2px solid #828282;
   border-radius: 6px;
   font-size: 14px;
-  width: 200px;
   transition: all 0.2s ease;
-  background-color: white;
+  background: rgba(220, 220, 220, 0.751);
 }
 
 .search-input:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(59, 76, 202, 0.2);
+  box-shadow: 0 0 0 3px rgba(59, 76, 202, 0.2);
 }
 
 .selector-list {
@@ -480,7 +513,7 @@
 .selector-item {
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  background-color: var(--panel-bg);
+  background-color: rgba(0, 0, 0, 0.5);
   cursor: pointer;
   overflow: hidden;
   transition: all 0.2s ease;
@@ -505,7 +538,7 @@
 .nature-element span,
 .item-element span {
   font-weight: 600;
-  color: var(--text-color);
+  color: rgb(255, 255, 255);
   font-size: 0.95rem;
   margin-bottom: 4px;
 }
@@ -514,7 +547,7 @@
 .nature-element small,
 .item-element small {
   font-size: 0.8rem;
-  color: #666;
+  color: #cacaca;
   line-height: 1.3;
 }
 
@@ -541,7 +574,7 @@
 
 .move-element .move-name {
   font-weight: 600;
-  color: var(--text-color);
+  color: white;
   grid-column: 1;
 }
 
@@ -553,7 +586,7 @@
 .move-element .move-category {
   grid-column: 3;
   font-size: 0.8rem;
-  color: #7c3aed;
+  color: #f19dff;
   font-weight: 600;
   text-align: center;
 }
@@ -586,7 +619,7 @@
   grid-column: 1 / -1;
   padding: 10px 15px;
   font-size: 0.75rem;
-  color: #666;
+  color: #cacaca;
   background-color: rgba(0, 0, 0, 0.02);
   border-top: 1px solid var(--border-color);
   line-height: 1.3;
@@ -601,7 +634,7 @@
   padding: 5px 15px;
   font-size: 0.7rem;
   font-weight: 600;
-  color: #666;
+  color: #ffffff;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border-bottom: 1px solid var(--border-color);
@@ -702,7 +735,7 @@
   padding: 5px 10px;
   font-size: 0.7rem;
   font-weight: 600;
-  color: #666;
+  color: #ffffff;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border-bottom: 1px solid var(--border-color);
@@ -754,8 +787,8 @@
 .pokemon-detail-card {
   padding: 16px;
   border-radius: 8px;
-  background-color: var(--panel-bg);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background-color: rgb(135 135 135 / 30%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border: 1px solid var(--border-color);
   height: 100%;
   display: flex;
@@ -790,7 +823,7 @@
 .pokemon-title h2 {
   margin: 0 0 6px 0;
   font-size: 1.2rem;
-  color: var(--text-color);
+  color: white;
   display: flex;
   justify-content: center;
 }
@@ -812,14 +845,15 @@
   flex-direction: column;
   gap: 4px;
   padding: 6px 10px;
-  background-color: var(--background-color);
+  background-color: rgba(0, 0, 0, 0.3);
   border-radius: 6px;
   border: 1px solid var(--border-color);
   transition: background-color 0.2s ease;
 }
 
 .attribute-row:hover {
-  background-color: var(--hover-bg);
+  background-color: rgba(0, 0, 0, 0.5);
+  border-color: var(--primary-color);
 }
 
 .attribute-row.selected {
@@ -829,7 +863,7 @@
 
 /* Selected attribute styling */
 .active-edit {
-  background-color: rgba(59, 130, 246, 0.1);
+  background-color: rgba(0, 0, 0, 0.5);
   border: 1px solid var(--border-color);
   border-radius: 6px;
   border-color: var(--primary-color);
@@ -840,19 +874,19 @@
 .attribute-label {
   font-size: 0.7rem;
   font-weight: 600;
-  color: #666;
+  color: #ffffff;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .attribute-value {
   font-weight: 500;
-  color: var(--text-color);
+  color: white;
   font-size: 0.85rem;
 }
 
 .remove-button {
-  background-color: #ef4444;
+  background: linear-gradient(135deg, #ea7fb4 0%, #8d407a 100%);
   color: white;
   border: none;
   padding: 6px 12px;
@@ -860,13 +894,11 @@
   cursor: pointer;
   font-weight: 500;
   font-size: 0.85rem;
-  transition: background-color 0.2s ease;
 }
 
 .remove-button:hover {
-  background-color: #dc2626;
+  background: linear-gradient(135deg, #f874b6 0%, #b04395 100%);
 }
-
 
 /* Bottom row: Stats + Moves in columns */
 .pokemon-details-row {
@@ -880,26 +912,26 @@
   justify-content: space-between;
   align-items: center;
   padding: 6px 10px;
-  background-color: var(--background-color);
+  background-color: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--border-color);
   border-radius: 4px;
   transition: background-color 0.2s ease;
 }
 
 .stat-row:hover {
-  background-color: var(--hover-bg);
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .stat-label {
   font-weight: 600;
   font-size: 0.9rem;
-  color: var(--text-color);
+  color: white;
 }
 
 .stat-value {
   font-weight: bold;
   font-size: 0.9rem;
-  color: var(--primary-color);
+  color: #00ffea;
   padding: 2px 6px;
   background-color: rgba(59, 76, 202, 0.1);
   border-radius: 3px;
@@ -914,7 +946,7 @@
 .pokemon-stats h3 {
   margin: 0 0 7px 0;
   font-size: 1rem;
-  color: var(--text-color);
+  color: white;
   font-weight: bold;
   padding: 4px 0px 4px 0px;
 }
@@ -968,7 +1000,7 @@
 
 .move-accuracy {
   color: #28a745;
-  background-color: rgba(40, 167, 69, 0.1);
+  background-color: rgba(40, 167, 69, 0.2);
 }
 
 .pokemon-moves {
@@ -983,7 +1015,7 @@
   gap: 25px;
   align-items: center;
   padding: 4px 10px 4px 10px;
-  background-color: var(--background-color);
+  background-color: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--border-color);
   border-radius: 4px;
   margin-bottom: 5px;
@@ -992,14 +1024,14 @@
 .moves-header-row h3 {
   margin: 0;
   font-size: 1rem;
-  color: var(--text-color);
+  color: white;
   font-weight: bold;
 }
 
 .move-col-header {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #666;
+  color: white;
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -1015,13 +1047,13 @@
 .move-slot {
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  background-color: var(--panel-bg);
+  background-color: rgba(0, 0, 0, 0.3);
   transition: all 0.2s ease;
   overflow: hidden;
 }
 
 .move-slot:hover {
-  background-color: var(--hover-bg);
+  background-color: rgba(0, 0, 0, 0.5);
   border-color: var(--primary-color);
 }
 
@@ -1070,21 +1102,19 @@
 .move-power,
 .move-accuracy,
 .move-pp {
-  font-size: 0.75rem;
-  font-weight: 500;
+  font-size: 14px;
   text-align: center;
-  color: var(--text-color);
 }
 
 .move-category {
-  color: #7c3aed;
+  color: #f19dff;
   font-weight: 600;
 }
 
 .move-power {
   color: #dc3545;
   font-weight: 600;
-  background-color: rgba(220, 53, 69, 0.1);
+  background-color: rgba(220, 53, 69, 0.2);
 }
 
 .move-accuracy {
@@ -1104,7 +1134,7 @@
 }
 
 .remove-move-btn {
-  background-color: #ef4444;
+  background: linear-gradient(135deg, #ea7fb4 0%, #8d407a 100%);
   color: white;
   border: none;
   border-radius: 50%;
@@ -1114,21 +1144,20 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 10px;
   font-weight: bold;
   line-height: 1;
   transition: all 0.2s ease;
 }
 
 .remove-move-btn:hover {
-  background-color: #dc2626;
+  background: linear-gradient(135deg, #f874b6 0%, #b04395 100%);
   transform: scale(1.1);
 }
 
 .move-description {
   grid-column: 1 / -1;
   font-size: 0.7rem;
-  color: #666;
+  color: #cacaca;
   font-style: italic;
   line-height: 1.2;
   padding: 4px 10px 4px 10px;
@@ -1144,38 +1173,16 @@
   display: none;
 }
 
-.save-team-button:disabled,
-.delete-team-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background-color: #ccc;
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-.save-team-button:disabled:hover,
-.delete-team-button:disabled:hover {
-  background-color: #ccc; /* Prevent hover effects */
+::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.3);
+  border-radius: 4px;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #00ddff, #210097);
+  border-radius: 4px;
+}
