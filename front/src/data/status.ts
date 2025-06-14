@@ -62,7 +62,7 @@ export const status = {
         context.pendingLogsAndEffects.push({
           log: `${context.attacker.name} est paralysé et ne peut pas agir !`,
         });
-      } else {
+      } else if (context.attacker.statusKey === 'paralysis' && random > 0.25){
         context.attacker.canAct = true;
         context.pendingLogsAndEffects.push({
           log: `${context.attacker.name} est paralysé mais peut agir !`

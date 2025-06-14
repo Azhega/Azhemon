@@ -51,28 +51,32 @@ export class TeamBuilderView {
   
   private render(): void {
     this.element.innerHTML = `
-      <div class="sound-toggle">
-        <div class="sound-icon">
-          ${this.audioManager.isMusicMuted() ? '🔇' : '🔊'}
-        </div>
-      </div>
       <div class="teambuilder-layout">
         <!-- Left panel - Team management -->
-        <div class="team-panel">
-          <div class="teambuilder-header">
-            <h1 class="teambuilder-title">Team Builder</h1>
-            <button id="back-to-menu" class="back-button">Retour au Menu</button>
-          </div>
-          
-          <!-- Teams Selector -->
-          <div class="team-list">
-            <h2>Mes équipes</h2>
-            <select id="teams-dropdown" class="teams-dropdown">
-              <!-- Saved teams will be injected here -->
-            </select>
-            <button id="new-team-btn" class="action-button">+ Nouvelle équipe</button>
-            <h3>Nom de l'équipe</h3>
-            <input type="text" id="team-name-input" placeholder="Entrez un nom d'équipe..." class="team-name-input">
+        <div class="team-panel">          
+          <div class="teambuilder-header-section">
+            <!-- Header with title and back button -->
+            <div class="teambuilder-header">
+              <h1 class="teambuilder-title">Team Builder</h1>
+              <button id="back-to-menu" class="back-button">Retour au Menu</button>
+            </div>
+            
+            <!-- Team controls (dropdown + new team button) -->
+            <div class="team-controls">
+              <div class="team-selector">
+                <label class="teams-label">Mes équipes</label>
+                <select id="teams-dropdown" class="teams-dropdown">
+                  <!-- Saved teams will be injected here -->
+                </select>
+              </div>
+              <button id="new-team-btn" class="new-team-button">+ Nouvelle équipe</button>
+            </div>
+            
+            <!-- Team name input -->
+            <div class="team-name-controls">
+              <label for="team-name-input" class="team-name-label">Nom de l'équipe</label>
+              <input type="text" id="team-name-input" placeholder="Entrez un nom d'équipe..." class="team-name-input">
+            </div>
           </div>
           
           <div class="team-pokemon-list">
@@ -132,8 +136,8 @@ export class TeamBuilderView {
             <div class="pokemon-info">
               <h3 class="pokemon-name">${pokemon.name}</h3>
               <div class="pokemon-types">
-                <span class="type ${pokemon.types[0].toLowerCase()}">${pokemon.types[0]}</span>
-                ${pokemon.types[1] ? `<span class="type ${pokemon.types[1]?.toLowerCase()}">${pokemon.types[1]}</span>` : ''}
+                <img src="src/public/images/types/${pokemon.types[0].toLowerCase()}.png" alt="${pokemon.types[0]}" class="type-icon">
+                ${pokemon.types[1] ? `<img src="src/public/images/types/${pokemon.types[1]?.toLowerCase()}.png" alt="${pokemon.types[1]}" class="type-icon">` : ''}
               </div>
             </div>
           </div>
@@ -171,21 +175,22 @@ export class TeamBuilderView {
             <div class="pokemon-title">
               <h2 class="pokemon-name editable" data-attribute="pokemon">${pokemon?.name}</h2>
               <div class="pokemon-types">
-                ${pokemon?.types.map(type => `<span class="type ${type.toLowerCase()}">${type}</span>`).join('')}
+                <img src="src/public/images/types/${pokemon?.types[0].toLowerCase()}.png" alt="${pokemon?.types[0]}" class="type-icon">
+                ${pokemon?.types[1] ? `<img src="src/public/images/types/${pokemon?.types[1]?.toLowerCase()}.png" alt="${pokemon?.types[1]}" class="type-icon">` : ''}
               </div>
             </div>
           </div>
           
           <div class="pokemon-attributes">
-            <div class="attribute-row">
+            <div class="attribute-row" data-type="item">
               <span class="attribute-label">Objet</span>
               <span class="attribute-value editable" data-attribute="item">${pokemon?.item?.name || 'Aucun'}</span>
             </div>
-            <div class="attribute-row">
+            <div class="attribute-row" data-type="ability">
               <span class="attribute-label">Talent</span>
               <span class="attribute-value editable" data-attribute="ability">${pokemon?.ability.name || 'Aucun'}</span>
             </div>
-            <div class="attribute-row">
+            <div class="attribute-row" data-type="nature">
               <span class="attribute-label">Nature</span>
               <span class="attribute-value editable" data-attribute="nature">${pokemon?.nature.name || 'Aucun'}</span>
             </div>
@@ -248,7 +253,9 @@ export class TeamBuilderView {
                     <div class="move-content">
                       <div class="move-data-row">
                         <span class="editable move-name" data-attribute="move" data-move-index="${i}">${move?.name || 'Attaque ' + (i + 1)}</span>
-                        <span class="move-type type ${move?.type?.toLowerCase() || ''}">${move?.type || '-'}</span>
+                        <div class="move-type-icon">
+                          <img src="src/public/images/types/${move?.type?.toLowerCase() || null}.png" alt="${move?.type || 'Normal'}" class="move-type">
+                        </div>
                         <span class="move-category">${move?.category || '-'}</span>
                         <span class="move-power">${move?.power || '-'}</span>
                         <span class="move-accuracy">${move?.accuracy ? move.accuracy + '%' : '-'}</span>
@@ -336,18 +343,40 @@ export class TeamBuilderView {
         <h3>Choisir un Pokémon</h3>
         <input type="text" id="pokemon-search" placeholder="Rechercher..." class="search-input">
       </div>
+      
+      <!-- Add column headers for Pokemon stats -->
+      <div class="pokemon-column-headers">
+        <span></span>
+        <span>Nom</span>
+        <span>Types</span>
+        <span>PV</span>
+        <span>Atk</span>
+        <span>Déf</span>
+        <span>Spa</span>
+        <span>Spd</span>
+        <span>Vit</span>
+      </div>
+      
       <div class="selector-list pokemon-list">
         ${pokemonSpecies.map(([key, pokemon]: [string, any]) => `
           <div class="selector-item pokemon-element" 
             data-pokemon-key="${key}" 
             data-pokemon-id="${pokemon.id}" 
             data-pokemon-name="${pokemon.name}">
-            <img src="src/public/images/sprites/${pokemon.name.toLowerCase()}/${pokemon.name.toLowerCase()}_face.png" 
+            <div class="pokemon-data-row">
+              <img src="src/public/images/sprites/${pokemon.name.toLowerCase()}/${pokemon.name.toLowerCase()}_face.png" 
                 alt="${pokemon.name}" class="pokemon-icon">
-            <span>${pokemon.name}</span>
-            <div class="pokemon-types small">
-              <span class="type ${pokemon.types[0].toLowerCase()}">${pokemon.types[0]}</span>
-              ${pokemon.types[1] ? `<span class="type ${pokemon.types[1]?.toLowerCase()}">${pokemon.types[1]}</span>` : ''}
+              <span class="pokemon-name">${pokemon.name}</span>
+              <div class="pokemon-types">
+                <img src="src/public/images/types/${pokemon.types[0].toLowerCase()}.png" alt="${pokemon.types[0]}" class="type-icon">
+                ${pokemon.types[1] ? `<img src="src/public/images/types/${pokemon.types[1]?.toLowerCase()}.png" alt="${pokemon.types[1]}" class="type-icon">` : ''}
+              </div>
+              <span class="pokemon-hp">${pokemon.baseStats.hp}</span>
+              <span class="pokemon-atk">${pokemon.baseStats.attack}</span>
+              <span class="pokemon-def">${pokemon.baseStats.defense}</span>
+              <span class="pokemon-spa">${pokemon.baseStats.specialAttack}</span>
+              <span class="pokemon-spd">${pokemon.baseStats.specialDefense}</span>
+              <span class="pokemon-spe">${pokemon.baseStats.speed}</span>
             </div>
           </div>
         `).join('')}
@@ -399,6 +428,8 @@ export class TeamBuilderView {
 
           this.updatePokemonInSlot(this.selectedPokemonIndex, selectedPokemon);
 
+          this.clearEditHighlight();
+
           // Reset the selector
           this.selectedAttributeType = null;
           this.loadSelector('');
@@ -418,6 +449,7 @@ export class TeamBuilderView {
       <div class="selector-list">
         <div class="selector-item item-element" data-item-id="0">
           <span>Aucun</span>
+          <small>Aucun objet équipé</small>
         </div>
         ${availableItems.map(([key, item]: [string, PokemonItem]) => `
           <div class="selector-item item-element" 
@@ -431,7 +463,18 @@ export class TeamBuilderView {
       </div>
     `;
 
-    // WIP search and click events similar to pokemon selector
+    const searchInput = container.querySelector('#item-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const query = (e.target as HTMLInputElement).value.toLowerCase();
+        const itemElements = container.querySelectorAll('.item-element');
+        
+        itemElements.forEach(element => {
+          const name = (element as HTMLElement).dataset.itemName?.toLowerCase() || "";
+          (element as HTMLElement).style.display = name.includes(query) ? 'flex' : 'none';
+        });
+      });
+    }
 
     const itemElements = container.querySelectorAll('.item-element');
     itemElements.forEach(item => {
@@ -443,6 +486,9 @@ export class TeamBuilderView {
             selectedPokemon.item = items[itemKey as keyof typeof items];
             selectedPokemon.itemKey = itemKey;
             this.updatePokemonInSlot(this.selectedPokemonIndex!, selectedPokemon);
+            
+            this.clearEditHighlight();
+            
             // Reset the selector
             this.selectedAttributeType = null;
             this.loadSelector('');
@@ -460,6 +506,7 @@ export class TeamBuilderView {
     container.innerHTML = `
       <div class="selector-header">
         <h3>Choisir un talent</h3>
+        <input type="text" id="ability-search" placeholder="Rechercher..." class="search-input">
       </div>
       <div class="selector-list">
         ${filteredAbilities.map(([key, ability]: [string, PokemonAbility]) => `
@@ -474,7 +521,18 @@ export class TeamBuilderView {
       </div>
     `;
 
-    // WIP click events
+    const searchInput = container.querySelector('#ability-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const query = (e.target as HTMLInputElement).value.toLowerCase();
+        const abilityElements = container.querySelectorAll('.ability-element');
+        
+        abilityElements.forEach(element => {
+          const name = (element as HTMLElement).dataset.abilityName?.toLowerCase() || "";
+          (element as HTMLElement).style.display = name.includes(query) ? 'flex' : 'none';
+        });
+      });
+    }
 
     const abilityElements = container.querySelectorAll('.ability-element');
     abilityElements.forEach(ability => {
@@ -486,6 +544,9 @@ export class TeamBuilderView {
             selectedPokemon.ability = abilities[abilityKey as keyof typeof abilities]
             selectedPokemon.abilityKey = abilityKey;
             this.updatePokemonInSlot(this.selectedPokemonIndex!, selectedPokemon);
+            
+            this.clearEditHighlight();
+            
             // Reset the selector
             this.selectedAttributeType = null;
             this.loadSelector('');
@@ -500,14 +561,15 @@ export class TeamBuilderView {
     
     container.innerHTML = `
       <div class="selector-header">
-        <h3>Choisir un talent</h3>
+        <h3>Choisir une nature</h3>
+        <input type="text" id="nature-search" placeholder="Rechercher..." class="search-input">
       </div>
       <div class="selector-list">
         ${availableNatures.map(([key, nature]: [string, PokemonNature]) => `
           <div class="selector-item nature-element" 
             data-nature-key="${key}"
             data-nature-id="${nature.id}" 
-            data-nature-name="${nature.name}"
+            data-nature-name="${nature.name}">
             <span>${nature.name}</span>
             <small>${nature.description}</small>
           </div>
@@ -515,7 +577,18 @@ export class TeamBuilderView {
       </div>
     `;
 
-    // WIP click events
+    const searchInput = container.querySelector('#nature-search');
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          const query = (e.target as HTMLInputElement).value.toLowerCase();
+          const natureElements = container.querySelectorAll('.nature-element');
+          
+          natureElements.forEach(element => {
+            const name = (element as HTMLElement).dataset.natureName?.toLowerCase() || "";
+            (element as HTMLElement).style.display = name.includes(query) ? 'flex' : 'none';
+          });
+        });
+      }
 
     const natureElements = container.querySelectorAll('.nature-element');
     natureElements.forEach(nature => {
@@ -528,6 +601,9 @@ export class TeamBuilderView {
             selectedPokemon.natureKey = natureKey;
             selectedPokemon.currentStats = selectedPokemon.calculateStats();
             this.updatePokemonInSlot(this.selectedPokemonIndex!, selectedPokemon);
+            
+            this.clearEditHighlight();
+
             // Reset the selector
             this.selectedAttributeType = null;
             this.loadSelector('');
@@ -548,7 +624,18 @@ export class TeamBuilderView {
         <h3>Choisir une attaque</h3>
         <input type="text" id="move-search" placeholder="Rechercher..." class="search-input">
       </div>
-      <div class="selector-list">
+      
+      <!-- Column headers for move data -->
+      <div class="move-column-headers">
+        <span>Nom</span>
+        <span>Type</span>
+        <span>Catégorie</span>
+        <span>Puissance</span>
+        <span>Précision</span>
+        <span>PP</span>
+      </div>
+      
+      <div class="selector-list move-selector-list">
         ${filteredMoves.map(([key, move]) => `
           <div class="selector-item move-element" 
           data-move-key="${key}"
@@ -556,20 +643,34 @@ export class TeamBuilderView {
           data-move-name="${move.name}" 
           data-move-index="${data?.moveIndex || 0}" 
           data-move-type="${move.type}">
-            <div class="move-header">
-              <span>${move.name}</span>
-              <span class="type ${move.type.toLowerCase()}">${move.type}</span>
+            <div class="move-data-row">
+              <span class="move-name">${move.name}</span>
+              <div class="move-type-icon">
+                <img src="src/public/images/types/${move?.type?.toLowerCase() || 'normal'}.png" alt="${move?.type || 'Normal'}" class="move-type">
+              </div>
+              <span class="move-category">${move.category}</span>
+              <span class="move-power">${move.power || '-'}</span>
+              <span class="move-accuracy">${move.accuracy ? move.accuracy + '%' : '-'}</span>
+              <span class="move-pp">${move.pp}</span>
             </div>
-            <div class="move-stats">
-              <small>Puissance: ${move.power}</small>
-              <small>Précision: ${move.accuracy}</small>
-            </div>
+            <div class="move-description">${move.description || 'Pas d\'effet secondaire'}</div>
           </div>
         `).join('')}
       </div>
     `;
 
-    // WIP search and click events
+    const searchInput = container.querySelector('#move-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const query = (e.target as HTMLInputElement).value.toLowerCase();
+        const moveElements = container.querySelectorAll('.move-element');
+        
+        moveElements.forEach(element => {
+          const name = (element as HTMLElement).dataset.moveName!.toLowerCase();
+          (element as HTMLElement).style.display = name.includes(query) ? 'flex' : 'none';
+        });
+      });
+    }
 
     const moveElements = container.querySelectorAll('.move-element');
     moveElements.forEach(move => {
@@ -593,7 +694,11 @@ export class TeamBuilderView {
               currentPP: baseMove.pp,
               target: null
             };
+            
             this.updatePokemonInSlot(this.selectedPokemonIndex!, selectedPokemon);
+            
+            this.clearEditHighlight();
+
             // Reset the selector
             this.selectedAttributeType = null;
             this.loadSelector('');
@@ -881,19 +986,25 @@ export class TeamBuilderView {
         
         if (editable) {
           const attribute = editable.getAttribute('data-attribute');
+          this.clearEditHighlight();
           
           if (attribute === 'pokemon') {
+            editable.classList.add('active-edit'); // Editable is active
             this.loadSelector('pokemon');
           } else if (attribute === 'item') {
+            editable.parentElement?.classList.add('active-edit');  // Editable's parent is active
             this.loadSelector('item');
           } else if (attribute === 'ability') {
+            editable.parentElement?.classList.add('active-edit'); // Editable's parent is active
             this.loadSelector('ability', this.currentTeam[this.selectedPokemonIndex!]);
           } else if (attribute === 'nature') {
+            editable.parentElement?.classList.add('active-edit'); // Editable's parent is active
             this.loadSelector('nature');
           } else if (attribute === 'move') {
             const moveIndex = parseInt(editable.getAttribute('data-move-index') || '0');
             const selectedPokemon = this.currentTeam[this.selectedPokemonIndex!];
-            this.loadSelector('move', { moveIndex, selectedPokemon });
+            editable.parentElement?.parentElement?.classList.add('active-edit'); // Editable parent's parent is active
+            this.loadSelector('move', { moveIndex, selectedPokemon });  
           }
         }
       });
@@ -985,5 +1096,10 @@ export class TeamBuilderView {
       // Enable delete only when editing an existing team
       deleteButton.disabled = !isEditingExistingTeam;
     }
+  }
+
+  private clearEditHighlight(): void {
+    const activeElements = this.element.querySelectorAll('.active-edit'); 
+    activeElements.forEach(activeElement => activeElement.classList.remove('active-edit'));
   }
 }
