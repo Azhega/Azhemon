@@ -69,8 +69,9 @@ export class MenuView {
           </div>
         </div>
 
-        <img src="src/public/images/logos/pokemon-logo.png" alt="Pokémon Showdown" class="logo" />
-        <h1 style="color:black">Azhemon</h1>
+        <div class="logo-container">
+          <div class="game-logo">AZHEMON</div>
+        </div>
         
         <!-- Team Selection Section -->
         <div class="team-selection-section">

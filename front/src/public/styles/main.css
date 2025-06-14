@@ -60,48 +60,7 @@ body {
   100% { transform: rotate(360deg); }
 }
 
-/* Menu Screen */
-#menu-screen {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background: linear-gradient(135deg, #ff3e3e 0%, #3b4cca 100%);
-  color: white;
-}
 
-.menu-container {
-  background-color: rgba(255, 255, 255, 0.9);
-  border-radius: 15px;
-  padding: 30px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  width: 90%;
-  max-width: 500px;
-  text-align: center;
-}
-
-.logo {
-  margin-bottom: 30px;
-  max-width: 300px;
-}
-
-.menu-button {
-  display: block;
-  width: 100%;
-  padding: 15px 20px;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 18px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.menu-button:hover {
-  background-color: var(--button-hover);
-}
 
 /* TeamBuilder Screen */
 #teambuilder-screen {
