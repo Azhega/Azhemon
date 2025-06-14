@@ -178,28 +178,6 @@
   margin-bottom: 20px;
 }
 
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.logout-button {
-  background-color: #ef4444;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.2s ease;
-}
-
-.logout-button:hover {
-  background-color: #dc2626;
-}
-
-
 .submit-button:disabled {
   background: #ccc !important;
   cursor: not-allowed !important;

@@ -7,12 +7,82 @@
   justify-content: center;
 }
 
+/* Menu Screen */
+#menu-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-image: url('/src/public/images/backgrounds/client-bg-horizon.jpg');
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: 100%;
+  color: white;
+}
+
+.menu-container {
+  background-color: rgb(255 255 255 / 30%);
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 500px;
+  text-align: center;
+  backdrop-filter: blur(2px);
+}
+
+.logo {
+  margin-bottom: 30px;
+  max-width: 300px;
+}
+
+.menu-button {
+  display: block;
+  width: 100%;
+  padding: 15px 20px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.menu-button:hover {
+  background-color: var(--button-hover);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 19px;
+}
+
+.logout-button {
+  background-color: #a1628c;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 15px;
+  transition: background-color 0.2s ease;
+}
+
+.logout-button:hover {
+  background-color: #b45694;
+}
+
 .team-selection-section {
   width: 100%;
   max-width: 800px;
   margin: 1rem 0;
   padding: 1.5rem;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgb(255 255 255 / 50%);
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
@@ -20,7 +90,7 @@
 .team-selector-container h3 {
   text-align: center;
   margin-bottom: 1rem;
-  color: #333;
+  color: #343434;
   font-size: 1.2rem;
   font-weight: 600;
 }
@@ -28,11 +98,11 @@
 .battle-teams-dropdown {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 2px solid #ddd;
+  border: 2px solid #828282;
   border-radius: 8px;
   font-size: 1rem;
-  background: white;
-  color: #333;
+  background: rgba(220, 220, 220, 0.751);
+  color: #000000;
   cursor: pointer;
   transition: border-color 0.3s ease;
 }
@@ -57,7 +127,7 @@
 .selected-team-preview h4 {
   text-align: center;
   margin-bottom: 1rem;
-  color: #555;
+  color: #343434;
   font-size: 1.1rem;
 }
 
@@ -81,14 +151,14 @@
 }
 
 .preview-slot.empty-slot {
-  background: #f8f9fa;
+  background: linear-gradient(135deg, #626262b0 0%, #9d9d9dc7 100%);
   border: 2px dashed #ddd;
-  color: #999;
+  color: #000000;
   font-weight: 500;
 }
 
 .preview-slot.filled-slot {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, #ffc1ecb0 0%, #8cdbeac7 100%);
   border: 2px solid #dee2e6;
   cursor: pointer;
 }
@@ -142,8 +212,8 @@
 }
 
 .menu-button:not(:disabled) {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  color: white;
+  background: linear-gradient(135deg, #e2a8d2 0%, #99ddef 100%);
+  color: #072e7f;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
@@ -153,15 +223,16 @@
 }
 
 .menu-button:disabled {
-  background: #e5e7eb;
-  color: #9ca3af;
+  background: #9e9e9ee0;
+  color: #6b6b6b;
   cursor: not-allowed;
   box-shadow: none;
 }
 
 .menu-button.ready-to-battle {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #062a79 0%, #355ca4 100%);
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  color: #f0e3ed;
 }
 
 .menu-button.ready-to-battle:hover {
@@ -187,3 +258,24 @@
 .type.dragon { background-color: #7038F8; }
 .type.dark { background-color: #705848; }
 .type.fairy { background-color: #EE99AC; }
+
+.game-logo {
+  font-family: 'Montserrat', 'Avenir Next', 'Avenir', sans-serif;
+  font-size: 54px;
+  font-weight: 800;
+  color: white;
+  text-shadow: 
+    -3px -3px 0 #000,
+    3px -3px 0 #000,
+    -3px 3px 0 #000,
+    3px 3px 0 #000,
+    -4px 0 0 #000,
+    4px 0 0 #000,
+    0 -4px 0 #000,
+    0 4px 0 #000;
+  letter-spacing: -1px;
+  text-align: center;
+  width: fit-content;
+  position: relative;
+  z-index: 1;
+}
