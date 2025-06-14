@@ -8,6 +8,26 @@
   overflow: hidden;
 }
 
+.exit-button {
+  position: absolute;
+  top: 2%;
+  right: 26%;
+  background: linear-gradient(135deg, #f874b6, #b04395);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.exit-button:hover {
+  background: linear-gradient(135deg, #f9a3c1, #d15b8e);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+}
+
 .battle-field {
   display: grid;
   grid-template-rows: 1fr 1fr;
