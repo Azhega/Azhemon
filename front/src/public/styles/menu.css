@@ -284,3 +284,121 @@
   position: relative;
   z-index: 1;
 }
+
+
+/* Small phones */
+@media screen and (max-width: 480px) {
+  #menu-screen {
+    background-size: cover;
+  }
+  
+  .menu-container {
+    width: 95%;
+    padding: 20px 15px;
+  }
+  
+  /* Logo size reduction */
+  .game-logo {
+    font-size: 36px;
+    text-shadow: 
+      -2px -2px 0 #000,
+      2px -2px 0 #000,
+      -2px 2px 0 #000,
+      2px 2px 0 #000,
+      -3px 0 0 #000,
+      3px 0 0 #000,
+      0 -3px 0 #000,
+      0 3px 0 #000;
+    margin-bottom: 15px;
+  }
+  
+  .team-selection-section {
+    padding: 1rem;
+  }
+  
+  .team-preview-slots {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+  
+  .preview-slot {
+    min-height: 100px;
+    padding: 0.4rem;
+  }
+
+  .preview-slot.preview-slot.filled-slot {
+    max-width: 88px;
+  }
+
+  .type-icon {
+    height: 15px;
+  }
+  
+  .preview-sprite {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .preview-name {
+    font-size: 0.7rem;
+  }
+  
+  .menu-buttons {
+    flex-direction: column;
+    gap: 0.7rem;
+    width: 100%;
+  }
+  
+  .menu-button {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    font-size: 1rem;
+    min-width: auto;
+  }
+}
+
+/* Tablets and landscape orientation */
+@media screen and (min-width: 481px) and (max-width: 1400px) {
+  #menu-screen {
+    background-size: cover;
+  }
+  
+  .menu-container {
+    width: 90%;
+    max-width: 600px;
+    margin: 10px auto;
+  }
+  
+  .game-logo {
+    font-size: 44px;
+  }
+  
+  .team-preview-slots {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .menu-buttons {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .menu-button {
+    min-width: 140px;
+  }
+}
+
+/* Short height landscape */
+@media screen and (max-height: 550px) {
+  #menu-screen {
+    height: auto; /* Allow to grow as needed */
+  }
+  
+  .menu-container {
+    margin: 10px auto;
+  }
+
+  /* Make the body/html scrollable */
+  html, body {
+    overflow-y: auto;
+  }
+}
