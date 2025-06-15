@@ -238,3 +238,49 @@
 #toggle-mode {
   transition: all 0.3s ease;
 }
+
+
+/* Small phones */
+@media screen and (max-width: 480px) {
+  .login-container {
+    background-size: cover; /* Ensure background covers all screen sizes */
+  }
+
+  .login-card {
+    padding: 25px 20px;
+  }
+  
+  .login-game-logo {
+    font-size: 38px;
+    text-shadow: 
+      -2px -2px 0 #000,
+      2px -2px 0 #000,
+      -2px 2px 0 #000,
+      2px 2px 0 #000,
+      -3px 0 0 #000,
+      3px 0 0 #000,
+      0 -3px 0 #000,
+      0 3px 0 #000;
+  }
+  
+  .login-header p {
+    font-size: 1rem;
+  }
+}
+
+/* Tablets and landscape orientation */
+@media screen and (min-width: 481px) and (max-width: 1400px) {
+  .login-container {
+    background-size: cover; /* Ensure background covers all screen sizes */
+  }
+
+  .login-game-logo {
+    font-size: 45px;
+  }
+
+  .login-card {
+    padding: 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+}
