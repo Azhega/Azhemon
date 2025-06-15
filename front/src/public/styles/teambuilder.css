@@ -1058,13 +1058,19 @@
 }
 
 .move-slot.empty {
-  background-color: var(--slot-empty-bg);
+  background-color: rgba(0, 0, 0, 0.3);
   border-style: dashed;
   color: #888;
   min-height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.move-slot.empty:hover {
+  background-color: rgba(0, 0, 0, 0.5);
+  border-color: var(--primary-color);
+  border-style: dashed;
 }
 
 .move-content {
