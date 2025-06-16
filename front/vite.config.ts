@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import { resolve } from 'path';
 
 export default defineConfig({
   server: {
@@ -13,14 +14,35 @@ export default defineConfig({
       }
     }
   },
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, './src')
+    }
+  },
   plugins: [
     {
       name: 'html-import',
+      enforce: 'pre',
       transform(code, id) {
-        if (id.endsWith('.html')) {
-          return `export default ${JSON.stringify(code)};`;
+        // Only process HTML files inside the views folder
+        if (id.includes('/views/') && id.endsWith('.html')) {
+          return {
+            code: `export default ${JSON.stringify(code)};`,
+            map: null
+          };
         }
       }
     }
-  ]
+  ],
+  build: {
+    // Generate source maps for easier debugging
+    sourcemap: true,
+    // Ensure assets are processed correctly
+    assetsDir: 'assets',
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html')
+      }
+    }
+  }
 });
