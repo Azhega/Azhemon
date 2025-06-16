@@ -17,7 +17,7 @@ export default defineConfig({
     {
       name: 'html-import',
       transform(code, id) {
-        if (id.endsWith('.html')) {
+        if (id.endsWith('.html') && !id.endsWith('index.html')) {
           return `export default ${JSON.stringify(code)};`;
         }
       }
