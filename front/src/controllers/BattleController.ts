@@ -3,7 +3,7 @@ import Store from '../utils/Store';
 import { BattleView } from '../views/BattleView';
 import { Pokemon, PokemonMove } from '../models/PokemonModel';
 import { TurnManager } from './TurnManager.ts';
-import { BattleAction, BattleState, BattleTurn } from '../models/BattleModel.ts';
+import { BattleAction, BattleState, BattleTurn } from '../models/BattleInterface.ts';
 import { items } from '../data/items.ts';
 import { abilities } from '../data/abilities.ts';
 import { moves } from '../data/moves.ts';

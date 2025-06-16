@@ -1,7 +1,7 @@
 import EventBus from '../utils/EventBus';
 import Store from '../utils/Store';
 import { Pokemon, PokemonMove } from '../models/PokemonModel';
-import { BattleState } from '../models/BattleModel';
+import { BattleState } from '../models/BattleInterface';
 import { AudioManager } from '../controllers/AudioManager';
 
 export class BattleView {
