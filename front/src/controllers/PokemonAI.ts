@@ -1,6 +1,6 @@
 // CPU AI Intelligence for Battle Decisions
 import { Pokemon, PokemonMove } from '../models/PokemonModel';
-import { BattleAction } from '../models/BattleModel';
+import { BattleAction } from '../models/BattleInterface.ts';
 import { BattleEngine } from './BattleEngine.ts';
 
 export interface AIDecision {
