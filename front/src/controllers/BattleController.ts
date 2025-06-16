@@ -391,7 +391,6 @@ export class BattleController {
         ...baseMove,
         moveKey: baseMove.moveKey,
         currentPP: baseMove.pp,
-        target: null
       }
     });
 

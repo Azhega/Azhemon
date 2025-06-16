@@ -1,9 +1,6 @@
 import { status } from './status';
-import { TurnManager } from '../controllers/TurnManager';
 import Store from '../utils/Store';
-import EventBus from '../utils/EventBus'; 
 import { Pokemon } from '../models/PokemonModel';
-import { Effect } from '../models/EffectModel';
 
 export const moves = {
   auraSphere: {

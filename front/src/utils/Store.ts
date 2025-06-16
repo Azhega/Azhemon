@@ -11,7 +11,7 @@ export class Store {
     // Initial state
     this.state = {
       game: {
-        screen: 'menu', // 'menu', 'teambuilder', 'battle'
+        screen: 'menu', // 'menu', 'teambuilder', 'battle', 'login'
         isLoading: false
       },
       user: {

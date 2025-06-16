@@ -2,7 +2,6 @@ import { abilities } from '../data/abilities';
 import { items } from '../data/items';
 import { moves } from '../data/moves';
 import { Pokemon } from '../models/PokemonModel';
-import State from '../utils/Store';
 import { status } from '../data/status';
 
 type EffectHook = 
@@ -23,7 +22,6 @@ export class EffectManager {
   private moveHooks: Map<EffectHook, EffectFunction[]> = new Map();
   private registeredItemFunctions: Map<EffectHook, Set<Function>> = new Map();
   private registeredStatusFunctions: Map<EffectHook, Set<Function>> = new Map();
-
 
   private constructor() {}
 
@@ -96,7 +94,6 @@ export class EffectManager {
   };
 
   public registerStatusEffects(pokemon: Pokemon): void {
-    // Register status effects
     const statusObj = status[pokemon.statusKey as keyof typeof status];
     if (statusObj) {
       for (const key of Object.keys(statusObj)) {
@@ -132,11 +129,13 @@ export class EffectManager {
     this.moveHooks.clear();
   }
 
+  // To avoid duplicate item effects bugs
   public unregisterItemFunctions() {
     console.log('Effect Manager : Unregistering all item functions', this.registeredItemFunctions);
     this.registeredItemFunctions.clear();
   }
 
+  // To avoid duplicate status effects bugs
   public unregisterStatusFunctions() {
     console.log('Effect Manager : Unregistering all status functions', this.registeredStatusFunctions);
     this.registeredStatusFunctions.clear();
@@ -162,8 +161,7 @@ export class EffectManager {
     this.unregisterStatusFunctions();
   }
 
-  public runHook(hook: EffectHook, context: any): any[] {
-    const results: any[] = [];
+  public runHook(hook: EffectHook, context: any): void {
     const functions = [
     ...(this.hooks.get(hook) || []),
     ...(this.moveHooks.get(hook) || [])
@@ -172,12 +170,11 @@ export class EffectManager {
     console.log(`Effect Manager : Functions for ${hook}:`, functions);
     for (const fn of functions) {
       try {
-        results.push(fn(context));
+        fn(context);
       } catch (error) {
         console.error(`Error occurred while running hook "${hook}" for function ${fn}:`, error);
       } 
     }
-    return results;
   }
 
   public chainHook<T>(hook: EffectHook, initialValue: T, context: any): T {

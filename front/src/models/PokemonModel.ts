@@ -1,5 +1,4 @@
 import Store from '../utils/Store.ts';
-import { Effect } from './EffectModel.ts';
 
 export interface PokemonStats {
   hp: number;
@@ -17,14 +16,13 @@ export interface PokemonMove {
   id: number;
   name: string;
   type: string;
-  category: 'Physical' | 'Special' | 'Status' | string;
+  category: 'Physique' | 'Spécial' | 'Statut' | string;
   power: number;
   accuracy: number;
   pp: number;
   currentPP: number;
   description: string;
   priority: number;
-  target: Pokemon | null;
   flags?: MoveFlags;
 }
 
@@ -133,7 +131,7 @@ export class Pokemon {
   }
   
   public calculateStats(): PokemonStats {
-    // To develop later: Nature and EV/IV calculations
+    // To develop later: EV/IV calculations
     return {
       hp: Math.floor(((2 * this.baseStats.hp + 31) * this.level) / 100) + this.level + 10,
       attack: Math.floor((((2 * this.baseStats.attack + 31) * this.level) / 100) + 5) * this.nature.atk,
@@ -193,42 +191,4 @@ export class Pokemon {
     this.canAct = true;
     this.hasBeenDamaged = false;
   }
-}
-
-export class PokemonTeam {
-  members: (Pokemon | null)[] = [null, null, null, null, null, null];
-  
-  constructor(initialMembers?: (Pokemon | null)[]) {
-    if (initialMembers) {
-      this.members = [...initialMembers];
-      while (this.members.length < 6) {
-        this.members.push(null);
-      }
-    }
-  }
-  
-  setPokemon(index: number, pokemon: Pokemon | null): void {
-    if (index >= 0 && index < 6) {
-      this.members[index] = pokemon;
-    }
-  }
-  
-  getPokemon(index: number): Pokemon | null {
-    if (index >= 0 && index < 6) {
-      return this.members[index];
-    }
-    return null;
-  }
-  
-  toJSON(): (Pokemon | null)[] {
-    return [...this.members];
-  }
-  
-  isEmpty(): boolean {
-    return !this.members.some(pokemon => pokemon !== null);
-  }
-}
-
-export interface PokemonDataTable {
-  [speciesName: string]: Pokemon;
 }

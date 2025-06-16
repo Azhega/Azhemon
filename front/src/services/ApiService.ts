@@ -27,9 +27,8 @@ export class ApiService {
     return this.getById('team/player_id', playerId);
   }
 
-
-
-  async getTeamPokemonMoveByTeamId(teamId: number): Promise<
+  // Get all team data
+  async getAllTeamDataByTeamId(teamId: number): Promise<
   { id: number; name: string; pokemons: { slot: number; pokemon_name: string; 
     moves: PokemonMove[]; ability: string; item: string; nature: string; }[] }> {
     return this.getById('team_pokemon_move/team_id', teamId);

@@ -113,27 +113,6 @@ class Router {
     }
 
     /**
-     * Check the authorization of the current request.
-     *
-     * @return bool True if the request is authorized, false otherwise
-     */
-    protected function checkAuth() {
-        $headers = getallheaders();
-        if (!isset($headers['Authorization'])) {
-            return false;
-        }
-
-        $authHeader = $headers['Authorization'];
-        if (preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
-            $jwt = $matches[1];
-            // Verify the JWT token
-            return JWT::verify($jwt);
-        }
-
-        return false;
-    }
-
-    /**
      * Match the URL against the given route pattern.
      *
      * @param string $url The requested URL

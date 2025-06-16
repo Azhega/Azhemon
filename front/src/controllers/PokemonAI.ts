@@ -1,7 +1,6 @@
-// PokemonAI.ts - Système d'IA pour les Pokémon CPU
+// CPU AI Intelligence for Battle Decisions
 import { Pokemon, PokemonMove } from '../models/PokemonModel';
 import { BattleAction } from '../models/BattleModel';
-import Store from '../utils/Store';
 import { BattleEngine } from './BattleEngine.ts';
 
 export interface AIDecision {
@@ -251,8 +250,6 @@ export class PokemonAI {
     // For now, return a fixed score
     this.reasoning.push(`CPU Decision: Status Move : ${move.name} (${move.moveKey}) of ${cpuPokemon.name} against ${playerPokemon.name}`);
 
-
-
     let moveScore = 5;
 
     const outspeedMult = cpuPokemon.currentStats.speed > playerPokemon.currentStats.speed ? 1.5 : 1;
@@ -337,7 +334,6 @@ export class PokemonAI {
       pp: 1,
       currentPP: 1,
       priority: 0,
-      target: null,
       description: 'Utilisé quand aucune autre attaque n\'est disponible, infligeant des dégâts de recul à l\'utilisateur.',
     };
   }
