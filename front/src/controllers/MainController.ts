@@ -1,9 +1,9 @@
-import EventBus from '../utils/EventBus';
-import Store from '../utils/Store';
-import { MenuView } from './MenuView.ts';
+import EventBus from '../utils/EventBus.ts';
+import Store from '../utils/Store.ts';
+import { MenuController } from './MenuController.ts';
 
-export class MainView {
-  private menuView: MenuView | null = null;
+export class MainController {
+  private menuController: MenuController | null = null;
   private loadingScreen: HTMLElement;
   
   constructor() {
@@ -12,8 +12,8 @@ export class MainView {
     EventBus.on('screen:changed', (screen) => this.updateScreen(screen));
 
     EventBus.on('auth:logout', () => {
-      console.log('MainView : Auth logout - destroying MenuView');
-      this.menuView = null;
+      console.log('MainView : Auth logout - destroying MenuController');
+      this.menuController = null;
     });
     
     // Subscribe to store changes
@@ -42,8 +42,8 @@ export class MainView {
         document.getElementById('login-screen')!.style.display = 'flex';
         break;
       case 'menu':
-        if (!this.menuView) {
-          this.menuView = new MenuView();
+        if (!this.menuController) {
+          this.menuController = new MenuController();
         }
         document.getElementById('menu-screen')!.style.display = 'flex';
         break;

@@ -1,0 +1,56 @@
+<div class="teambuilder-layout">
+  <!-- Left panel - Team management -->
+  <div class="team-panel">          
+    <div class="teambuilder-header-section">
+      <!-- Header with title and back button -->
+      <div class="teambuilder-header">
+        <h1 class="teambuilder-title">Team Builder</h1>
+        <button id="back-to-menu" class="back-button">Retour au Menu</button>
+      </div>
+      
+      <!-- Team controls (dropdown + new team button) -->
+      <div class="team-controls">
+        <div class="team-selector">
+          <label class="teams-label" for="teams-dropdown">Mes équipes</label>
+          <select id="teams-dropdown" class="teams-dropdown">
+            <!-- Saved teams will be injected here -->
+          </select>
+        </div>
+        <button id="new-team-btn" class="new-team-button">+ Nouvelle équipe</button>
+      </div>
+      
+      <!-- Team name input -->
+      <div class="team-name-controls">
+        <label for="team-name-input" class="team-name-label">Nom de l'équipe</label>
+        <input type="text" id="team-name-input" placeholder="Entrez un nom d'équipe..." class="team-name-input">
+      </div>
+    </div>
+    
+    <div class="team-pokemon-list">
+      <h2>Pokémon de l'équipe</h2>
+      <div id="team-slots">
+        {{TEAM_SLOTS}}
+      </div>
+    </div>
+
+    <button id="delete-team" class="delete-team-button">Supprimer l'équipe</button>
+    <button id="save-team" class="save-team-button">Sauvegarder l'équipe</button>
+  </div>
+  
+  <!-- Right panel - Pokemon details & selector -->
+  <div class="details-panel">
+    <div id="pokemon-details" class="pokemon-details">
+      <!-- Pokemon details will be displayed here when a pokemon is selected -->
+      <div class="empty-details-message">
+        <p>Sélectionnez un Pokémon pour voir et modifier ses détails</p>
+      </div>
+    </div>
+    
+    <div id="selector-panel" class="selector-panel">
+      <!-- Dynamic content will be loaded here based on what is being edited -->
+      <div class="empty-selector-message">
+        <p>Cliquez sur un attribut du Pokémon pour le modifier</p>
+      </div>
+    </div>
+  </div>
+</div>

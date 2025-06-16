@@ -12,5 +12,15 @@ export default defineConfig({
         changeOrigin: true,
       }
     }
-  }
+  },
+  plugins: [
+    {
+      name: 'html-import',
+      transform(code, id) {
+        if (id.endsWith('.html')) {
+          return `export default ${JSON.stringify(code)};`;
+        }
+      }
+    }
+  ]
 });

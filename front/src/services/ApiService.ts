@@ -1,4 +1,4 @@
-import { PokemonMove } from '../models/PokemonModel';
+import { PokemonMove } from '../interfaces/PokemonInterface.ts';
 import AuthService from './AuthService';
 
 export class ApiService {

@@ -5,8 +5,8 @@ export class AuthService {
   private static baseUrl = 'http://localhost:8099';
   private static refreshTokenPromise: Promise<boolean> | null = null;
   private static tokenCheckInterval: number | null = null;
-  private static REFRESH_TOKEN_LIFETIME = 30 * 24 * 60 * 60 * 1000;
-  private static RENEWAL_THRESHOLD = 2 * 24 * 60 * 60 * 1000;
+  private static REFRESH_TOKEN_LIFETIME = 30 * 24 * 60 * 60 * 1000; // Session UX
+  private static RENEWAL_THRESHOLD = 2 * 24 * 60 * 60 * 1000; // Session UX
 
   private static isTokenExpired(token: string): boolean {
     try {
@@ -23,7 +23,7 @@ export class AuthService {
     localStorage.setItem('refresh_token_issued_at', now.toString());
   }
 
-  static shouldRenewSession(): boolean {
+  static shouldRenewSession(): boolean { // Session UX
     const issuedAt = localStorage.getItem('refresh_token_issued_at');
     
     if (!issuedAt) {
@@ -31,8 +31,8 @@ export class AuthService {
       return true;
     }
 
-    const tokenAge = Date.now() - parseInt(issuedAt);
-    const timeUntilExpiry = this.REFRESH_TOKEN_LIFETIME - tokenAge;
+    const refreshTokenAge = Date.now() - parseInt(issuedAt);
+    const timeUntilExpiry = this.REFRESH_TOKEN_LIFETIME - refreshTokenAge;
     
     // If less than 2 days remaining, require fresh login
     return timeUntilExpiry < this.RENEWAL_THRESHOLD;

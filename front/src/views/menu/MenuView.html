@@ -1,0 +1,43 @@
+<div class="sound-toggle">
+  <div class="sound-icon">
+    {{SOUND_ICON}}
+  </div>
+</div>
+
+<button id="logout-button" class="logout-button">Déconnexion</button>
+
+<div class="menu-container">
+  <!-- User info -->
+  <div class="menu-header">
+    <div class="user-info">
+      <span>Bienvenue, {{USERNAME}}</span>
+    </div>
+  </div>
+
+  <div class="logo-container">
+    <div class="game-logo">AZHEMON</div>
+  </div>
+  
+  <!-- Team Selection Section -->
+  <div class="team-selection-section">
+    <div class="team-selector-container">
+      <h3>Choisir une équipe</h3>
+      <select id="battle-teams-dropdown" class="battle-teams-dropdown">
+        <option value="">Chargement des équipes...</option>
+      </select>
+      
+      <div id="selected-team-preview" class="selected-team-preview" style="display: none;">
+        <h4>Aperçu de l'équipe</h4>
+        <div id="team-preview-slots" class="team-preview-slots">
+          <!-- Team preview will be populated here -->
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Action Buttons -->
+  <div class="menu-buttons">
+    <button id="teambuilder-button" class="menu-button">Team Builder</button>
+    <button id="battle-button" class="menu-button" disabled>Lancer le Combat</button>
+  </div>
+</div>

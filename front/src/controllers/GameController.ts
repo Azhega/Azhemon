@@ -1,22 +1,22 @@
 import Store from '../utils/Store';
 import EventBus from '../utils/EventBus';
 import AuthService from '../services/AuthService';
-import { MainView } from '../views/MainView';
-import { LoginView } from '../views/LoginView';
+import { MainController } from './MainController';
 import { Pokemon } from '../models/PokemonModel';
-import { TeamBuilderView } from '../views/TeamBuilderView';
+import { LoginController } from './LoginController';
+import { TeamBuilderController } from './TeamBuilderController';
 import { BattleController } from './BattleController';
 import { AudioManager } from './AudioManager';
 
 export class GameController {
-  private mainView: MainView;
-  private loginView: LoginView | null = null;
-  private teamBuilderView: TeamBuilderView | null = null;
+  private mainController: MainController;
+  private loginController: LoginController | null = null;
+  private teamBuilderController: TeamBuilderController | null = null;
   private battleController: BattleController | null = null;
   private audioManager: AudioManager;
 
   constructor() {
-    this.mainView = new MainView();
+    this.mainController = new MainController();
     this.audioManager = AudioManager.getInstance();
     this.audioManager.initialize();
 
@@ -27,7 +27,7 @@ export class GameController {
   initialize(): void {
     console.log('Initializing game...');
 
-    this.mainView.initialize();
+    this.mainController.initialize();
 
     this.loadInitialData().then(async () => {
       await this.checkAuthenticationStatus();
@@ -99,10 +99,10 @@ export class GameController {
 
     if (screen === 'login') {
       this.audioManager.stopCurrentMusic();
-      if (!this.loginView) {
-        this.loginView = new LoginView();
+      if (!this.loginController) {
+        this.loginController = new LoginController();
       } else {
-        this.loginView.reset();
+        this.loginController.reset();
       }
     }
 
@@ -113,8 +113,8 @@ export class GameController {
       }
     }
 
-    if (screen === 'teambuilder' && !this.teamBuilderView) {
-      this.teamBuilderView = new TeamBuilderView();
+    if (screen === 'teambuilder' && !this.teamBuilderController) {
+      this.teamBuilderController = new TeamBuilderController();
     }
 
     if (screen === 'battle') {

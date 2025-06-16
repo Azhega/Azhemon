@@ -1,8 +1,9 @@
-import EventBus from '../utils/EventBus';
-import Store from '../utils/Store';
-import { Pokemon, PokemonMove } from '../models/PokemonModel';
-import { BattleState } from '../models/BattleInterface';
-import { AudioManager } from '../controllers/AudioManager';
+import EventBus from '../../utils/EventBus';
+import Store from '../../utils/Store';
+import { Pokemon } from '../../models/PokemonModel';
+import { PokemonMove } from '../../interfaces/PokemonInterface';
+import { BattleState } from '../../interfaces/BattleInterface';
+import { AudioManager } from '../../controllers/AudioManager';
 
 export class BattleView {
   private isInitialized: boolean = false;
@@ -447,7 +448,6 @@ export class BattleView {
     }
 
     const playerPokemon = battleState.activePokemon.player;
-    const cpuPokemon = battleState.activePokemon.cpu;
     
     // Hide action menu, show move menu
     this.actionMenu.style.display = 'none';

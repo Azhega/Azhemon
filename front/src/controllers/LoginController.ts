@@ -2,8 +2,9 @@ import EventBus from '../utils/EventBus';
 import Store from '../utils/Store';
 import ApiService from '../services/ApiService';
 import AuthService from '../services/AuthService';
+import loginView from '../views/login/LoginView.html';
 
-export class LoginView {
+export class LoginController {
   private element: HTMLElement;
   private isLoginMode: boolean = true;
   private isSubmitting: boolean = false;
@@ -16,49 +17,7 @@ export class LoginView {
   }
 
   private render(): void {
-    this.element.innerHTML = `
-      <div class="login-container">
-        <div class="login-card">
-          <div class="login-header">
-            <h1 class="login-game-logo">AZHEMON</h1>
-            <p>Connectez-vous pour jouer</p>
-          </div>
-          
-          <div class="login-tabs">
-            <button id="login-tab" class="tab-button active">Connexion</button>
-            <button id="register-tab" class="tab-button">Inscription</button>
-          </div>
-          
-          <form id="auth-form" class="auth-form">
-            <div class="error-message" id="error-message" style="display: none;"></div>
-            <div class="success-message" id="success-message" style="display: none;"></div>
-            
-            <div class="form-group">
-              <label for="username">Nom d'utilisateur</label>
-              <input type="text" id="username" name="username" required>
-            </div>
-            
-            <div class="form-group">
-              <label for="password">Mot de passe</label>
-              <input type="password" id="password" name="password" required>
-            </div>
-            
-            <div class="form-group" id="confirm-password-group" style="display: none;">
-              <label for="confirm-password">Confirmer le mot de passe</label>
-              <input type="password" id="confirm-password" name="confirm-password">
-            </div>
-            
-            <button type="submit" id="submit-button" class="submit-button">
-              Se connecter
-            </button>
-          </form>
-          
-          <div class="login-footer">
-            <p id="toggle-text">Pas de compte ? <a href="#" id="toggle-mode">S'inscrire</a></p>
-          </div>
-        </div>
-      </div>
-    `;
+    this.element.innerHTML = loginView;
   }
 
   private attachEvents(): void {
