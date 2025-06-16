@@ -41,10 +41,8 @@ export class EffectManager {
         if (typeof value === 'function') {
           const hook = key as EffectHook;
           if (!this.hooks.has(hook)) {
-            console.log(`Effect Manager : Registering ability hook : ${hook}`);
             this.hooks.set(hook, []);
           }
-          console.log(`Effect Manager : pushing ability hook ${abilityObj.name}: ${hook}`);
           this.hooks.get(hook)!.push((value as Function).bind(abilityObj));
         }
       }
@@ -58,7 +56,6 @@ export class EffectManager {
         if (typeof value === 'function') {
           const hook = key as EffectHook;
           if (!this.hooks.has(hook)) {
-            console.log(`Effect Manager : Registering item hook ${itemObj.name}: ${hook}`);
             this.hooks.set(hook, []);
           }
           if (!this.registeredItemFunctions.has(hook)) {
@@ -67,7 +64,6 @@ export class EffectManager {
           const registeredFns = this.registeredItemFunctions.get(hook)!;
           if (!registeredFns.has(value as Function)) {
             registeredFns.add(value as Function);
-            console.log(`Effect Manager : pushing item hook ${itemObj.name}: ${hook}`);
             this.hooks.get(hook)!.push((value as Function).bind(itemObj));
           }
         }
@@ -83,10 +79,8 @@ export class EffectManager {
         if (typeof value === 'function') {
           const hook = key as EffectHook;
           if (!this.moveHooks.has(hook)) {
-            console.log(`Effect Manager : Registering move hook ${moveObj.name}: ${hook}`);
             this.moveHooks.set(hook, []);
           }
-          console.log(`Effect Manager : pushing move hook ${moveObj.name}: ${hook}`);
           this.moveHooks.get(hook)!.push((value as Function).bind(moveObj));
         }
       }
@@ -101,7 +95,6 @@ export class EffectManager {
         if (typeof value === 'function') {
           const hook = key as EffectHook;
           if (!this.hooks.has(hook)) {
-            console.log(`Effect Manager : Registering status hook : ${hook}`);
             this.hooks.set(hook, []);
           }
           if (!this.registeredStatusFunctions.has(hook)) {
@@ -110,7 +103,6 @@ export class EffectManager {
           const registeredFns = this.registeredStatusFunctions.get(hook)!;
           if (!registeredFns.has(value as Function)) {
             registeredFns.add(value as Function);
-            console.log(`Effect Manager : pushing status hook ${statusObj.name}: ${hook}`);
             this.hooks.get(hook)!.push((value as Function).bind(statusObj));
           }
         }
@@ -120,29 +112,24 @@ export class EffectManager {
 
   // To clear effects when a Pokemon leaves the battle
   public unregisterAllEffects() {
-    console.log('Effect Manager : Unregistering all items/abilities/status effects', this.hooks);
     this.hooks.clear();
   }
 
   public unregisterMoveEffects() {
-    console.log('Effect Manager : Unregistering all move effects : ', this.moveHooks);
     this.moveHooks.clear();
   }
 
   // To avoid duplicate item effects bugs
   public unregisterItemFunctions() {
-    console.log('Effect Manager : Unregistering all item functions', this.registeredItemFunctions);
     this.registeredItemFunctions.clear();
   }
 
   // To avoid duplicate status effects bugs
   public unregisterStatusFunctions() {
-    console.log('Effect Manager : Unregistering all status functions', this.registeredStatusFunctions);
     this.registeredStatusFunctions.clear();
   }
 
   public resetEffects(firstPokemon: Pokemon, secondPokemon: Pokemon) {
-    console.log('Effect Manager : Resetting all effects');
     this.unregisterAllEffects();
     this.unregisterMoveEffects();
     this.unregisterItemFunctions();
@@ -154,7 +141,6 @@ export class EffectManager {
   }
 
   public clearAllEffects() {
-    console.log('Effect Manager : Clearing all effects');
     this.unregisterAllEffects();
     this.unregisterMoveEffects();
     this.unregisterItemFunctions();
@@ -166,8 +152,6 @@ export class EffectManager {
     ...(this.hooks.get(hook) || []),
     ...(this.moveHooks.get(hook) || [])
     ];
-    console.log(`Effect Manager : Running Hook for ${hook} with context :`, context);
-    console.log(`Effect Manager : Functions for ${hook}:`, functions);
     for (const fn of functions) {
       try {
         fn(context);
@@ -183,10 +167,7 @@ export class EffectManager {
     ...(this.hooks.get(hook) || []),
     ...(this.moveHooks.get(hook) || [])
     ];
-    console.log(`Effect Manager : Running chainHook for ${hook} with initial value:`, initialValue);
-    console.log(`Effect Manager : Functions for ${hook}:`, functions);
     for (const fn of functions) {
-      console.log(`Effect Manager : Running function:`, fn);
       try {
         if (typeof fn !== 'function') {
           throw new Error(`Hook "${hook}" is not a function`);
@@ -195,8 +176,6 @@ export class EffectManager {
         console.error(`Error occurred while running hook "${hook}":`, error);
       }
       const result = fn(value, context);
-      console.log('Effect Manager : context:', context);
-      console.log(`Effect Manager : Result of function:`, result);
       if (result !== undefined) {
         value = result;
       }
@@ -210,7 +189,7 @@ export class EffectManager {
   public applyPreMoveEffects(context: any) {
     this.runHook('onPreMove', context);
   }
-  public applyDamageModifierEffects(damage:number, context: any): number {
+  public applyDamageModifierEffects(damage: number, context: any): number {
     return this.chainHook('onDamageModifier', damage, context);
   }
   public applyPostMoveEffects(context: any) {

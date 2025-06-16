@@ -16,33 +16,26 @@ import { abilities } from '../data/abilities';
 import { natures } from '../data/natures';
 import { createBattlePokemon } from '../utils/PokemonFactory';
 import ApiService from '../services/ApiService';
-import { AudioManager } from './AudioManager';
 import Swal from 'sweetalert2';
 
 export class TeamBuilderController {
   private element: HTMLElement;
   private currentTeam: (Pokemon | null)[] = [null, null, null, null, null, null];
-  private currentTeamName: string = '';
   private selectedPokemonIndex: number | null = null;
-  private selectedAttributeType: string | null = null; // 'pokemon', 'item', 'ability', 'move'
-  private audioManager: AudioManager;
 
   constructor() {
     this.element = document.getElementById('teambuilder-screen')!;
-    this.audioManager = AudioManager.getInstance();
     this.render();
     this.attachEvents();
 
     this.loadTeams();
 
     EventBus.on('auth:login-success', () => {
-      console.log('User logged in - reloading teams in TeamBuilderView');
       this.loadTeams();
       this.resetTeamBuilder();
     });
 
     EventBus.on('auth:logout', () => {
-      console.log('User logged out - clearing teams in TeamBuilderView');
       this.clearTeams();
       this.resetTeamBuilder();
     });
@@ -54,8 +47,6 @@ export class TeamBuilderController {
         this.updateTeamDisplay();
       }
     });
-
-    console.log("Store :", Store.getState());
   }
   
   private render(): void {
@@ -81,8 +72,6 @@ export class TeamBuilderController {
     for (let i = 0; i < 6; i++) {
       const slot = teamContainer.querySelector(`[data-slot="${i}"]`) as HTMLElement;
       const pokemon = this.currentTeam[i];
-      console.log("pokemon : ", pokemon);
-      console.log("currentTeam : ", this.currentTeam);
       
       if (pokemon) {
         slot.className = 'pokemon-slot' + (this.selectedPokemonIndex === i ? ' selected' : '');
@@ -201,7 +190,6 @@ export class TeamBuilderController {
 
   private loadSelector(type: string, data?: any): void {
     const selectorPanel = document.getElementById('selector-panel')!;
-    this.selectedAttributeType = type;
     
     selectorPanel.innerHTML = '<div class="loading">Chargement...</div>';
     
@@ -231,10 +219,7 @@ export class TeamBuilderController {
   }
 
   private loadPokemonSelector(container: HTMLElement): void {
-    const state = Store.getState();
     const pokemonSpecies = Object.entries(Pokedex);
-    console.log("pokemonSpecies : ", pokemonSpecies);
-    console.log("state : ", state);
 
     let template = pokemonSelectorView;
     template = template.replace('{{SELECTOR_POKEMON_LIST}}', 
@@ -291,7 +276,6 @@ export class TeamBuilderController {
             return;
           }
           const [key, _] = PokemonEntry;
-          console.log('SelectedPokemonIndex:', this.selectedPokemonIndex);
 
           const selectedPokemon = createBattlePokemon(
             key as keyof typeof Pokedex, 
@@ -312,7 +296,6 @@ export class TeamBuilderController {
           this.clearEditHighlight();
 
           // Reset the selector
-          this.selectedAttributeType = null;
           this.loadSelector('');
         }
       });
@@ -364,7 +347,6 @@ export class TeamBuilderController {
             this.clearEditHighlight();
             
             // Reset the selector
-            this.selectedAttributeType = null;
             this.loadSelector('');
           }
         }
@@ -419,7 +401,6 @@ export class TeamBuilderController {
             this.clearEditHighlight();
             
             // Reset the selector
-            this.selectedAttributeType = null;
             this.loadSelector('');
           }
         }
@@ -473,7 +454,6 @@ export class TeamBuilderController {
             this.clearEditHighlight();
 
             // Reset the selector
-            this.selectedAttributeType = null;
             this.loadSelector('');
           }
         }
@@ -485,8 +465,6 @@ export class TeamBuilderController {
     const availableMoves = data?.selectedPokemon.possibleMoves || [];
     const filteredMoves = Object.entries(moves)
       .filter(([key]) => availableMoves.includes(key));
-
-    console.log("moves : ", moves);
 
     let template = moveSelectorView;
     template = template.replace('{{SELECTOR_MOVE_LIST}}',
@@ -554,7 +532,6 @@ export class TeamBuilderController {
             this.clearEditHighlight();
 
             // Reset the selector
-            this.selectedAttributeType = null;
             this.loadSelector('');
           }
         }
@@ -565,14 +542,12 @@ export class TeamBuilderController {
   private attachEvents(): void {
     document.getElementById('back-to-menu')?.addEventListener('click', () => {
       // Reset the selector
-      this.selectedAttributeType = null;
       this.loadSelector('');
       EventBus.emit('teambuilder:back-to-menu');
     });
 
     document.getElementById('delete-team')?.addEventListener('click', () => {
       // Reset the selector
-      this.selectedAttributeType = null;
       this.loadSelector('');
 
       const teamIndex = Store.getState().currentTeamIndex;
@@ -702,8 +677,7 @@ export class TeamBuilderController {
       
       try {
         if (Store.getState().currentTeamIndex) {
-          const response = await ApiService.patch('update_team/' + Store.getState().currentTeamIndex, payload);
-          console.log('Team updated:', response);
+          await ApiService.patch('update_team/' + Store.getState().currentTeamIndex, payload);
           Swal.fire({
             title: 'Succès !',
             text: 'Équipe mise à jour avec succès !',
@@ -721,8 +695,7 @@ export class TeamBuilderController {
           this.updateTeamDisplay();
           return;
         }
-        const response = await ApiService.post('create_team', payload);
-        console.log('Team saved:', response);
+        await ApiService.post('create_team', payload);
         Swal.fire({
           title: 'Succès !',
           text: 'Équipe sauvegardée avec succès !',
@@ -753,7 +726,6 @@ export class TeamBuilderController {
     if (teamContainer) {
       teamContainer.addEventListener('click', (e) => {
         // Reset the selector
-        this.selectedAttributeType = null;
         this.loadSelector('');
         
         const slot = (e.target as HTMLElement).closest('.pokemon-slot');
@@ -763,12 +735,10 @@ export class TeamBuilderController {
           if (this.currentTeam[slotIndex]) {
             // If the slot has a Pokémon, select it
             this.selectedPokemonIndex = slotIndex;
-            console.log("selectedPokemonIndex : ", this.selectedPokemonIndex);
             this.updateTeamDisplay();
           } else {
             // If the slot is empty, open the Pokémon selector
             this.selectedPokemonIndex = slotIndex;
-            console.log("selectedPokemonIndex : ", this.selectedPokemonIndex);
             this.loadSelector('pokemon');
             this.updateTeamDisplay();
           }
@@ -781,7 +751,6 @@ export class TeamBuilderController {
       this.currentTeam = [null, null, null, null, null, null];
 
       // Reset the selector
-      this.selectedAttributeType = null;
       this.loadSelector('');
       
       this.selectedPokemonIndex = null;
@@ -803,7 +772,6 @@ export class TeamBuilderController {
         teamNameInput.value = '';
       }
 
-      console.log(Store.getState());
       this.updateTeamDisplay();
       this.updateButtonStates();
     });
@@ -812,7 +780,6 @@ export class TeamBuilderController {
     const teamsDropdown = document.getElementById('teams-dropdown') as HTMLSelectElement;
     teamsDropdown?.addEventListener('change', async (e: Event) => {
       // Reset the selector
-      this.selectedAttributeType = null;
       this.loadSelector('');
 
       const selectedValue = (e.target as HTMLSelectElement).value;
@@ -836,8 +803,6 @@ export class TeamBuilderController {
       try {
         const teamData = await ApiService.getAllTeamDataByTeamId(selectedTeamId);
 
-        console.log("Selected team data:", teamData);
-
         this.currentTeam = teamData.pokemons.map((apiPokemon) => {
           const apiPokemonNature = natures[apiPokemon.nature as keyof typeof natures];
           const apiPokemonAbility = abilities[apiPokemon.ability as keyof typeof abilities];
@@ -852,7 +817,6 @@ export class TeamBuilderController {
             }
           });
 
-          console.log('selectedPokemonIndex:', this.selectedPokemonIndex);
           const battlePokemon = createBattlePokemon(apiPokemon.pokemon_name as keyof typeof Pokedex, {
             nature: apiPokemonNature,
             moves: apiPokemonMoves,
@@ -869,9 +833,6 @@ export class TeamBuilderController {
         });
 
         Store.setState({ currentTeam: [...this.currentTeam], currentTeamIndex: selectedTeamId, currentTeamName: teamData.name });
-
-        console.log("Transformed team data:", this.currentTeam);
-        console.log("Store :", Store.getState());
 
         this.updateTeamDisplay();
       } catch (error) {
@@ -929,7 +890,6 @@ export class TeamBuilderController {
             this.updateTeamDisplay();
 
             // Reset the selector
-            this.selectedAttributeType = null;
             this.loadSelector('');
           }
         });
@@ -955,9 +915,7 @@ export class TeamBuilderController {
 
   private resetTeamBuilder(): void {
     this.currentTeam = [null, null, null, null, null, null];
-    this.currentTeamName = '';
     this.selectedPokemonIndex = null;
-    this.selectedAttributeType = null;
     
     Store.setState({ 
       currentTeam: this.currentTeam,

@@ -88,11 +88,9 @@ export class Pokemon {
     let battleState = Store.getState().battle;
     const clamp = (value: number, min: number, max: number) => {
       if (value > max) {
-        console.log(`Modificateur ${value} est supérieur à la limite ${max}, ajusté à ${max}.`);
         const statMessage = `Limite de +6, la stat ne peut pas plus augmenter !`;
         battleState.context.pendingLogs.push(statMessage);
       } else if (value < min) {
-        console.log(`Modificateur ${value} est inférieur à la limite ${min}, ajusté à ${min}.`);
         const statMessage = `Limite de -6, la stat ne peut pas plus diminuer !`;
         battleState.context.pendingLogs.push(statMessage);
       }

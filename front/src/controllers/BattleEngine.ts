@@ -195,7 +195,6 @@ export class BattleEngine {
     
     const hitChance = move.accuracy * (accuracy / evasion);
     const roll = Math.random() * 100;
-    console.log('BattleEngine : Hit chance:', hitChance, 'Roll:', roll, 'Accuracy:', accuracy, 'Evasion:', evasion);
     return roll <= hitChance;
   }
   
@@ -218,7 +217,6 @@ export class BattleEngine {
 
       return { damage: 0, effectiveness: 1, critical: false };
     }
-    console.log('Battle Engine : Move power : ', move.power);
     // Determine if the move is physical or special
     let attackStat: number;
     let defenseStat: number;
@@ -252,7 +250,6 @@ export class BattleEngine {
 
     // Final Damage
     let finalDamage = Math.ceil(baseDamage * stab * effectiveness * critMod * randomMod);
-    console.log('BattleEngine : Base Damage:', baseDamage, 'Final Damage:', finalDamage, 'CriticalMod:', critMod, 'Effectiveness:', effectiveness, 'STAB:', stab, 'RandomMod:', randomMod);
 
     const context = {
       ...battleState.context,
@@ -276,7 +273,6 @@ export class BattleEngine {
     ============================================================================
     */
     finalDamage = EffectManager.applyDamageModifierEffects(finalDamage, context);
-    console.log('BattleEngine : Final Damage after hooks:', finalDamage);
 
     return {
       damage: finalDamage,
@@ -338,7 +334,6 @@ export class BattleEngine {
     
     // Check if the move hits
     const hits = this.calculateHit(move, attacker, defender);
-    console.log('BattleEngine : Hits :', hits);
     
     if (!hits) {
       battleState.context.hits = false;
@@ -388,14 +383,10 @@ export class BattleEngine {
       const { target, damage } = battleState.context.pendingDamage;
       
       if (damage > 0) {
-        console.log('BattleEngine : Applying stored damage:', damage, 'to', target.name);
-        console.log('BattleEngine : HP before:', target.currentHp);
         
         target.currentHp = Math.max(0, target.currentHp - damage);
         target.hasBeenDamaged = true;
-        
-        console.log('BattleEngine : HP after:', target.currentHp);
-        
+                
         if (target.currentHp <= 0) {
           target.isAlive = false;
         }
