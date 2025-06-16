@@ -1,4 +1,4 @@
-import { Pokemon } from './PokemonModel';
+import { Pokemon } from '../models/PokemonModel';
 
 export type BattleStatus = 'initializing' | 'active' | 'won' | 'lost';
 export type WeatherType = 'clear' | 'rain' | 'sun' | 'sandstorm' | 'hail' | 'fog'; // to implement later

@@ -1440,3 +1440,33 @@
     margin-bottom: 10px;
   }
 }
+
+
+/* SweetAlert2 CSS */
+.swal2-popup {
+  border: 5px solid #333;
+  border-radius: 10px;
+}
+
+.swal2-title {
+  color: #333;
+  font-size: 1.5em;
+}
+
+.swal2-confirm {
+  background: linear-gradient(135deg, #062a79 0%, #355ca4 100%) !important;
+  border-radius: 5px !important;
+}
+
+.swal2-confirm:hover {
+  background: linear-gradient(135deg, #023093 0%, #3664b9 100%) !important;
+}
+
+.swal2-cancel {
+  background: linear-gradient(135deg, #ea7fb4 0%, #8d407a 100%) !important;
+  border-radius: 5px !important;
+}
+
+.swal2-cancel:hover {
+  background: linear-gradient(135deg, #f874b6 0%, #b04395 100%) !important;
+}

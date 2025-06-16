@@ -1,6 +1,14 @@
+import teamBuilderView from '../views/teambuilder/TeamBuilderView.html';
+import teamBuilderDetailsPanel from '../views/teambuilder/DetailsPanelView.html';
+import pokemonSelectorView from '../views/teambuilder/PokemonSelectorView.html';
+import itemSelectorView from '../views/teambuilder/ItemSelectorView.html';
+import abilitySelectorView from '../views/teambuilder/AbilitySelectorView.html';
+import natureSelectorView from '../views/teambuilder/NatureSelectorView.html';
+import moveSelectorView from '../views/teambuilder/MoveSelectorView.html';
 import EventBus from '../utils/EventBus';
 import Store from '../utils/Store';
-import { Pokemon, PokemonAbility, PokemonNature, PokemonItem, PokemonMove } from '../models/PokemonModel';
+import { Pokemon } from '../models/PokemonModel';
+import { PokemonAbility, PokemonNature, PokemonItem, PokemonMove } from '../interfaces/PokemonInterface';
 import { Pokedex } from '../data/pokedex';
 import { items } from '../data/items';
 import { moves } from '../data/moves';
@@ -8,9 +16,10 @@ import { abilities } from '../data/abilities';
 import { natures } from '../data/natures';
 import { createBattlePokemon } from '../utils/PokemonFactory';
 import ApiService from '../services/ApiService';
-import { AudioManager } from '../controllers/AudioManager';
+import { AudioManager } from './AudioManager';
+import Swal from 'sweetalert2';
 
-export class TeamBuilderView {
+export class TeamBuilderController {
   private element: HTMLElement;
   private currentTeam: (Pokemon | null)[] = [null, null, null, null, null, null];
   private currentTeamName: string = '';
@@ -50,69 +59,18 @@ export class TeamBuilderView {
   }
   
   private render(): void {
-    this.element.innerHTML = `
-      <div class="teambuilder-layout">
-        <!-- Left panel - Team management -->
-        <div class="team-panel">          
-          <div class="teambuilder-header-section">
-            <!-- Header with title and back button -->
-            <div class="teambuilder-header">
-              <h1 class="teambuilder-title">Team Builder</h1>
-              <button id="back-to-menu" class="back-button">Retour au Menu</button>
-            </div>
-            
-            <!-- Team controls (dropdown + new team button) -->
-            <div class="team-controls">
-              <div class="team-selector">
-                <label class="teams-label" for="teams-dropdown">Mes équipes</label>
-                <select id="teams-dropdown" class="teams-dropdown">
-                  <!-- Saved teams will be injected here -->
-                </select>
-              </div>
-              <button id="new-team-btn" class="new-team-button">+ Nouvelle équipe</button>
-            </div>
-            
-            <!-- Team name input -->
-            <div class="team-name-controls">
-              <label for="team-name-input" class="team-name-label">Nom de l'équipe</label>
-              <input type="text" id="team-name-input" placeholder="Entrez un nom d'équipe..." class="team-name-input">
-            </div>
-          </div>
-          
-          <div class="team-pokemon-list">
-            <h2>Pokémon de l'équipe</h2>
-            <div id="team-slots">
-              ${Array(6).fill(0).map((_, i) => `
-                <div class="pokemon-slot empty" data-slot="${i}">
-                  <div class="slot-number">${i + 1}</div>
-                </div>
-              `).join('')}
-            </div>
-          </div>
+    let template = teamBuilderView;
 
-          <button id="delete-team" class="delete-team-button">Supprimer l'équipe</button>
-          <button id="save-team" class="save-team-button">Sauvegarder l'équipe</button>
+    template = template.replace('{{TEAM_SLOTS}}', 
+      `${Array(6).fill(0).map((_, i) => `
+        <div class="pokemon-slot empty" data-slot="${i}">
+          <div class="slot-number">${i + 1}</div>
         </div>
-        
-        <!-- Right panel - Pokemon details & selector -->
-        <div class="details-panel">
-          <div id="pokemon-details" class="pokemon-details">
-            <!-- Pokemon details will be displayed here when a pokemon is selected -->
-            <div class="empty-details-message">
-              <p>Sélectionnez un Pokémon pour voir et modifier ses détails</p>
-            </div>
-          </div>
-          
-          <div id="selector-panel" class="selector-panel">
-            <!-- Dynamic content will be loaded here based on what is being edited -->
-            <div class="empty-selector-message">
-              <p>Cliquez sur un attribut du Pokémon pour le modifier</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-    
+      `).join('')}`
+    );
+
+    this.element.innerHTML = template;
+
     this.updateTeamDisplay();
   }
   
@@ -163,117 +121,57 @@ export class TeamBuilderView {
       `;
       return;
     }
-    
+
     const pokemon = this.currentTeam[this.selectedPokemonIndex];
-    detailsPanel.innerHTML = `
-      <div class="pokemon-detail-card">
-        <!-- Top row: Pokemon info + attributes in columns -->
-        <div class="pokemon-info-row">
-          <div class="pokemon-header">
-            <img src="src/public/images/sprites/${pokemon?.name.toLowerCase()}/${pokemon?.name.toLowerCase()}_face.png" 
-                alt="${pokemon?.name.toLowerCase()}" class="pokemon-avatar">
-            <div class="pokemon-title">
-              <h2 class="pokemon-name editable" data-attribute="pokemon">${pokemon?.name}</h2>
-              <div class="pokemon-types">
-                <img src="src/public/images/types/${pokemon?.types[0].toLowerCase()}.png" alt="${pokemon?.types[0]}" class="type-icon">
-                ${pokemon?.types[1] ? `<img src="src/public/images/types/${pokemon?.types[1]?.toLowerCase()}.png" alt="${pokemon?.types[1]}" class="type-icon">` : ''}
+
+    let template = teamBuilderDetailsPanel;
+    template = template.replace('{{POKEMON_SPRITE}}', `${pokemon?.name.toLowerCase()}/${pokemon?.name.toLowerCase()}`);
+    template = template.replace('{{POKEMON_SPRITE_ALT}}', `${pokemon?.name.toLowerCase()}`);
+    template = template.replace('{{POKEMON_NAME}}', `${pokemon?.name}`);
+    template = template.replace('{{POKEMON_FIRST_TYPE}}', `${pokemon?.types[0].toLowerCase()}`);
+    template = template.replace('{{POKEMON_FIRST_TYPE_ALT}}', `${pokemon?.types[0]}`);
+      template = template.replace('{{POKEMON_SECOND_TYPE}}', 
+        `${pokemon?.types[1] ? `<img src="src/public/images/types/${pokemon.types[1]?.toLowerCase()}.png" alt="${pokemon.types[1]}" class="type-icon">` : ''}`);
+    
+    template = template.replace('{{POKEMON_ITEM}}', pokemon?.item?.name || 'Aucun');
+    template = template.replace('{{POKEMON_ABILITY}}', pokemon?.ability.name || 'Aucun');
+    template = template.replace('{{POKEMON_NATURE}}', pokemon?.nature.name || 'Aucun');
+
+    template = template.replace('{{SELECTED_POKEMON_INDEX}}', `${this.selectedPokemonIndex}`);
+
+    template = template.replace('{{POKEMON_HP}}', `${pokemon?.baseStats.hp || 0}`);
+    template = template.replace('{{POKEMON_ATTACK}}', `${pokemon?.baseStats.attack || 0}`);
+    template = template.replace('{{POKEMON_DEFENSE}}', `${pokemon?.baseStats.defense || 0}`);
+    template = template.replace('{{POKEMON_SPECIAL_ATTACK}}', `${pokemon?.baseStats.specialAttack || 0}`);
+    template = template.replace('{{POKEMON_SPECIAL_DEFENSE}}', `${pokemon?.baseStats.specialDefense || 0}`);
+    template = template.replace('{{POKEMON_SPEED}}', `${pokemon?.baseStats.speed || 0}`);
+
+    template = template.replace('{{POKEMON_MOVES}}',
+      `${Array(4).fill(0).map((_, i) => {
+        const move = pokemon?.moves && pokemon?.moves[i] ? pokemon?.moves[i] : null;
+        return `
+          <div class="move-slot ${!move ? 'empty' : ''}" data-move-slot="${i}">
+            <div class="move-content">
+              <div class="move-data-row">
+                <span class="editable move-name" data-attribute="move" data-move-index="${i}">${move?.name || 'Attaque ' + (i + 1)}</span>
+                <div class="move-type-icon">
+                  <img src="src/public/images/types/${move?.type?.toLowerCase() || null}.png" alt="${move?.type || 'Normal'}" class="move-type">
+                </div>
+                <span class="move-category">${move?.category || '-'}</span>
+                <span class="move-power">${move?.power || '-'}</span>
+                <span class="move-accuracy">${move?.accuracy ? move.accuracy + '%' : '-'}</span>
+                <span class="move-pp">${move?.pp || '-'}</span>
+                <span class="move-action">
+                  ${move ? `<button class="remove-move-btn" data-move-index="${i}" title="Supprimer cette attaque">×</button>` : ''}
+                </span>
               </div>
+              ${move && move.description ? `<div class="move-description">${move.description}</div>` : `<div class="move-description">Pas d'effet secondaire</div>`}
             </div>
           </div>
-          
-          <div class="pokemon-attributes">
-            <div class="attribute-row" data-type="item">
-              <span class="attribute-label">Objet</span>
-              <span class="attribute-value editable" data-attribute="item">${pokemon?.item?.name || 'Aucun'}</span>
-            </div>
-            <div class="attribute-row" data-type="ability">
-              <span class="attribute-label">Talent</span>
-              <span class="attribute-value editable" data-attribute="ability">${pokemon?.ability.name || 'Aucun'}</span>
-            </div>
-            <div class="attribute-row" data-type="nature">
-              <span class="attribute-label">Nature</span>
-              <span class="attribute-value editable" data-attribute="nature">${pokemon?.nature.name || 'Aucun'}</span>
-            </div>
-          </div>
-          
-          <div class="pokemon-actions">
-            <button id="remove-pokemon" class="remove-button" data-slot="${this.selectedPokemonIndex}">
-              Retirer
-            </button>
-          </div>
-        </div>
-        
-        <!-- Bottom row: Stats + Moves in columns -->
-        <div class="pokemon-details-row">
-          <div class="pokemon-stats">
-            <h3>Statistiques</h3>
-            <div class="stats-grid">
-              <div class="stat-row">
-                <span class="stat-label">PV</span>
-                <span class="stat-value">${pokemon?.baseStats.hp || 0}</span>
-              </div>
-              <div class="stat-row">
-                <span class="stat-label">Attaque</span>
-                <span class="stat-value">${pokemon?.baseStats.attack || 0}</span>
-              </div>
-              <div class="stat-row">
-                <span class="stat-label">Défense</span>
-                <span class="stat-value">${pokemon?.baseStats.defense || 0}</span>
-              </div>
-              <div class="stat-row">
-                <span class="stat-label">Att. Spé</span>
-                <span class="stat-value">${pokemon?.baseStats.specialAttack || 0}</span>
-              </div>
-              <div class="stat-row">
-                <span class="stat-label">Déf. Spé</span>
-                <span class="stat-value">${pokemon?.baseStats.specialDefense || 0}</span>
-              </div>
-              <div class="stat-row">
-                <span class="stat-label">Vitesse</span>
-                <span class="stat-value">${pokemon?.baseStats.speed || 0}</span>
-              </div>
-            </div>
-          </div>
-          
-          <div class="pokemon-moves">
-            <div class="moves-header-row">
-              <h3>Attaques</h3>
-              <span class="move-col-header type-col">Type</span>
-              <span class="move-col-header category-col">Catégorie</span>
-              <span class="move-col-header power-col">Puissance</span>
-              <span class="move-col-header accuracy-col">Précision</span>
-              <span class="move-col-header pp-col">PP</span>
-              <span class="move-col-header action-col"></span>
-            </div>
-            <div class="moves-list">
-              ${Array(4).fill(0).map((_, i) => {
-                const move = pokemon?.moves && pokemon?.moves[i] ? pokemon?.moves[i] : null;
-                return `
-                  <div class="move-slot ${!move ? 'empty' : ''}" data-move-slot="${i}">
-                    <div class="move-content">
-                      <div class="move-data-row">
-                        <span class="editable move-name" data-attribute="move" data-move-index="${i}">${move?.name || 'Attaque ' + (i + 1)}</span>
-                        <div class="move-type-icon">
-                          <img src="src/public/images/types/${move?.type?.toLowerCase() || null}.png" alt="${move?.type || 'Normal'}" class="move-type">
-                        </div>
-                        <span class="move-category">${move?.category || '-'}</span>
-                        <span class="move-power">${move?.power || '-'}</span>
-                        <span class="move-accuracy">${move?.accuracy ? move.accuracy + '%' : '-'}</span>
-                        <span class="move-pp">${move?.pp || '-'}</span>
-                        <span class="move-action">
-                          ${move ? `<button class="remove-move-btn" data-move-index="${i}" title="Supprimer cette attaque">×</button>` : ''}
-                        </span>
-                      </div>
-                      ${move && move.description ? `<div class="move-description">${move.description}</div>` : `<div class="move-description">Pas d'effet secondaire</div>`}
-                    </div>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
+        `;
+      }).join('')}`);
+
+    detailsPanel.innerHTML = template;
 
     this.attachDetailEvents();
   }
@@ -337,51 +235,34 @@ export class TeamBuilderView {
     const pokemonSpecies = Object.entries(Pokedex);
     console.log("pokemonSpecies : ", pokemonSpecies);
     console.log("state : ", state);
-    
-    container.innerHTML = `
-      <div class="selector-header">
-        <h3>Choisir un Pokémon</h3>
-        <input type="text" id="pokemon-search" placeholder="Rechercher..." class="search-input">
-      </div>
-      
-      <!-- Add column headers for Pokemon stats -->
-      <div class="pokemon-column-headers">
-        <span></span>
-        <span>Nom</span>
-        <span>Types</span>
-        <span>PV</span>
-        <span>Atk</span>
-        <span>Déf</span>
-        <span>Spa</span>
-        <span>Spd</span>
-        <span>Vit</span>
-      </div>
-      
-      <div class="selector-list pokemon-list">
-        ${pokemonSpecies.map(([key, pokemon]: [string, any]) => `
-          <div class="selector-item pokemon-element" 
-            data-pokemon-key="${key}" 
-            data-pokemon-id="${pokemon.id}" 
-            data-pokemon-name="${pokemon.name}">
-            <div class="pokemon-data-row">
-              <img src="src/public/images/sprites/${pokemon.name.toLowerCase()}/${pokemon.name.toLowerCase()}_face.png" 
-                alt="${pokemon.name}" class="pokemon-icon">
-              <span class="pokemon-name">${pokemon.name}</span>
-              <div class="pokemon-types">
-                <img src="src/public/images/types/${pokemon.types[0].toLowerCase()}.png" alt="${pokemon.types[0]}" class="type-icon">
-                ${pokemon.types[1] ? `<img src="src/public/images/types/${pokemon.types[1]?.toLowerCase()}.png" alt="${pokemon.types[1]}" class="type-icon">` : ''}
-              </div>
-              <span class="pokemon-hp">${pokemon.baseStats.hp}</span>
-              <span class="pokemon-atk">${pokemon.baseStats.attack}</span>
-              <span class="pokemon-def">${pokemon.baseStats.defense}</span>
-              <span class="pokemon-spa">${pokemon.baseStats.specialAttack}</span>
-              <span class="pokemon-spd">${pokemon.baseStats.specialDefense}</span>
-              <span class="pokemon-spe">${pokemon.baseStats.speed}</span>
+
+    let template = pokemonSelectorView;
+    template = template.replace('{{SELECTOR_POKEMON_LIST}}', 
+      `${pokemonSpecies.map(([key, pokemon]: [string, any]) => `
+        <div class="selector-item pokemon-element" 
+          data-pokemon-key="${key}" 
+          data-pokemon-id="${pokemon.id}" 
+          data-pokemon-name="${pokemon.name}">
+          <div class="pokemon-data-row">
+            <img src="src/public/images/sprites/${pokemon.name.toLowerCase()}/${pokemon.name.toLowerCase()}_face.png" 
+              alt="${pokemon.name}" class="pokemon-icon">
+            <span class="pokemon-name">${pokemon.name}</span>
+            <div class="pokemon-types">
+              <img src="src/public/images/types/${pokemon.types[0].toLowerCase()}.png" alt="${pokemon.types[0]}" class="type-icon">
+              ${pokemon.types[1] ? `<img src="src/public/images/types/${pokemon.types[1]?.toLowerCase()}.png" alt="${pokemon.types[1]}" class="type-icon">` : ''}
             </div>
+            <span class="pokemon-hp">${pokemon.baseStats.hp}</span>
+            <span class="pokemon-atk">${pokemon.baseStats.attack}</span>
+            <span class="pokemon-def">${pokemon.baseStats.defense}</span>
+            <span class="pokemon-spa">${pokemon.baseStats.specialAttack}</span>
+            <span class="pokemon-spd">${pokemon.baseStats.specialDefense}</span>
+            <span class="pokemon-spe">${pokemon.baseStats.speed}</span>
           </div>
-        `).join('')}
-      </div>
-    `;
+        </div>
+      `).join('')}`
+    );
+
+    container.innerHTML = template;
 
     // Attach search event
     const searchInput = document.getElementById('pokemon-search');
@@ -440,28 +321,21 @@ export class TeamBuilderView {
 
   private loadItemSelector(container: HTMLElement): void {
     const availableItems = Object.entries(items);
-    
-    container.innerHTML = `
-      <div class="selector-header">
-        <h3>Choisir un objet</h3>
-        <input type="text" id="item-search" placeholder="Rechercher..." class="search-input">
-      </div>
-      <div class="selector-list">
-        <div class="selector-item item-element" data-item-id="0">
-          <span>Aucun</span>
-          <small>Aucun objet équipé</small>
+
+    let template = itemSelectorView;
+    template = template.replace('{{SELECTOR_ITEM_LIST}}',
+      `${availableItems.map(([key, item]: [string, PokemonItem]) => `
+        <div class="selector-item item-element" 
+          data-item-key="${key}"
+          data-item-id="${item.id}" 
+          data-item-name="${item.name}">
+          <span>${item.name}</span>
+          <small>${item.description}</small>
         </div>
-        ${availableItems.map(([key, item]: [string, PokemonItem]) => `
-          <div class="selector-item item-element" 
-            data-item-key="${key}"
-            data-item-id="${item.id}" 
-            data-item-name="${item.name}">
-            <span>${item.name}</span>
-            <small>${item.description}</small>
-          </div>
-        `).join('')}
-      </div>
-    `;
+      `).join('')}`
+    );
+
+    container.innerHTML = template;
 
     const searchInput = container.querySelector('#item-search');
     if (searchInput) {
@@ -502,24 +376,21 @@ export class TeamBuilderView {
     const availableAbilities = pokemonData?.possibleAbilities || [];
     const filteredAbilities = Object.entries(abilities)
       .filter(([key]) => availableAbilities.includes(key));
+      
+    let template = abilitySelectorView;
+    template = template.replace('{{SELECTOR_ABILITY_LIST}}',
+      `${filteredAbilities.map(([key, ability]: [string, PokemonAbility]) => `
+        <div class="selector-item ability-element" 
+          data-ability-key="${key}"
+          data-ability-id="${ability.id}" 
+          data-ability-name="${ability.name}">
+          <span>${ability.name}</span>
+          <small>${ability.description}</small>
+        </div>
+      `).join('')}`
+    );
 
-    container.innerHTML = `
-      <div class="selector-header">
-        <h3>Choisir un talent</h3>
-        <input type="text" id="ability-search" placeholder="Rechercher..." class="search-input">
-      </div>
-      <div class="selector-list">
-        ${filteredAbilities.map(([key, ability]: [string, PokemonAbility]) => `
-          <div class="selector-item ability-element" 
-            data-ability-key="${key}"
-            data-ability-id="${ability.id}" 
-            data-ability-name="${ability.name}">
-            <span>${ability.name}</span>
-            <small>${ability.description}</small>
-          </div>
-        `).join('')}
-      </div>
-    `;
+    container.innerHTML = template;
 
     const searchInput = container.querySelector('#ability-search');
     if (searchInput) {
@@ -558,24 +429,21 @@ export class TeamBuilderView {
 
   private loadNatureSelector(container: HTMLElement): void {
     const availableNatures = Object.entries(natures);
-    
-    container.innerHTML = `
-      <div class="selector-header">
-        <h3>Choisir une nature</h3>
-        <input type="text" id="nature-search" placeholder="Rechercher..." class="search-input">
-      </div>
-      <div class="selector-list">
-        ${availableNatures.map(([key, nature]: [string, PokemonNature]) => `
-          <div class="selector-item nature-element" 
-            data-nature-key="${key}"
-            data-nature-id="${nature.id}" 
-            data-nature-name="${nature.name}">
-            <span>${nature.name}</span>
-            <small>${nature.description}</small>
-          </div>
-        `).join('')}
-      </div>
-    `;
+
+    let template = natureSelectorView;
+    template = template.replace('{{SELECTOR_NATURE_LIST}}',
+      `${availableNatures.map(([key, nature]: [string, PokemonNature]) => `
+        <div class="selector-item nature-element" 
+          data-nature-key="${key}"
+          data-nature-id="${nature.id}" 
+          data-nature-name="${nature.name}">
+          <span>${nature.name}</span>
+          <small>${nature.description}</small>
+        </div>
+      `).join('')}`
+    );
+
+    container.innerHTML = template; 
 
     const searchInput = container.querySelector('#nature-search');
       if (searchInput) {
@@ -619,45 +487,32 @@ export class TeamBuilderView {
       .filter(([key]) => availableMoves.includes(key));
 
     console.log("moves : ", moves);
-    container.innerHTML = `
-      <div class="selector-header">
-        <h3>Choisir une attaque</h3>
-        <input type="text" id="move-search" placeholder="Rechercher..." class="search-input">
-      </div>
-      
-      <!-- Column headers for move data -->
-      <div class="move-column-headers">
-        <span>Nom</span>
-        <span>Type</span>
-        <span>Catégorie</span>
-        <span>Puissance</span>
-        <span>Précision</span>
-        <span>PP</span>
-      </div>
-      
-      <div class="selector-list move-selector-list">
-        ${filteredMoves.map(([key, move]) => `
-          <div class="selector-item move-element" 
-          data-move-key="${key}"
-          data-move-id="${move.id}" 
-          data-move-name="${move.name}" 
-          data-move-index="${data?.moveIndex || 0}" 
-          data-move-type="${move.type}">
-            <div class="move-data-row">
-              <span class="move-name">${move.name}</span>
-              <div class="move-type-icon">
-                <img src="src/public/images/types/${move?.type?.toLowerCase() || 'normal'}.png" alt="${move?.type || 'Normal'}" class="move-type">
-              </div>
-              <span class="move-category">${move.category}</span>
-              <span class="move-power">${move.power || '-'}</span>
-              <span class="move-accuracy">${move.accuracy ? move.accuracy + '%' : '-'}</span>
-              <span class="move-pp">${move.pp}</span>
+
+    let template = moveSelectorView;
+    template = template.replace('{{SELECTOR_MOVE_LIST}}',
+      `${filteredMoves.map(([key, move]) => `
+        <div class="selector-item move-element" 
+        data-move-key="${key}"
+        data-move-id="${move.id}" 
+        data-move-name="${move.name}" 
+        data-move-index="${data?.moveIndex || 0}" 
+        data-move-type="${move.type}">
+          <div class="move-data-row">
+            <span class="move-name">${move.name}</span>
+            <div class="move-type-icon">
+              <img src="src/public/images/types/${move?.type?.toLowerCase() || 'normal'}.png" alt="${move?.type || 'Normal'}" class="move-type">
             </div>
-            <div class="move-description">${move.description || 'Pas d\'effet secondaire'}</div>
+            <span class="move-category">${move.category}</span>
+            <span class="move-power">${move.power || '-'}</span>
+            <span class="move-accuracy">${move.accuracy ? move.accuracy + '%' : '-'}</span>
+            <span class="move-pp">${move.pp}</span>
           </div>
-        `).join('')}
-      </div>
-    `;
+          <div class="move-description">${move.description || 'Pas d\'effet secondaire'}</div>
+        </div>
+      `).join('')}`
+    );
+
+    container.innerHTML = template;
 
     const searchInput = container.querySelector('#move-search');
     if (searchInput) {
@@ -722,22 +577,43 @@ export class TeamBuilderView {
 
       const teamIndex = Store.getState().currentTeamIndex;
       if (teamIndex) {
-        ApiService.delete('team/' + teamIndex)
-          .then(() => {
-            alert('Équipe supprimée avec succès !');
+        Swal.fire({
+          title: 'Confirmation',
+          text: 'Veux-tu vraiment supprimer cette équipe ?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Oui, supprimer',
+          cancelButtonText: 'Annuler'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            ApiService.delete('team/' + teamIndex)
+              .then(() => {
+                Swal.fire({
+                  title: 'Supprimée !',
+                  text: 'Équipe supprimée avec succès !',
+                  icon: 'success',
+                  confirmButtonText: 'OK'
+                });
 
-            // For MenuView team selector
-            EventBus.emit('teambuilder:team-deleted');
-            
-            this.loadTeams();
-            this.currentTeam = [null, null, null, null, null, null];
-            Store.setState({ currentTeam: this.currentTeam , currentTeamIndex: null });
-            this.updateTeamDisplay();
-          })
-          .catch((error) => {
-            console.error('Erreur lors de la suppression de l\'équipe:', error);
-            alert('Erreur lors de la suppression de l\'équipe.');
-          });
+                // For MenuView team selector
+                EventBus.emit('teambuilder:team-deleted');
+                
+                this.loadTeams();
+                this.currentTeam = [null, null, null, null, null, null];
+                Store.setState({ currentTeam: this.currentTeam , currentTeamIndex: null });
+                this.updateTeamDisplay();
+              })
+              .catch((error) => {
+                console.error('Erreur lors de la suppression de l\'équipe:', error);
+                Swal.fire({
+                  title: 'Erreur',
+                  text: 'Erreur lors de la suppression de l\'équipe.',
+                  icon: 'error',
+                  confirmButtonText: 'OK'
+                });
+              });
+          }
+        });
       } else {
         this.loadTeams();
         this.currentTeam = [null, null, null, null, null, null];
@@ -750,28 +626,53 @@ export class TeamBuilderView {
       const teamNameInput = document.getElementById('team-name-input') as HTMLInputElement;
       const teamNameInputValue = teamNameInput.value;
       if (!Store.getState().currentTeamIndex && !teamNameInputValue) {
-        alert('Tu dois donner un nom à ton équipe !');
+        Swal.fire({
+          title: 'Erreur',
+          text: 'Tu dois donner un nom à ton équipe !',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
         return;
       }
 
       if (!this.currentTeam.some(pokemon => pokemon !== null)) {
-        alert('Tu dois ajouter au moins un Pokémon à ton équipe !');
+        Swal.fire({
+          title: 'Erreur',
+          text: 'Tu dois ajouter au moins un Pokémon à ton équipe !',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
         return;
       }
   
       for (const pokemon of this.currentTeam) {
         if (!pokemon) continue;
         if (pokemon.ability.id === 0) {
-          alert('Un Pokémon doit avoir un talent !');
+          Swal.fire({
+            title: 'Erreur',
+            text: 'Un Pokémon doit avoir un talent !',
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
           return;
         }
         if (pokemon.nature.id === 0) {
-          alert('Un Pokémon doit avoir une nature !');
-          return; 
+          Swal.fire({
+            title: 'Erreur',
+            text: 'Un Pokémon doit avoir une nature !',
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
+          return;
         }
         if (pokemon.moves.length === 0) {
-          alert('Un Pokémon doit avoir au moins une attaque !');
-          return; 
+          Swal.fire({
+            title: 'Erreur',
+            text: 'Un Pokémon doit avoir au moins une attaque !',
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
+          return;
         }
       }
       
@@ -803,7 +704,12 @@ export class TeamBuilderView {
         if (Store.getState().currentTeamIndex) {
           const response = await ApiService.patch('update_team/' + Store.getState().currentTeamIndex, payload);
           console.log('Team updated:', response);
-          alert('Équipe mise à jour avec succès !');
+          Swal.fire({
+            title: 'Succès !',
+            text: 'Équipe mise à jour avec succès !',
+            icon: 'success',
+            confirmButtonText: 'OK'
+          });
 
           // For MenuView team selector
           EventBus.emit('teambuilder:team-saved');
@@ -817,13 +723,23 @@ export class TeamBuilderView {
         }
         const response = await ApiService.post('create_team', payload);
         console.log('Team saved:', response);
-        alert('Équipe sauvegardée avec succès !');
+        Swal.fire({
+          title: 'Succès !',
+          text: 'Équipe sauvegardée avec succès !',
+          icon: 'success',
+          confirmButtonText: 'OK'
+        });
 
         // For MenuView team selector
         EventBus.emit('teambuilder:team-saved');
       } catch (error) {
         console.error('Erreur lors du saveTeam:', error);
-        alert("Une erreur est survenue lors de la sauvegarde de l'équipe.");
+        Swal.fire({
+          title: 'Erreur',
+          text: "Une erreur est survenue lors de la sauvegarde de l'équipe.",
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
       }
       teamNameInput.value = ''; // Clear the input after saving
       this.loadTeams();

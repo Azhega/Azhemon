@@ -1,9 +1,10 @@
 import EventBus from '../utils/EventBus';
 import Store from '../utils/Store';
-import { BattleView } from '../views/BattleView';
-import { Pokemon, PokemonMove } from '../models/PokemonModel';
+import { BattleView } from '../views/battle/BattleView.ts';
+import { Pokemon } from '../models/PokemonModel';
+import { PokemonMove } from '../interfaces/PokemonInterface.ts'
 import { TurnManager } from './TurnManager.ts';
-import { BattleAction, BattleState, BattleTurn } from '../models/BattleInterface.ts';
+import { BattleAction, BattleState, BattleTurn } from '../interfaces/BattleInterface.ts';
 import { items } from '../data/items.ts';
 import { abilities } from '../data/abilities.ts';
 import { moves } from '../data/moves.ts';

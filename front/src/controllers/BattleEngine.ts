@@ -1,5 +1,6 @@
-import { Pokemon, PokemonMove } from '../models/PokemonModel';
-import { MoveResult, BattleState, WeatherType } from '../models/BattleInterface';
+import { Pokemon } from '../models/PokemonModel';
+import { PokemonMove } from '../interfaces/PokemonInterface';
+import { MoveResult, BattleState } from '../interfaces/BattleInterface';
 import Store from '../utils/Store';
 import EffectManager from './EffectManager';
 

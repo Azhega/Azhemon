@@ -1,6 +1,6 @@
 import Store from '../utils/Store.ts';
 import { PokemonStats, PokemonMove, PokemonAbility, 
-  PokemonItem, PokemonNature, PokemonStatus } from './PokemonInterface.ts';
+  PokemonItem, PokemonNature, PokemonStatus } from '../interfaces/PokemonInterface.ts';
 
 export class Pokemon {
   key: string;

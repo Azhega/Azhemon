@@ -1,4 +1,4 @@
-import { BattleAction, BattleTurn } from '../models/BattleInterface';
+import { BattleAction, BattleTurn } from '../interfaces/BattleInterface';
 import { Pokemon } from '../models/PokemonModel';
 import { BattleEngine } from './BattleEngine';
 import EventBus from '../utils/EventBus';

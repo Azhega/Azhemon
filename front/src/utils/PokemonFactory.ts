@@ -1,5 +1,6 @@
 import { Pokedex } from '../data/pokedex';
-import { Pokemon, PokemonAbility, PokemonMove, PokemonItem, PokemonNature } from '../models/PokemonModel';
+import { Pokemon } from '../models/PokemonModel';
+import { PokemonAbility, PokemonMove, PokemonItem, PokemonNature } from '../interfaces/PokemonInterface';
 
 export function createBattlePokemon(
   speciesName: keyof typeof Pokedex,

@@ -1,3 +1,5 @@
+import menuView from '../views/menu/MenuView.html';
+import menuTeamPreview from '../views/menu/TeamPreviewView.html';
 import EventBus from '../utils/EventBus';
 import Store from '../utils/Store';
 import ApiService from '../services/ApiService';
@@ -9,9 +11,9 @@ import { moves } from '../data/moves';
 import { abilities } from '../data/abilities';
 import { natures } from '../data/natures';
 import { createBattlePokemon } from '../utils/PokemonFactory';
-import { AudioManager } from '../controllers/AudioManager';
+import { AudioManager } from './AudioManager';
 
-export class MenuView {
+export class MenuController {
   private element: HTMLElement;
   private audioManager: AudioManager;
 
@@ -54,51 +56,12 @@ export class MenuView {
   }
   
   private render(): void {
-    this.element.innerHTML = `
-      <div class="sound-toggle">
-        <div class="sound-icon">
-          ${this.audioManager.isMusicMuted() ? '🔇' : '🔊'}
-        </div>
-      </div>
-      
-      <button id="logout-button" class="logout-button">Déconnexion</button>
+    let template = menuView;
 
-      <div class="menu-container">
-        <!-- User info -->
-        <div class="menu-header">
-          <div class="user-info">
-            <span>Bienvenue, ${Store.getState().user.username || 'Joueur'}</span>
-          </div>
-        </div>
+    template = template.replace('{{SOUND_ICON}}', this.audioManager.isMusicMuted() ? '🔇' : '🔊');
+    template = template.replace('{{USERNAME}}', Store.getState().user.username || 'Joueur');
 
-        <div class="logo-container">
-          <div class="game-logo">AZHEMON</div>
-        </div>
-        
-        <!-- Team Selection Section -->
-        <div class="team-selection-section">
-          <div class="team-selector-container">
-            <h3>Choisir une équipe</h3>
-            <select id="battle-teams-dropdown" class="battle-teams-dropdown">
-              <option value="">Chargement des équipes...</option>
-            </select>
-            
-            <div id="selected-team-preview" class="selected-team-preview" style="display: none;">
-              <h4>Aperçu de l'équipe</h4>
-              <div id="team-preview-slots" class="team-preview-slots">
-                <!-- Team preview will be populated here -->
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Action Buttons -->
-        <div class="menu-buttons">
-          <button id="teambuilder-button" class="menu-button">Team Builder</button>
-          <button id="battle-button" class="menu-button" disabled>Lancer le Combat</button>
-        </div>
-      </div>
-    `;
+    this.element.innerHTML = template;
   }
 
   private clearTeams(): void {
@@ -205,20 +168,17 @@ export class MenuView {
       if (!pokemon) {
         return `<div class="preview-slot empty-slot">${index + 1}</div>`;
       }
-      
-      return `
-        <div class="preview-slot filled-slot">
-          <img src="src/public/images/sprites/${pokemon.name.toLowerCase()}/${pokemon.name.toLowerCase()}_face.png" 
-               alt="${pokemon.name}" class="preview-sprite">
-          <div class="preview-info">
-            <span class="preview-name">${pokemon.name}</span>
-            <div class="pokemon-types">
-                <img src="src/public/images/types/${pokemon.types[0].toLowerCase()}.png" alt="${pokemon.types[0]}" class="type-icon">
-                ${pokemon.types[1] ? `<img src="src/public/images/types/${pokemon.types[1]?.toLowerCase()}.png" alt="${pokemon.types[1]}" class="type-icon">` : ''}
-              </div>
-          </div>
-        </div>
-      `;
+
+      let template = menuTeamPreview;
+      template = template.replace('{{POKEMON_SPRITE}}', `${pokemon.name.toLowerCase()}/${pokemon.name.toLowerCase()}`);
+      template = template.replace('{{POKEMON_SPRITE_ALT}}', pokemon.name);
+      template = template.replace('{{POKEMON_NAME}}', pokemon.name);
+      template = template.replace('{{POKEMON_FIRST_TYPE}}', pokemon.types[0].toLowerCase());
+      template = template.replace('{{POKEMON_FIRST_TYPE_ALT}}', pokemon.types[0]);
+      template = template.replace('{{POKEMON_SECOND_TYPE}}', 
+        `${pokemon.types[1] ? `<img src="src/public/images/types/${pokemon.types[1]?.toLowerCase()}.png" alt="${pokemon.types[1]}" class="type-icon">` : ''}`);
+
+      return template;
     }).join('');
     
     previewContainer.style.display = 'block';
