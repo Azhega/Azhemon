@@ -360,8 +360,6 @@ export class PokemonAI {
 
     this.reasoning.push(`CPU Decision: Switch to ${newCpuPokemon.name} (bestScore: ${bestScore})`);
 
-    console.log(this.reasoning.join('\n')); // Debug output
-
     return {
       newCpuPokemon: newCpuPokemon,
       bestScore: bestScore

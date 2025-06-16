@@ -53,7 +53,6 @@ export const moves = {
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         const random = Math.random();
-        console.log('Ébullition : random', random);
         if (context.defender.statusKey === null || context.defender.statusKey === undefined) {
           if (random < 0.3 && !context.defender.types.includes('Feu') && context.defender.isAlive) {
             context.pendingLogsAndEffects.push({
@@ -82,7 +81,6 @@ export const moves = {
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         const random = Math.random();
-        console.log('Ball\'ombre : random', random);
         if (random < 0.2 && context.defender.isAlive) {
           context.pendingLogsAndEffects.push({
             log: `Ball'ombre ! La Défense Spéciale de ${context.defender.name} baisse !`,
@@ -133,7 +131,6 @@ export const moves = {
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         const random = Math.random();
-        console.log('Tonnerre : random', random);
         if (context.defender.statusKey === null || context.defender.statusKey === undefined) {
           if (random < 0.1 && (!context.defender.types.includes('Électrik') || !context.defender.types.includes('Sol')) && context.defender.isAlive) {
             context.pendingLogsAndEffects.push({
@@ -162,7 +159,6 @@ export const moves = {
     onDamageModifier: (damage: number, context: any): number => {
       if (!context.critical) {
         const random = Math.random();
-        console.log('Lame de Roc : random', random);
         if (random < 0.125) {
           context.pendingLogsAndEffects.push({
             log: `Lame de Roc ! Coup critique !`          
@@ -212,7 +208,6 @@ export const moves = {
     onDamageModifier: (damage: number, context: any): number => {
       if (!context.critical) {
         const random = Math.random();
-        console.log('Poison-Croix : random', random);
         if (random < 0.125) {
           context.pendingLogsAndEffects.push({
             log: `Poison-Croix ! Coup critique !`
@@ -226,7 +221,6 @@ export const moves = {
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         const random = Math.random();
-        console.log('Poison-Croix : random', random);
         if (random < 0.1 && context.defender.statusKey === null && context.defender.isAlive) {
           context.pendingLogsAndEffects.push({
             log: `Poison-Croix ! ${context.defender.name} est empoisonné !`,
@@ -253,7 +247,6 @@ export const moves = {
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         const random = Math.random();
-        console.log('Laser Glace : random', random);
         if (context.defender.statusKey === null || context.defender.statusKey === undefined) {
           if (random < 0.1 && !context.defender.types.includes('Glace') && context.defender.isAlive) {
             context.pendingLogsAndEffects.push({
@@ -282,7 +275,6 @@ export const moves = {
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         const random = Math.random();
-        console.log('Psyko : random', random);
         if (random < 0.1 && context.defender.isAlive) {
           context.pendingLogsAndEffects.push({
             log: `Psyko ! La Défense Spéciale de ${context.defender.name} baisse !`,
@@ -310,7 +302,6 @@ export const moves = {
       if (context.attacker.canAct === true && context.hits 
         && (context.defender.statusKey === null || context.defender.statusKey === undefined)) {
         const random = Math.random();
-        console.log('Triplattaque : random', random);
         if (random < 0.067 && !context.defender.types.includes('Glace') && context.defender.isAlive) {
           context.pendingLogsAndEffects.push({
             log: `Triplattaque ! ${context.defender.name} est gelé !`,
@@ -353,7 +344,6 @@ export const moves = {
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         const random = Math.random();
-        console.log('Lance-Flammes : random', random);
         if (random < 0.1 && !context.defender.types.includes('Feu') && context.defender.isAlive) {
           context.pendingLogsAndEffects.push({
             log: `Lance-Flammes ! ${context.defender.name} est brûlé !`,
@@ -380,7 +370,6 @@ export const moves = {
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         const random = Math.random();
-        console.log('Éco-Sphère : random', random);
         if (random < 0.1 && context.defender.isAlive) {
           context.pendingLogsAndEffects.push({
             log: `Éco-Sphère ! La Défense Spéciale de ${context.defender.name} baisse !`,
@@ -419,7 +408,6 @@ export const moves = {
     onDamageModifier: (damage: number, context: any): number => {
       if (!context.critical) {
         const random = Math.random();
-        console.log('Tranche-Nuit : random', random);
         if (random < 0.125) {
           context.pendingLogsAndEffects.push({
             log: `Tranche-Nuit : coup critique !`
@@ -1065,7 +1053,6 @@ export const moves = {
         });
 
         const random = Math.random();
-        console.log('Boutefeu : random', random);
         if (random < 0.1 && !context.defender.types.includes('Feu') 
           && context.defender.isAlive && context.defender.statusKey === null) {
           context.pendingLogsAndEffects.push({
@@ -1267,7 +1254,6 @@ export const moves = {
     onPostMove: (context: any): void => {
       if (context.attacker.canAct === true && context.hits) {
         const random = Math.random();
-        console.log('Telluriforce : random', random);
         if (random < 0.1 && context.defender.isAlive) {
           context.pendingLogsAndEffects.push({
             log: `Telluriforce ! La Défense Spéciale de ${context.defender.name} baisse !`,

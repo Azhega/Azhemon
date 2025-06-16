@@ -27,7 +27,6 @@ export class AuthService {
     const issuedAt = localStorage.getItem('refresh_token_issued_at');
     
     if (!issuedAt) {
-      console.log('No refresh token issued at timestamp, login required');
       return true;
     }
 
@@ -44,7 +43,6 @@ export class AuthService {
 
     this.tokenCheckInterval = window.setInterval(async () => {
       const token = localStorage.getItem('access_token');
-      console.log('Starting token validation...');
 
       if (!token) {
         this.logout();
@@ -53,7 +51,6 @@ export class AuthService {
 
       // Check expiration client-side (no server call)
       if (this.isTokenExpired(token)) {
-        console.log('Token expiring, refreshing...');
         const success = await this.refreshToken();
         if (!success) {
           this.logout();
@@ -67,7 +64,6 @@ export class AuthService {
     if (this.tokenCheckInterval) {
       clearInterval(this.tokenCheckInterval);
       this.tokenCheckInterval = null;
-      console.log('Token validation stopped');
     }
   }
 
@@ -79,19 +75,16 @@ export class AuthService {
     }
 
     if (this.shouldRenewSession()) {
-      console.log('Refresh token approaching expiry - requiring fresh login');
       return false; // This will redirect to login
     }
 
     if (this.isTokenExpired(token)) {
-      console.log('Access token expired during startup, attempting refresh...');
       const refreshSuccess = await this.refreshToken();
       return refreshSuccess;
     }
 
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      console.log('Validating token payload:', payload);
       Store.setState({
         user: {
           id: payload.sub,
@@ -102,10 +95,8 @@ export class AuthService {
         }
       });
       
-      console.log('Token valid, user authenticated from JWT');
       return true;
     } catch (error) {
-      console.log('Invalid token format');
       return false;
     }
   }
@@ -183,7 +174,6 @@ export class AuthService {
     
     // If we get 401 (unauthorized), try to refresh token and retry
     if (response.status === 401 && !endpoint.includes('auth/')) {
-      console.log('Got 401, attempting token refresh...');
       const refreshSuccess = await this.refreshToken();
       
       if (refreshSuccess) {

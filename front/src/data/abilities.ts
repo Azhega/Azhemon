@@ -9,7 +9,6 @@ export const abilities = {
     description: 'Soigne le Pokémon des statuts à chaque fin de tour',
     onTurnEnd: (context: any): void => {
       const battleState = Store.getState().battle;
-      console.log('battleState : ', battleState);
       for (const pokemon of Object.values(battleState.activePokemon) as Pokemon[]) {
         if (pokemon.abilityKey === 'magicGuard' && pokemon.statusKey) {
           context.pendingLogsAndEffects.push({
@@ -131,19 +130,16 @@ export const abilities = {
     description: 'Quand le Pokémon est empoisonné, il regagne des PV au lieu d\'en perdre',
     onTurnEnd: (context: any): void => {
       const battleState = Store.getState().battle;
-      console.log('battleState : ', battleState);
       for (const pokemon of Object.values(battleState.activePokemon) as Pokemon[]) {
         if (pokemon.abilityKey === 'poisonHeal' && pokemon.statusKey === 'poison' 
           && pokemon.currentHp > 0 && pokemon.currentHp < pokemon.maxHp) {
           context.pendingLogsAndEffects.push({
             log: `Talent Soin-Poison ! ${pokemon.name} récupère des PV !`,
             effect: () => {
-              console.log('PoisonHeal before : ', pokemon.name, pokemon.currentHp);
               pokemon.currentHp = Math.min(
                 pokemon.maxHp,
                 pokemon.currentHp + Math.floor(pokemon.maxHp / 8)
               );
-              console.log('PoisonHeal after : ', pokemon.name, pokemon.currentHp);
             }
           });
         }

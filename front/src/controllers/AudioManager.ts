@@ -33,7 +33,7 @@ export class AudioManager {
     this.stopCurrentMusic();
     if (this.menuMusic) {
       this.menuMusic.currentTime = 0;
-      this.menuMusic.play().catch(err => {
+      this.menuMusic.play().catch(() => {
         console.log('Music autoplay prevented');
         this.isMuted = true;
         EventBus.emit('menu:toggle-music-mute');
@@ -48,7 +48,7 @@ export class AudioManager {
     this.stopCurrentMusic();
     if (this.battleMusic) {
       this.battleMusic.currentTime = 0;
-      this.battleMusic.play().catch(err => console.log('Music autoplay prevented'));
+      this.battleMusic.play().catch(() => console.log('Music autoplay prevented'));
       this.currentlyPlaying = this.battleMusic;
     }
   }
@@ -57,7 +57,7 @@ export class AudioManager {
     this.stopCurrentMusic();
     if (this.victoryMusic) {
       this.victoryMusic.currentTime = 0;
-      this.victoryMusic.play().catch(err => console.log('Music autoplay prevented'));
+      this.victoryMusic.play().catch(() => console.log('Music autoplay prevented'));
       this.currentlyPlaying = this.victoryMusic;
     }
   }
@@ -80,7 +80,7 @@ export class AudioManager {
         this.currentlyPlaying.pause();
       } else {
         // Unmute by playing
-        this.currentlyPlaying.play().catch(err => console.log('Music resume prevented'));
+        this.currentlyPlaying.play().catch(() => console.log('Music resume prevented'));
       }
     }
     

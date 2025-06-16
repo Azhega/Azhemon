@@ -8,7 +8,6 @@ export const items = {
     description: 'Restaure 1/16 des PV max du porteur à chaque tour',
     onTurnEnd: (context: any): void => {
       const battleState = Store.getState().battle;
-      console.log('battleState : ', battleState);
       for (const pokemon of Object.values(battleState.activePokemon) as Pokemon[]) {
         if (pokemon.itemKey === 'leftovers' && pokemon.currentHp > 0 && pokemon.currentHp < pokemon.maxHp) {
           const healAmount = Math.floor(pokemon.maxHp / 16);
@@ -17,7 +16,6 @@ export const items = {
             log: `Restes ! ${pokemon.name} récupère des PV !`,
             effect: () => {
               pokemon.currentHp = Math.min(pokemon.maxHp, pokemon.currentHp + healAmount);
-              console.log(`Leftovers: ${pokemon.name} healed for ${healAmount} HP`);
             }
           });
         }
@@ -37,7 +35,6 @@ export const items = {
           log: `${context.attacker.name} subit ${damage} points de dégâts à cause du Casque Brut de ${context.defender.name} !`,
           effect: () => {
             context.attacker.currentHp = Math.max(0, context.attacker.currentHp - damage);
-            console.log(`${context.attacker.name} subit ${damage} points de dégâts à cause du Casque Brut de ${context.defender.name} !`);
           }
         });
       }

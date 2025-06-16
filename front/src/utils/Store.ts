@@ -24,7 +24,6 @@ export class Store {
       battle: null,
       currentTeam: [],
       currentTeamIndex: null,
-      currentTeamName: '',
       currentBattleTeam: []
     };
   }

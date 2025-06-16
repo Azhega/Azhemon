@@ -162,7 +162,6 @@ export class BattleController {
           EffectManager.registerPokemonEffects(battleState.activePokemon.cpu);
           
           battleState = Store.getState().battle;
-          console.log(`BattleController : ====== TURN START : ${battleState.turn} ======`);
           Store.setState({
             battle: {
               ...battleState,
@@ -222,7 +221,6 @@ export class BattleController {
     let selectedMove = activePokemon.moves[moveIndex] || null; // To test with struggle
     if(moveIndex === -1) {
       moveType = 'struggle';
-      console.log('Battle Controller : Struggle move selected');
     }
 
     const playerAction: BattleAction = {
@@ -246,8 +244,6 @@ export class BattleController {
         cpu: cpuAction.action
       }
     };
-
-    console.log('BattleController : CPU Action Reasoning:', cpuAction.reasoning);
     
     this.executeTurn(currentTurn);
   }
@@ -264,12 +260,10 @@ export class BattleController {
     const selectedPokemon = playerTeam[pokemonIndex];
     
     if (selectedPokemon === battleState.activePokemon.player) {
-      console.log('This Pokémon is already active');
       return;
     }
     
     if (!selectedPokemon.isAlive) {
-      console.log('This Pokémon is fainted');
       return;
     }
     
@@ -302,8 +296,6 @@ export class BattleController {
   
   private exitBattle(): void {
     const state = Store.getState();
-    console.log('Exiting battle...', state);
-    console.log('Current Battle Team : ', state.currentBattleTeam);
 
     const currentBattleTeam = state.currentBattleTeam;
 
@@ -340,8 +332,6 @@ export class BattleController {
       }
       return null;
     });
-
-    console.log('Reset Team : ', resetTeam);
 
     // Update the state with the reset team
     Store.setState({
@@ -410,10 +400,7 @@ export class BattleController {
     const cpuTeam = battleState.cpuTeam;
     
     const decision = this.ai.makeDecision(cpuPokemon, playerPokemon, cpuTeam);
-    
-    // Debug
-    console.log(`BattleController : IA Decision Reasoning : ${decision.reasoning}`);
-    
+ 
     return decision.action;
   }
   
@@ -425,13 +412,10 @@ export class BattleController {
   }
   
   private checkBattleState(): void {
-    console.log('BattleController : Checking battle state...');
     if (this.checkIfBattleOver()) {
-      console.log('BattleController : Battle is over.');
       return;
     }
 
-    console.log('BattleController : Starting next turn...');
     this.startNextTurn();
   }
 
@@ -522,7 +506,6 @@ export class BattleController {
           EffectManager.resetEffects(battleState.activePokemon.player, battleState.activePokemon.cpu);
           
           battleState = Store.getState().battle;
-          console.log(`BattleController : ====== TURN START : ${battleState.turn} ======`);
           Store.setState({
             battle: {
               ...battleState,

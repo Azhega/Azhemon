@@ -25,8 +25,6 @@ export class GameController {
   }
   
   initialize(): void {
-    console.log('Initializing game...');
-
     this.mainController.initialize();
 
     this.loadInitialData().then(async () => {
@@ -70,9 +68,6 @@ export class GameController {
         currentTeam: [null, null, null, null, null, null],
         currentBattleTeam: [null, null, null, null, null, null]
       });
-
-      console.log('current Team initialized successfully');
-      console.log('Store : ', Store.getState());
     } catch (error) {
       console.error('Error loading initial data:', error);
     } finally {
@@ -82,7 +77,6 @@ export class GameController {
 
   switchScreen(screen: 'menu' | 'teambuilder' | 'battle' | 'login'): void {
     const previousScreen = Store.getState().game.screen;
-    console.log(`Switching screen from ${previousScreen} to ${screen}`);
 
     Store.setState({
       game: {
@@ -90,10 +84,7 @@ export class GameController {
         screen: screen
       }
     });
-
-    console.log('Store updated:', Store.getState());
-    console.log('Store user username:', Store.getState().user.username);
-
+    
     // MainView.updateScreen(screen);
     EventBus.emit('screen:changed', screen);
 

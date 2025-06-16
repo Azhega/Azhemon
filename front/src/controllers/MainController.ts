@@ -12,7 +12,6 @@ export class MainController {
     EventBus.on('screen:changed', (screen) => this.updateScreen(screen));
 
     EventBus.on('auth:logout', () => {
-      console.log('MainView : Auth logout - destroying MenuController');
       this.menuController = null;
     });
     

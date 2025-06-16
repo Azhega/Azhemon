@@ -26,7 +26,6 @@ export class MenuController {
     this.displayTeamPreview(Array(6).fill(null));
 
     EventBus.on('auth:login-success', () => {
-      console.log('MenuView : User logged in - reloading teams in MenuView');
       this.loadTeams();
 
       const userInfoSpan = document.querySelector('.user-info span');
@@ -37,7 +36,6 @@ export class MenuController {
     });
 
     EventBus.on('auth:logout', () => {
-      console.log('MenuView : User logged out - clearing teams in MenuView');
       this.clearTeams();
     });
 
@@ -105,7 +103,6 @@ export class MenuController {
   private async loadTeamPreview(teamId: number): Promise<void> {
     try {
       const teamData = await ApiService.getAllTeamDataByTeamId(teamId);
-      console.log("Team data for preview:", teamData);
       
       const teamPokemons: (Pokemon | null)[] = Array(6).fill(null);
       
