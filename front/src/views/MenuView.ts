@@ -141,7 +141,7 @@ export class MenuView {
   
   private async loadTeamPreview(teamId: number): Promise<void> {
     try {
-      const teamData = await ApiService.getTeamPokemonMoveByTeamId(teamId);
+      const teamData = await ApiService.getAllTeamDataByTeamId(teamId);
       console.log("Team data for preview:", teamData);
       
       const teamPokemons: (Pokemon | null)[] = Array(6).fill(null);
@@ -159,7 +159,6 @@ export class MenuView {
             ...baseMove,
             moveKey: move.name,
             currentPP: baseMove.pp,
-            target: null
           };
         });
         

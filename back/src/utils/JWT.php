@@ -9,16 +9,11 @@ class JWT {
   private static $algorithm = 'HS256';
   private static $issuer;
   private static $audience;
-  private static $db;
 
   public static function initialize($secret, $issuer = null, $audience = null) {  
     self::$secret = $secret;
     self::$issuer = $issuer;
     self::$audience = $audience;
-  }
-
-  public static function setDB($db) {
-    self::$db = $db;
   }
 
   public static function generate($payload) {

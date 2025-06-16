@@ -42,6 +42,7 @@ export class GameController {
     // Teambuilder events
     EventBus.on('teambuilder:back-to-menu', () => this.switchScreen('menu'));
 
+    // Battle events
     EventBus.on('battle:back-to-menu', () => this.switchScreen('menu'));
 
     // Session events

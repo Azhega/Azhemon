@@ -438,7 +438,6 @@ export class TurnManager {
             pp: 1,
             currentPP: 1,
             priority: 0,
-            target: null,
             description: 'Utilisé quand aucune autre attaque n\'est disponible. Inflige des dégâts à l\'utilisateur.'
           };
           

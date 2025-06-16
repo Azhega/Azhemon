@@ -692,7 +692,6 @@ export class TeamBuilderView {
               ...baseMove,
               moveKey: moveKey,
               currentPP: baseMove.pp,
-              target: null
             };
             
             this.updatePokemonInSlot(this.selectedPokemonIndex!, selectedPokemon);
@@ -919,10 +918,7 @@ export class TeamBuilderView {
       }
 
       try {
-        const teamData: { id: number; name: string; pokemons: 
-          { slot: number; pokemon_name: string; moves: PokemonMove[]; 
-            ability: string; item: string; nature: string; }[] } =
-        await ApiService.getTeamPokemonMoveByTeamId(selectedTeamId);
+        const teamData = await ApiService.getAllTeamDataByTeamId(selectedTeamId);
 
         console.log("Selected team data:", teamData);
 
@@ -937,7 +933,6 @@ export class TeamBuilderView {
               ...baseMove,
               moveKey: baseMove.moveKey,
               currentPP: baseMove.pp,
-              target: null
             }
           });
 

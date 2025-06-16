@@ -7,8 +7,6 @@ require_once 'C:\laragon\www\Azhemon\back\src\utils\JWT.php';
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-use back\utils\JWT;
-use back\models\SqlConnect;
 use back\Router;
 use back\controllers\{
   AuthController,
@@ -18,11 +16,6 @@ use back\controllers\{
   TeamPokemonController,
   TeamPokemonMoveController
 };
-
-$sqlConnect = new SqlConnect();
-$db = $sqlConnect->db;
-
-JWT::setDB($db);
 
 $controllers = [
   AuthController::class,
