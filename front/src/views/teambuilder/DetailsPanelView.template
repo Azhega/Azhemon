@@ -2,12 +2,12 @@
   <!-- Top row: Pokemon info + attributes in columns -->
   <div class="pokemon-info-row">
     <div class="pokemon-header">
-      <img src="src/public/images/sprites/{{POKEMON_SPRITE}}_face.png" 
+      <img src="assets/public/images/sprites/{{POKEMON_SPRITE}}_face.png" 
           alt="{{POKEMON_SPRITE_ALT}}" class="pokemon-avatar">
       <div class="pokemon-title">
         <h2 class="pokemon-name editable" data-attribute="pokemon">{{POKEMON_NAME}}</h2>
         <div class="pokemon-types">
-          <img src="src/public/images/types/{{POKEMON_FIRST_TYPE}}.png" alt="{{POKEMON_FIRST_TYPE_ALT}}" class="type-icon">
+          <img src="assets/public/images/types/{{POKEMON_FIRST_TYPE}}.png" alt="{{POKEMON_FIRST_TYPE_ALT}}" class="type-icon">
           {{POKEMON_SECOND_TYPE}}
         </div>
       </div>

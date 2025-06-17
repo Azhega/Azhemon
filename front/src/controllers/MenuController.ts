@@ -173,7 +173,7 @@ export class MenuController {
       template = template.replace('{{POKEMON_FIRST_TYPE}}', pokemon.types[0].toLowerCase());
       template = template.replace('{{POKEMON_FIRST_TYPE_ALT}}', pokemon.types[0]);
       template = template.replace('{{POKEMON_SECOND_TYPE}}', 
-        `${pokemon.types[1] ? `<img src="src/public/images/types/${pokemon.types[1]?.toLowerCase()}.png" alt="${pokemon.types[1]}" class="type-icon">` : ''}`);
+        `${pokemon.types[1] ? `<img src="assets/public/images/types/${pokemon.types[1]?.toLowerCase()}.png" alt="${pokemon.types[1]}" class="type-icon">` : ''}`);
 
       return template;
     }).join('');

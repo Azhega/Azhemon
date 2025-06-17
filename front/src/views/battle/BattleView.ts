@@ -82,7 +82,6 @@ export class BattleView {
       attackerSide: 'player' | 'cpu',
       moveType: string
     }) => {
-      console.log('BattleView: Received animation event:', data);
       await this.playMoveAnimation(data.moveCategory, data.attackerSide, data.moveType);
     });
 
@@ -279,7 +278,6 @@ export class BattleView {
   }
 
   private renderPokemonSprite(container: HTMLElement, pokemon: Pokemon, side: 'player' | 'cpu'): void {
-    console.log(`BattleView : Rendering ${side} Pokemon:`, pokemon);
     // Check if elements already exist
     let spriteContainer = container.querySelector('.pokemon-battle-sprite') as HTMLElement;
     let dataContainer = container.querySelector('.pokemon-data') as HTMLElement;
@@ -293,8 +291,8 @@ export class BattleView {
 
     // Set sprite image based on pokemon name and side
     const spriteUrl = side === 'player' 
-      ? `/src/public/images/sprites/${pokemon.name.toLowerCase()}/${pokemon.name.toLowerCase()}_back.gif`
-      : `/src/public/images/sprites/${pokemon.name.toLowerCase()}/${pokemon.name.toLowerCase()}_face.gif`;    
+      ? `/assets/public/images/sprites/${pokemon.name.toLowerCase()}/${pokemon.name.toLowerCase()}_back.gif`
+      : `/assets/public/images/sprites/${pokemon.name.toLowerCase()}/${pokemon.name.toLowerCase()}_face.gif`;   
     spriteContainer.style.backgroundImage = `url('${spriteUrl}')`;
     
     // Create data container only if it doesn't exist
@@ -415,7 +413,6 @@ export class BattleView {
     fightButton.textContent = 'Attaque';
     fightButton.onclick = () => {
       if (playerPokemon.moves.every((move: PokemonMove) => move.currentPP <= 0)) {
-        console.log('No moves available, using struggle');
         if (this.actionMenu?.style.display) {
           const buttons = this.actionMenu.querySelectorAll('button');
           buttons.forEach(button => button.style.display = 'none');
@@ -464,7 +461,6 @@ export class BattleView {
       moveButton.innerHTML = `${move.name}<br><small>${move.type} | PP: ${move.currentPP}/${move.pp}</small>`;
       moveButton.onclick = () => {
         if (move.currentPP <= 0) {
-          console.log('No more PP left for this move');
           return;
         }
         move.currentPP--;
@@ -682,7 +678,6 @@ export class BattleView {
 
   public async playMoveAnimation(moveCategory: 'Physique' | 'Spécial' | 'Statut', 
     attackerSide: 'player' | 'cpu', moveType: string): Promise<void> {
-    console.log('BattleView: Playing animation:', { moveCategory, attackerSide, moveType });
 
     return new Promise((resolve) => {
       const container = attackerSide === 'player' ? this.playerField : this.cpuField;
@@ -696,24 +691,18 @@ export class BattleView {
       }
 
       const onComplete = () => {
-        console.log('BattleView: Animation completed, emitting event');
         EventBus.emit('battle:animation-complete'); // For TurnManager to continue
         resolve();
       };
 
-      console.log('BattleView: Found sprite, playing animation type:', moveCategory);
-
       switch (moveCategory) {
         case 'Physique':
-          console.log('BattleView: Playing physical attack');
           this.playPhysicalAttack(sprite, onComplete);
           break;
         case 'Spécial':
-          console.log('BattleView: Playing special attack');
           this.playSpecialAttack(sprite, attackerSide, moveType || 'normal', onComplete);
           break;
         case 'Statut':
-          console.log('BattleView: Playing status attack');
           this.playStatusAttack(sprite, onComplete);
           break;
         default:
@@ -725,20 +714,16 @@ export class BattleView {
 
   // Adding and removing the class once will play the animation
   private playPhysicalAttack(sprite: HTMLElement, callback: () => void): void {
-    console.log('BattleView: Adding physical-attack class to sprite');
     sprite.classList.add('physical-attack');
     
     setTimeout(() => {
-      console.log('BattleView: Removing physical-attack class from sprite');
       sprite.classList.remove('physical-attack');
       callback();
     }, 800);
   }
 
   // Adding and removing the class once will play the animation
-  private playSpecialAttack(sprite: HTMLElement, attackerSide: 'player' | 'cpu', moveType: string, callback: () => void): void {
-    console.log('BattleView: Starting special attack animation for type:', moveType);
-  
+  private playSpecialAttack(sprite: HTMLElement, attackerSide: 'player' | 'cpu', moveType: string, callback: () => void): void {  
     // Start attacker animation
     sprite.classList.add('special-attack');
     
@@ -754,9 +739,7 @@ export class BattleView {
     // Apply the custom background with type colors
     energyBall.style.background = `radial-gradient(circle, var(--type-color-secondary), var(--type-color-primary))`;
     energyBall.style.boxShadow = `0 0 20px var(--type-color-primary)`;
-    
-    console.log('BattleView: Created energy ball with color:', typeColor);
-    
+        
     // Position energy ball at attacker
     const spriteRect = sprite.getBoundingClientRect();
     const containerRect = sprite.closest('.battle-field')?.getBoundingClientRect();
@@ -783,7 +766,6 @@ export class BattleView {
     }
     
     setTimeout(() => {
-      console.log('BattleView: Cleaning up special attack animation');
       sprite.classList.remove('special-attack');
       energyBall.remove();
       callback();
@@ -810,11 +792,9 @@ export class BattleView {
 
   // Adding and removing the class once will play the animation
   private playStatusAttack(sprite: HTMLElement, callback: () => void): void {
-    console.log('BattleView: Adding status-attack class to sprite');
     sprite.classList.add('status-attack');
     
     setTimeout(() => {
-      console.log('BattleView: Removing status-attack class from sprite');
       sprite.classList.remove('status-attack');
       callback();
     }, 600);

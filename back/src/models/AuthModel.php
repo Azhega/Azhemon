@@ -130,32 +130,6 @@ class AuthModel extends SqlConnect {
   /*========================= LOGOUT =========================================*/
 
   public function logout() {
-    $headers = getallheaders();
-
-    if (!isset($headers['Authorization'])) {
-      throw new Exception("Authorization header not found");
-    }
-
-    $authHeader = $headers['Authorization'];
-
-    if (!isset($headers['Authorization']) 
-    || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
-      throw new HttpException("Access Token missing.", 400);
-    }
-
-    $accessToken = $matches[1];
-
-    try {
-      JWT::initialize(JWT_SECRET, JWT_ISSUER, JWT_AUDIENCE);
-      $payload = JWT::verify($accessToken);
-      
-      if (isset($payload['jti'])) {
-        $this->revokeToken($payload['jti']);
-      }
-    } catch (Exception $e) {
-      //Continue even if verification fails (token already expired or invalid)
-    }
-
     setcookie('refresh_token', '', [
       'expires'  => time() - 3600,
       'path'     => '/',
