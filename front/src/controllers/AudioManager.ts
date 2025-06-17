@@ -17,15 +17,15 @@ export class AudioManager {
   
   // Initialize music tracks
   public initialize(): void {
-    this.menuMusic = new Audio('/src/public/audio/explorers-of-the-sky-theme.mp3');
+    this.menuMusic = new Audio('/assets/public/audio/explorers-of-the-sky-theme.mp3');
     this.menuMusic.loop = true;
     this.menuMusic.volume = 1;
 
-    this.battleMusic = new Audio('/src/public/audio/iris-theme.mp3');
+    this.battleMusic = new Audio('/assets/public/audio/iris-theme.mp3');
     this.battleMusic.loop = true;
     this.battleMusic.volume = 1;
     
-    this.victoryMusic = new Audio('/src/public/audio/victory-theme.mp3');
+    this.victoryMusic = new Audio('/assets/public/audio/victory-theme.mp3');
     this.victoryMusic.volume = 1;
   }
 

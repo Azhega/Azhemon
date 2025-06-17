@@ -78,13 +78,13 @@ export class TeamBuilderController {
         slot.innerHTML = `
           <div class="slot-number">${i + 1}</div>
           <div class="pokemon-preview">
-            <img src="src/public/images/sprites/${pokemon.name.toLowerCase()}/${pokemon.name.toLowerCase()}_face.png" 
+            <img src="assets/public/images/sprites/${pokemon.name.toLowerCase()}/${pokemon.name.toLowerCase()}_face.png" 
                 alt="${pokemon.name.toLowerCase()}" class="pokemon-sprite">
             <div class="pokemon-info">
               <h3 class="pokemon-name">${pokemon.name}</h3>
               <div class="pokemon-types">
-                <img src="src/public/images/types/${pokemon.types[0].toLowerCase()}.png" alt="${pokemon.types[0]}" class="type-icon">
-                ${pokemon.types[1] ? `<img src="src/public/images/types/${pokemon.types[1]?.toLowerCase()}.png" alt="${pokemon.types[1]}" class="type-icon">` : ''}
+                <img src="assets/public/images/types/${pokemon.types[0].toLowerCase()}.png" alt="${pokemon.types[0]}" class="type-icon">
+                ${pokemon.types[1] ? `<img src="assets/public/images/types/${pokemon.types[1]?.toLowerCase()}.png" alt="${pokemon.types[1]}" class="type-icon">` : ''}
               </div>
             </div>
           </div>
@@ -120,7 +120,7 @@ export class TeamBuilderController {
     template = template.replace('{{POKEMON_FIRST_TYPE}}', `${pokemon?.types[0].toLowerCase()}`);
     template = template.replace('{{POKEMON_FIRST_TYPE_ALT}}', `${pokemon?.types[0]}`);
       template = template.replace('{{POKEMON_SECOND_TYPE}}', 
-        `${pokemon?.types[1] ? `<img src="src/public/images/types/${pokemon.types[1]?.toLowerCase()}.png" alt="${pokemon.types[1]}" class="type-icon">` : ''}`);
+        `${pokemon?.types[1] ? `<img src="assets/public/images/types/${pokemon.types[1]?.toLowerCase()}.png" alt="${pokemon.types[1]}" class="type-icon">` : ''}`);
     
     template = template.replace('{{POKEMON_ITEM}}', pokemon?.item?.name || 'Aucun');
     template = template.replace('{{POKEMON_ABILITY}}', pokemon?.ability.name || 'Aucun');
@@ -144,7 +144,7 @@ export class TeamBuilderController {
               <div class="move-data-row">
                 <span class="editable move-name" data-attribute="move" data-move-index="${i}">${move?.name || 'Attaque ' + (i + 1)}</span>
                 <div class="move-type-icon">
-                  <img src="src/public/images/types/${move?.type?.toLowerCase() || null}.png" alt="${move?.type || 'Normal'}" class="move-type">
+                  <img src="assets/public/images/types/${move?.type?.toLowerCase() || null}.png" alt="${move?.type || 'Normal'}" class="move-type">
                 </div>
                 <span class="move-category">${move?.category || '-'}</span>
                 <span class="move-power">${move?.power || '-'}</span>
@@ -229,12 +229,12 @@ export class TeamBuilderController {
           data-pokemon-id="${pokemon.id}" 
           data-pokemon-name="${pokemon.name}">
           <div class="pokemon-data-row">
-            <img src="src/public/images/sprites/${pokemon.name.toLowerCase()}/${pokemon.name.toLowerCase()}_face.png" 
+            <img src="assets/public/images/sprites/${pokemon.name.toLowerCase()}/${pokemon.name.toLowerCase()}_face.png" 
               alt="${pokemon.name}" class="pokemon-icon">
             <span class="pokemon-name">${pokemon.name}</span>
             <div class="pokemon-types">
-              <img src="src/public/images/types/${pokemon.types[0].toLowerCase()}.png" alt="${pokemon.types[0]}" class="type-icon">
-              ${pokemon.types[1] ? `<img src="src/public/images/types/${pokemon.types[1]?.toLowerCase()}.png" alt="${pokemon.types[1]}" class="type-icon">` : ''}
+              <img src="assets/public/images/types/${pokemon.types[0].toLowerCase()}.png" alt="${pokemon.types[0]}" class="type-icon">
+              ${pokemon.types[1] ? `<img src="assets/public/images/types/${pokemon.types[1]?.toLowerCase()}.png" alt="${pokemon.types[1]}" class="type-icon">` : ''}
             </div>
             <span class="pokemon-hp">${pokemon.baseStats.hp}</span>
             <span class="pokemon-atk">${pokemon.baseStats.attack}</span>
@@ -478,7 +478,7 @@ export class TeamBuilderController {
           <div class="move-data-row">
             <span class="move-name">${move.name}</span>
             <div class="move-type-icon">
-              <img src="src/public/images/types/${move?.type?.toLowerCase() || 'normal'}.png" alt="${move?.type || 'Normal'}" class="move-type">
+              <img src="assets/public/images/types/${move?.type?.toLowerCase() || 'normal'}.png" alt="${move?.type || 'Normal'}" class="move-type">
             </div>
             <span class="move-category">${move.category}</span>
             <span class="move-power">${move.power || '-'}</span>
