@@ -1,5 +1,5 @@
-import menuView from '../views/menu/MenuView.html';
-import menuTeamPreview from '../views/menu/TeamPreviewView.html';
+import menuView from '../views/menu/MenuView.template';
+import menuTeamPreview from '../views/menu/TeamPreviewView.template';
 import EventBus from '../utils/EventBus';
 import Store from '../utils/Store';
 import ApiService from '../services/ApiService';

@@ -2,7 +2,7 @@ import EventBus from '../utils/EventBus';
 import Store from '../utils/Store';
 import ApiService from '../services/ApiService';
 import AuthService from '../services/AuthService';
-import loginView from '../views/login/LoginView.html';
+import loginView from '../views/login/LoginView.template';
 
 export class LoginController {
   private element: HTMLElement;
