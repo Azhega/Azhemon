@@ -13,7 +13,7 @@ class SqlConnect {
   private string $user;
 
   public function __construct() {
-    $this->host = '127.0.0.1';
+    $this->host = 'db5018049812.hosting-data.io';
     $this->dbname = $_ENV['DB_NAME'];
     $this->user = $_ENV['DB_USER'];
     $this->password = $_ENV['DB_PASSWORD'];

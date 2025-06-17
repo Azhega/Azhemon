@@ -2,7 +2,7 @@ import { PokemonMove } from '../interfaces/PokemonInterface.ts';
 import AuthService from './AuthService';
 
 export class ApiService {
-  private baseUrl = 'http://localhost:8099';
+  private baseUrl = 'https://azhemon.fr/api';
 
   // Use AuthService for all authenticated requests
   async getAll(endpoint: string): Promise<any[]> {
