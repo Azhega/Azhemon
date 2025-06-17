@@ -2,7 +2,7 @@ import Store from '../utils/Store';
 import EventBus from '../utils/EventBus';
 
 export class AuthService {
-  private static baseUrl = 'https://azhemon.fr/api';
+  private static baseUrl = 'https://azhemon.fr/back';
   private static refreshTokenPromise: Promise<boolean> | null = null;
   private static tokenCheckInterval: number | null = null;
   private static REFRESH_TOKEN_LIFETIME = 30 * 24 * 60 * 60 * 1000; // Session UX
