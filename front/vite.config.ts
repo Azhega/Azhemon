@@ -21,11 +21,11 @@ export default defineConfig({
   },
   plugins: [
     {
-      name: 'html-import',
+      name: 'template-import',
       enforce: 'pre',
       transform(code, id) {
-        // Only process HTML files inside the views folder
-        if (id.includes('/views/') && id.endsWith('.html')) {
+        // Only process .template files
+        if (id.endsWith('.template')) {
           return {
             code: `export default ${JSON.stringify(code)};`,
             map: null
@@ -35,9 +35,7 @@ export default defineConfig({
     }
   ],
   build: {
-    // Generate source maps for easier debugging
     sourcemap: true,
-    // Ensure assets are processed correctly
     assetsDir: 'assets',
     rollupOptions: {
       input: {

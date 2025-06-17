@@ -1,10 +1,10 @@
-import teamBuilderView from '../views/teambuilder/TeamBuilderView.html';
-import teamBuilderDetailsPanel from '../views/teambuilder/DetailsPanelView.html';
-import pokemonSelectorView from '../views/teambuilder/PokemonSelectorView.html';
-import itemSelectorView from '../views/teambuilder/ItemSelectorView.html';
-import abilitySelectorView from '../views/teambuilder/AbilitySelectorView.html';
-import natureSelectorView from '../views/teambuilder/NatureSelectorView.html';
-import moveSelectorView from '../views/teambuilder/MoveSelectorView.html';
+import teamBuilderView from '../views/teambuilder/TeamBuilderView.template';
+import teamBuilderDetailsPanel from '../views/teambuilder/DetailsPanelView.template';
+import pokemonSelectorView from '../views/teambuilder/PokemonSelectorView.template';
+import itemSelectorView from '../views/teambuilder/ItemSelectorView.template';
+import abilitySelectorView from '../views/teambuilder/AbilitySelectorView.template';
+import natureSelectorView from '../views/teambuilder/NatureSelectorView.template';
+import moveSelectorView from '../views/teambuilder/MoveSelectorView.template';
 import EventBus from '../utils/EventBus';
 import Store from '../utils/Store';
 import { Pokemon } from '../models/PokemonModel';
