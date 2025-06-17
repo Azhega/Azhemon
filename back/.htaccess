@@ -1,9 +1,24 @@
-RewriteEngine On
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /back/
 
-# Redirige tout vers index.php sauf si le fichier ou dossier existe
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php [QSA,L]
+  # Transférer le header Authorization dans la variable d'environnement
+  RewriteCond %{HTTP:Authorization} .
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+  # Si la méthode est OPTIONS, renvoie directement 200 OK
+  RewriteCond %{REQUEST_METHOD} OPTIONS
+  RewriteRule .* - [R=200,L]
+
+  # Si le fichier ou dossier demandé n'existe pas, redirige vers index.php
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+
+<IfModule mod_setenvif.c>
+  SetEnvIfNoCase Authorization "(.*)" HTTP_AUTHORIZATION=$1
+</IfModule>
 
 <IfModule mod_headers.c>
   Header always unset Access-Control-Allow-Origin
@@ -12,12 +27,3 @@ RewriteRule ^(.*)$ index.php [QSA,L]
   Header always set Access-Control-Allow-Headers "Content-Type, Authorization"
   Header always set Access-Control-Allow-Credentials "true"
 </IfModule>
-
-
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  # Si la méthode est OPTIONS, renvoie directement 200 OK
-  RewriteCond %{REQUEST_METHOD} OPTIONS
-  RewriteRule ^(.*)$ $1 [R=200,L]
-</IfModule>
-

@@ -18,13 +18,32 @@ class AuthMiddleware {
   public function handle(&$request) {
     JWT::initialize(JWT_SECRET, JWT_ISSUER, JWT_AUDIENCE);
 
+    $authHeader = null;
     $headers = getallheaders();
     
-    if (!isset($headers['Authorization'])) {
-      throw new HttpException("Authorization header not found", 401);
+    // Method 1: Standard headers
+    if (isset($headers['Authorization'])) {
+      $authHeader = $headers['Authorization'];
+    }
+    // Method 2: Apache specific environment variable
+    else if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+      $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
+    }
+    // Method 3: Apache mod_rewrite specific
+    else if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+      $authHeader = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+    }
+    // Method 4: Manual header extraction for some hosting environments
+    else if (function_exists('apache_request_headers')) {
+      $apacheHeaders = apache_request_headers();
+      if (isset($apacheHeaders['Authorization'])) {
+        $authHeader = $apacheHeaders['Authorization'];
+      }
     }
 
-    $authHeader = $headers['Authorization'];
+    if (!$authHeader) {
+      throw new HttpException("Authorization header not found", 401);
+    }
 
     if (!preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
       throw new HttpException("Invalid Authorization header format", 401);

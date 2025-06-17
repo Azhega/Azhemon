@@ -9,11 +9,37 @@ class Router {
     protected array $routes = [];
     protected string $url;
     protected string $method;
+    protected string $basePath = '/back';
 
     public function __construct() {
         // Parse the current request URL and method
-        $this->url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $requestUri = $_SERVER['REQUEST_URI'];
+        $this->url = $this->removeBasePath($requestUri);
         $this->method = $_SERVER['REQUEST_METHOD'];
+    }
+
+    protected function removeBasePath($uri) {
+        // Remove the base path from the URL
+        if (strpos($uri, $this->basePath) === 0) {
+            $uri = substr($uri, strlen($this->basePath));
+        }
+        
+        // Also remove '/index.php' if present
+        if (strpos($uri, '/index.php') === 0) {
+            $uri = substr($uri, strlen('/index.php'));
+        }
+        
+        // Remove query string if present
+        if (($queryPos = strpos($uri, '?')) !== false) {
+            $uri = substr($uri, 0, $queryPos);
+        }
+        
+        // Ensure we always have at least a slash
+        if (empty($uri)) {
+            return '/';
+        }
+        
+        return $uri;
     }
 
     /**
