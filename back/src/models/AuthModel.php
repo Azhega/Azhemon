@@ -109,7 +109,7 @@ class AuthModel extends SqlConnect {
             'expires'   => time() + REFRESH_TOKEN_EXPIRATION,
             'path'      => '/',
             'domain'    => '',
-            'secure'    => false, //true pour https en prod
+            'secure'    => true,
             'httponly'  => true,
             'samesite'  => 'Lax' // Better compatibility than 'Strict'
           ]);
@@ -134,7 +134,7 @@ class AuthModel extends SqlConnect {
       'expires'  => time() - 3600,
       'path'     => '/',
       'domain'    => '',
-      'secure'   => false,
+      'secure'   => true,
       'httponly' => true,
       'samesite' => 'Lax' // Better compatibility than 'Strict'
     ]);
