@@ -21,7 +21,7 @@
       
       <!-- Team name input -->
       <div class="team-name-controls">
-        <label for="team-name-input" class="team-name-label">Nom de l'équipe</label>
+        <label for="team-name-input" class="team-name-label">Nom de l'équipe <small>(obligatoire)</small></label>
         <input type="text" id="team-name-input" placeholder="Entrez un nom d'équipe..." class="team-name-input">
       </div>
     </div>

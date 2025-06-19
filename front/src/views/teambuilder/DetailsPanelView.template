@@ -1,11 +1,11 @@
 <div class="pokemon-detail-card">
   <!-- Top row: Pokemon info + attributes in columns -->
   <div class="pokemon-info-row">
-    <div class="pokemon-header">
+    <div class="pokemon-header editable" data-attribute="pokemon">
       <img src="assets/public/images/sprites/{{POKEMON_SPRITE}}_face.png" 
           alt="{{POKEMON_SPRITE_ALT}}" class="pokemon-avatar">
       <div class="pokemon-title">
-        <h2 class="pokemon-name editable" data-attribute="pokemon">{{POKEMON_NAME}}</h2>
+        <h2 class="pokemon-name">{{POKEMON_NAME}}</h2>
         <div class="pokemon-types">
           <img src="assets/public/images/types/{{POKEMON_FIRST_TYPE}}.png" alt="{{POKEMON_FIRST_TYPE_ALT}}" class="type-icon">
           {{POKEMON_SECOND_TYPE}}
@@ -14,17 +14,17 @@
     </div>
     
     <div class="pokemon-attributes">
-      <div class="attribute-row" data-type="item">
+      <div class="attribute-row editable" data-attribute="item">
         <span class="attribute-label">Objet</span>
-        <span class="attribute-value editable" data-attribute="item">{{POKEMON_ITEM}}</span>
+        <span class="attribute-value">{{POKEMON_ITEM}}</span>
       </div>
-      <div class="attribute-row" data-type="ability">
-        <span class="attribute-label">Talent</span>
-        <span class="attribute-value editable" data-attribute="ability">{{POKEMON_ABILITY}}</span>
+      <div class="attribute-row editable" data-attribute="ability">
+        <span class="attribute-label">Talent <small>(obligatoire)</small></span>
+        <span class="attribute-value">{{POKEMON_ABILITY}}</span>
       </div>
-      <div class="attribute-row" data-type="nature">
-        <span class="attribute-label">Nature</span>
-        <span class="attribute-value editable" data-attribute="nature">{{POKEMON_NATURE}}</span>
+      <div class="attribute-row editable" data-attribute="nature">
+        <span class="attribute-label">Nature <small>(obligatoire)</small></span>
+        <span class="attribute-value">{{POKEMON_NATURE}}</span>
       </div>
     </div>
     
@@ -69,7 +69,7 @@
     
     <div class="pokemon-moves">
       <div class="moves-header-row">
-        <h3>Attaques</h3>
+        <h3>Attaques <small>(au moins une)</small></h3>
         <span class="move-col-header type-col">Type</span>
         <span class="move-col-header category-col">Catégorie</span>
         <span class="move-col-header power-col">Puissance</span>

@@ -61,7 +61,7 @@ export class LoginController {
     this.isLoginMode = false;
     document.getElementById('login-tab')!.classList.remove('active');
     document.getElementById('register-tab')!.classList.add('active');
-    document.getElementById('confirm-password-group')!.style.display = 'block';
+    document.getElementById('confirm-password-group')!.style.display = 'flex';
     document.getElementById('submit-button')!.textContent = 'S\'inscrire';
     document.getElementById('toggle-text')!.innerHTML = 'Déjà un compte ? <a href="#" id="toggle-mode">Se connecter</a>';
     
@@ -96,16 +96,8 @@ export class LoginController {
         this.showError('Les mots de passe ne correspondent pas.');
         return;
       }
-      if (password.length <= 5) {
-        this.showError('Le mot de passe doit contenir au moins 6 caractères.');
-        return;
-      }
-      if (!/[A-Z]/.test(password)) {
-        this.showError('Le mot de passe doit contenir au moins une majuscule.');
-        return;
-      }
-      if (!/[0-9]/.test(password)) {
-        this.showError('Le mot de passe doit contenir au moins un chiffre.');
+      if (password.length <= 5 || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+        this.showError('Le mot de passe doit contenir au moins 6 caractères, une majuscule et un chiffre.');
         return;
       }
     }
