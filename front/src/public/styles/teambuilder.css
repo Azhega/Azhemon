@@ -448,6 +448,7 @@
   background-color: rgba(0, 0, 0, 0.5);
   text-decoration: none;
   transform: translateY(-1px);
+  border-color: var(--primary-color);
 }
 
 .selector-panel {
@@ -594,7 +595,7 @@
 .move-element .move-power {
   grid-column: 4;
   font-size: 0.8rem;
-  color: #dc3545;
+  color: #ff8f9a;
   font-weight: 600;
   text-align: center;
 }
@@ -602,7 +603,7 @@
 .move-element .move-accuracy {
   grid-column: 5;
   font-size: 0.8rem;
-  color: #28a745;
+  color: #78ff98;
   font-weight: 600;
   text-align: center;
 }
@@ -787,7 +788,7 @@
 .pokemon-detail-card {
   padding: 16px;
   border-radius: 8px;
-  background-color: rgb(135 135 135 / 30%);
+  background-color: rgb(70 70 70 / 50%);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border: 1px solid var(--border-color);
   height: 100%;
@@ -812,6 +813,10 @@
   align-items: center;
   gap: 12px;
   flex: 0 0 auto;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s ease;
 }
 
 .pokemon-avatar {
@@ -848,27 +853,17 @@
   background-color: rgba(0, 0, 0, 0.3);
   border-radius: 6px;
   border: 1px solid var(--border-color);
-  transition: background-color 0.2s ease;
-}
-
-.attribute-row:hover {
-  background-color: rgba(0, 0, 0, 0.5);
-  border-color: var(--primary-color);
-}
-
-.attribute-row.selected {
-  border: 2px solid var(--primary-color);
-  background-color: var(--selected-bg);
+  transition: all 0.2s ease;
 }
 
 /* Selected attribute styling */
 .active-edit {
-  background-color: rgba(0, 0, 0, 0.5);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  border-color: var(--primary-color);
-  position: relative;
-  transition: all 0.2s ease;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 6px !important;
+  border-color: var(--primary-color) !important;
+  position: relative !important;
+  transition: all 0.2s ease !important;
 }
 
 .attribute-label {
@@ -999,7 +994,7 @@
 }
 
 .move-accuracy {
-  color: #28a745;
+  color: #7eff9c;
   background-color: rgba(40, 167, 69, 0.2);
 }
 
@@ -1118,13 +1113,13 @@
 }
 
 .move-power {
-  color: #dc3545;
+  color: #ff8f9a;
   font-weight: 600;
   background-color: rgba(220, 53, 69, 0.2);
 }
 
 .move-accuracy {
-  color: #28a745;
+  color: #78ff98;
   font-weight: 600;
 }
 
