@@ -24,7 +24,7 @@ Azhemon is a web-based game that combines strategic turn-based combat with team 
 
 ## Deployment
 
-The project is deployed using a IONOS shared server
+The project is deployed using a [IONOS](https://www.ionos.fr/) shared server
 
 - **Frontend:** Built with Vite and deployed as static assets, served from the web root
 - **Backend:** PHP API deployed to back directory
