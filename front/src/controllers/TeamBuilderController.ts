@@ -150,10 +150,10 @@ export class TeamBuilderController {
       `${Array(4).fill(0).map((_, i) => {
         const move = pokemon?.moves && pokemon?.moves[i] ? pokemon?.moves[i] : null;
         return `
-          <div class="move-slot ${!move ? 'empty' : ''}" data-move-slot="${i}">
+          <div class="move-slot ${!move ? 'empty' : ''} editable" data-attribute="move" data-move-slot="${i}" data-move-index="${i}">
             <div class="move-content">
               <div class="move-data-row">
-                <span class="editable move-name" data-attribute="move" data-move-index="${i}">${move?.name || 'Attaque ' + (i + 1)}</span>
+                <span class="move-name">${move?.name || 'Attaque ' + (i + 1)}</span>
                 <div class="move-type-icon">
                   <img src="src/public/images/types/${move?.type?.toLowerCase() || null}.png" alt="${move?.type || 'Normal'}" class="move-type">
                 </div>
@@ -571,6 +571,8 @@ export class TeamBuilderController {
     });
 
     document.getElementById('delete-team')?.addEventListener('click', () => {
+      const teamNameInput = document.getElementById('team-name-input') as HTMLInputElement;
+
       // Reset the selector
       this.selectedAttributeType = null;
       this.loadSelector('');
@@ -598,6 +600,7 @@ export class TeamBuilderController {
                 // For MenuView team selector
                 EventBus.emit('teambuilder:team-deleted');
                 
+                teamNameInput.value = ''; // Clear the team name input after deleting
                 this.loadTeams();
                 this.currentTeam = [null, null, null, null, null, null];
                 Store.setState({ currentTeam: this.currentTeam , currentTeamIndex: null });
@@ -625,7 +628,17 @@ export class TeamBuilderController {
     document.getElementById('save-team')?.addEventListener('click', async () => {
       const teamNameInput = document.getElementById('team-name-input') as HTMLInputElement;
       const teamNameInputValue = teamNameInput.value;
-      if (!Store.getState().currentTeamIndex && !teamNameInputValue) {
+      if (!Store.getState().currentTeamIndex && !teamNameInputValue) { // For new teams
+        Swal.fire({
+          title: 'Erreur',
+          text: 'Tu dois donner un nom à ton équipe !',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+        return;
+      }
+
+      if (!teamNameInputValue || teamNameInputValue.length === 0) { // For existing teams
         Swal.fire({
           title: 'Erreur',
           text: 'Tu dois donner un nom à ton équipe !',
@@ -647,28 +660,11 @@ export class TeamBuilderController {
   
       for (const pokemon of this.currentTeam) {
         if (!pokemon) continue;
-        if (pokemon.ability.id === 0) {
+        if (pokemon.ability.id === 0 || pokemon.nature.id === 0 || 
+          !pokemon.moves || pokemon.moves.every((move: any) => move === null)) {
           Swal.fire({
             title: 'Erreur',
-            text: 'Un Pokémon doit avoir un talent !',
-            icon: 'error',
-            confirmButtonText: 'OK'
-          });
-          return;
-        }
-        if (pokemon.nature.id === 0) {
-          Swal.fire({
-            title: 'Erreur',
-            text: 'Un Pokémon doit avoir une nature !',
-            icon: 'error',
-            confirmButtonText: 'OK'
-          });
-          return;
-        }
-        if (pokemon.moves.length === 0) {
-          Swal.fire({
-            title: 'Erreur',
-            text: 'Un Pokémon doit avoir au moins une attaque !',
+            text: 'Un Pokémon doit avoir un talent, une nature, et au moins une attaque !',
             icon: 'error',
             confirmButtonText: 'OK'
           });
@@ -815,6 +811,7 @@ export class TeamBuilderController {
       this.selectedAttributeType = null;
       this.loadSelector('');
 
+      const teamNameInput = document.getElementById('team-name-input') as HTMLInputElement;
       const selectedValue = (e.target as HTMLSelectElement).value;
 
       const selectedTeamId = parseInt(selectedValue);
@@ -823,6 +820,7 @@ export class TeamBuilderController {
         return;
       }
       if (selectedTeamId === 0) { // "Sélectionner une équipe" button
+        teamNameInput.value = ''; // Clear team name input
         this.currentTeam = [null, null, null, null, null, null];
         Store.setState({ 
           currentTeam: this.currentTeam, 
@@ -836,6 +834,7 @@ export class TeamBuilderController {
       try {
         const teamData = await ApiService.getAllTeamDataByTeamId(selectedTeamId);
 
+        teamNameInput.value = teamData.name; // Set team name input
         console.log("Selected team data:", teamData);
 
         this.currentTeam = teamData.pokemons.map((apiPokemon) => {
@@ -892,29 +891,26 @@ export class TeamBuilderController {
           e.stopPropagation(); // Prevent triggering the editable click
           const moveIndex = parseInt(target.getAttribute('data-move-index') || '0');
           this.removeMove(moveIndex);
+          target.closest('.move-slot')?.classList.add('active-edit'); // Remove active edit class
           return;
         }
         
         if (editable) {
           const attribute = editable.getAttribute('data-attribute');
           this.clearEditHighlight();
+          editable.classList.add('active-edit');
           
           if (attribute === 'pokemon') {
-            editable.classList.add('active-edit'); // Editable is active
             this.loadSelector('pokemon');
           } else if (attribute === 'item') {
-            editable.parentElement?.classList.add('active-edit');  // Editable's parent is active
             this.loadSelector('item');
           } else if (attribute === 'ability') {
-            editable.parentElement?.classList.add('active-edit'); // Editable's parent is active
             this.loadSelector('ability', this.currentTeam[this.selectedPokemonIndex!]);
           } else if (attribute === 'nature') {
-            editable.parentElement?.classList.add('active-edit'); // Editable's parent is active
             this.loadSelector('nature');
           } else if (attribute === 'move') {
             const moveIndex = parseInt(editable.getAttribute('data-move-index') || '0');
             const selectedPokemon = this.currentTeam[this.selectedPokemonIndex!];
-            editable.parentElement?.parentElement?.classList.add('active-edit'); // Editable parent's parent is active
             this.loadSelector('move', { moveIndex, selectedPokemon });  
           }
         }
@@ -994,12 +990,22 @@ export class TeamBuilderController {
     const deleteButton = document.getElementById('delete-team') as HTMLButtonElement;
     
     const hasAnyPokemon = this.currentTeam.some(pokemon => pokemon !== null);
+
+    const hasRequiredAttributes = this.currentTeam
+      .filter(pokemon => pokemon !== null)
+      .every(pokemon => {
+      if (!pokemon) return false;
+      const hasAbility = pokemon.ability && pokemon.ability.id !== 0;
+      const hasNature = pokemon.nature && pokemon.nature.id !== 0;
+      const hasMove = Array.isArray(pokemon.moves) && pokemon.moves.some(move => move !== null);
+      return hasAbility && hasNature && hasMove;
+      });
     
     const isEditingExistingTeam = Store.getState().currentTeamIndex !== null;
     
     if (saveButton) {
-      // Enable save if: has Pokémon OR editing existing team (allow saving empty team as deletion)
-      saveButton.disabled = !hasAnyPokemon;
+      // Enable save if: has Pokémon OR editing existing team AND pokemons have required attributes
+      saveButton.disabled = (!hasAnyPokemon || !hasRequiredAttributes);
       saveButton.textContent = isEditingExistingTeam ? 'Mettre à jour' : 'Sauvegarder';
     }
     

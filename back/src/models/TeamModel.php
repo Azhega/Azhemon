@@ -57,19 +57,19 @@ class TeamModel extends SqlConnect {
       $teamPokemonId = $this->db->lastInsertId();
 
       foreach ($pokemon["moves"] as $move) {
-        if ($move) {
-          $query3 = "
-            INSERT INTO team_pokemon_move (team_pokemon_id, move, slot)
-            VALUES (:team_pokemon_id, :move, :slot)
-          ";
+      if (isset($move["move"]) && $move["move"] !== null) {
+        $query3 = "
+          INSERT INTO team_pokemon_move (team_pokemon_id, move, slot)
+          VALUES (:team_pokemon_id, :move, :slot)
+        ";
 
-          $req = $this->db->prepare($query3);
-          $req->execute([
-            "team_pokemon_id" => $teamPokemonId,
-            "move" => $move["move"],
-            "slot" => $move["slot"]
-          ]);
-        }
+        $req = $this->db->prepare($query3);
+        $req->execute([
+          "team_pokemon_id" => $teamPokemonId,
+          "move" => $move["move"],
+          "slot" => $move["slot"]
+        ]);
+      }
       }
     }
   }
