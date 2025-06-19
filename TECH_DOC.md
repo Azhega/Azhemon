@@ -85,6 +85,7 @@ Azhemon uses a client-server architecture with:
 - `POST /back/create_team`: Create new team
 - `PATCH /back/update_team/:id`: Update team
 - `DELETE /back/team/:id`: Delete team
+- `GET /back/team_pokemon_move/team_id/:id`: Get all team data by team ID
 
 ---
 
