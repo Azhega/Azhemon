@@ -98,11 +98,10 @@ export const items = {
         context.pendingLogsAndEffects.push({
           log: `Ceinture Force ! ${context.defender.name} survit à un coup fatal !`,
           effect: () => {
-            damage = context.defender.maxHp - 1; 
             context.defender.itemKey = null;
-            return damage;
           }
         });
+        return context.defender.maxHp - 1;
       }
       return damage;
     }
