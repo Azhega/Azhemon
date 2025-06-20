@@ -109,7 +109,7 @@ class AuthModel extends SqlConnect {
             'expires'   => time() + REFRESH_TOKEN_EXPIRATION,
             'path'      => '/',
             'domain'    => '',
-            'secure'    => false, //true pour https en prod
+            'secure'    => true, //true pour https en prod
             'httponly'  => true,
             'samesite'  => 'Lax' // Better compatibility than 'Strict'
           ]);
@@ -130,11 +130,56 @@ class AuthModel extends SqlConnect {
   /*========================= LOGOUT =========================================*/
 
   public function logout() {
+    $authHeader = null;
+    $headers = getallheaders();
+    
+    // Method 1: Standard headers
+    if (isset($headers['Authorization'])) {
+      $authHeader = $headers['Authorization'];
+    }
+    // Method 2: Apache specific environment variable
+    else if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+      $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
+    }
+    // Method 3: Apache mod_rewrite specific
+    else if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+      $authHeader = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+    }
+    // Method 4: Manual header extraction for some hosting environments
+    else if (function_exists('apache_request_headers')) {
+      $apacheHeaders = apache_request_headers();
+      if (isset($apacheHeaders['Authorization'])) {
+        $authHeader = $apacheHeaders['Authorization'];
+      }
+    }
+
+    if (!$authHeader) {
+      throw new HttpException("Authorization header not found", 401);
+    }
+
+    if (!preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+      throw new HttpException("Invalid Authorization header format", 401);
+    }
+
+    $accessToken = $matches[1];
+
+    try {
+      JWT::initialize(JWT_SECRET, JWT_ISSUER, JWT_AUDIENCE);
+      $payload = JWT::verify($accessToken);
+      
+      if (isset($payload['jti'])) {
+        $this->revokeToken($payload['jti']);
+      }
+    } catch (Exception $e) {
+      throw new Exception("Logout failed: " . $e->getMessage());
+      //Continue even if verification fails (token already expired or invalid)
+    }
+
     setcookie('refresh_token', '', [
       'expires'  => time() - 3600,
       'path'     => '/',
       'domain'    => '',
-      'secure'   => false,
+      'secure'   => true,
       'httponly' => true,
       'samesite' => 'Lax' // Better compatibility than 'Strict'
     ]);

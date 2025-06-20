@@ -68,9 +68,7 @@ class AuthController extends Controller {
         throw new Exception("Disconnection error.");
       }
     } catch (Exception $e) {
-      header('HTTP/1.1 500 Internal Server Error');
-      header('Content-Type: application/json');
-      return ['success' => false, 'message' => 'Disconnection Failed'];
+      throw new HttpException($e->getMessage(), 401);
     }
   }
 
